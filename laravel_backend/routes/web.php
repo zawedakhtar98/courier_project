@@ -4,7 +4,7 @@ use App\Enum\Incoterm;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/test', function () {
-    return Incoterm::options();
+    return Incoterm::options(); //implementation of enum testing
 });
 
 Route::get('/', function () {
