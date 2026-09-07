@@ -1,18 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuth } from '@/services/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = createRouter({
+
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: () => {
-        const { isAuthenticated } = useAuth()
-        return isAuthenticated.value ? '/admin/dashboard' : '/login'
-      },
-    },
-    {
-      path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
       meta: { requiresGuest: true },
@@ -103,20 +97,22 @@ const router = createRouter({
           meta: { title: 'Service Partner Rate Slab List' },
         },
       ],
-    },
-    {
-      path: '/:pathMatch(.*)*',
-      redirect: '/login',
-    },
+    }
   ],
 })
 
-router.beforeEach((to, _from, next) => {
-  const { isAuthenticated } = useAuth()
+router.beforeEach(async (to, _from, next) => {
+  const authStore = useAuthStore()
+  // console.log(authStore.isReady, "asdsdas"); return false
+  // On first load, check if user is already authenticated
+  if (!authStore.isReady) {
+    debugger
+    await authStore.checkAuth()
+  }
 
-  if (to.meta.requiresAuth && !isAuthenticated.value) {
+  if (to.meta.requiresAuth && !authStore.isLogin) {
     next({ name: 'login' })
-  } else if (to.meta.requiresGuest && isAuthenticated.value) {
+  } else if (to.meta.requiresGuest && authStore.isLogin) {
     next({ name: 'admin-dashboard' })
   } else {
     next()

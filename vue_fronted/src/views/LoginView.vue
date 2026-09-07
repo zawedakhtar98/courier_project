@@ -1,15 +1,14 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from '@/services/auth'
+import { useAuthStore } from '@/stores/authStore'
 import logoImg from '@/assets/images/logo/logo.png'
 
 const router = useRouter()
-const { login } = useAuth()
+const authStore = useAuthStore()
 
-const email = ref('admin@expressit.com')
-const password = ref('password123')
-const rememberMe = ref(true)
+const email = ref('')
+const password = ref('')
 const showPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -26,7 +25,11 @@ const handleLogin = async () => {
 
   isLoading.value = true
   try {
-    await login(email.value, password.value)
+    const formdata = {
+      email: email.value,
+      password: password.value
+    }
+    await authStore.login(formdata)
     router.push({ name: 'admin-dashboard' })
   } catch (err) {
     errorMessage.value = err.message || 'Login failed. Please verify your credentials.'
@@ -84,14 +87,8 @@ const handleResetPassword = () => {
               <span class="input-group-text bg-light border-end-0 text-muted">
                 <i class="bi bi-envelope"></i>
               </span>
-              <input
-                v-model="email"
-                type="email"
-                class="form-control border-start-0 ps-0 bg-light"
-                placeholder="name@expressit.com"
-                required
-                autocomplete="email"
-              />
+              <input v-model="email" type="email" class="form-control border-start-0 ps-0 bg-light"
+                placeholder="Enter your email" required autocomplete="email" />
             </div>
           </div>
 
@@ -99,11 +96,8 @@ const handleResetPassword = () => {
           <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <label class="form-label text-secondary small fw-semibold mb-0">Password</label>
-              <a
-                href="#"
-                @click.prevent="showForgotModal = true"
-                class="text-decoration-none small text-primary fw-medium"
-              >
+              <a href="#" @click.prevent="showForgotModal = true"
+                class="text-decoration-none small text-primary fw-medium">
                 Forgot password?
               </a>
             </div>
@@ -111,63 +105,37 @@ const handleResetPassword = () => {
               <span class="input-group-text bg-light border-end-0 text-muted">
                 <i class="bi bi-lock"></i>
               </span>
-              <input
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                class="form-control border-start-0 border-end-0 ps-0 bg-light"
-                placeholder="Enter password"
-                required
-                autocomplete="current-password"
-              />
-              <button
-                type="button"
-                class="input-group-text bg-light border-start-0 text-muted"
-                @click="showPassword = !showPassword"
-                title="Toggle password visibility"
-              >
+              <input v-model="password" :type="showPassword ? 'text' : 'password'"
+                class="form-control border-start-0 border-end-0 ps-0 bg-light" placeholder="Enter password" required
+                autocomplete="current-password" />
+              <button type="button" class="input-group-text bg-light border-start-0 text-muted"
+                @click="showPassword = !showPassword" title="Toggle password visibility">
                 <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
               </button>
             </div>
           </div>
 
           <!-- Submit Button -->
-          <button
-            type="submit"
+          <button type="submit"
             class="btn btn-primary-gradient w-100 py-2 fs-6 shadow-sm mb-3 d-flex align-items-center justify-content-center gap-2"
-            :disabled="isLoading"
-          >
-            <span
-              v-if="isLoading"
-              class="spinner-border spinner-border-sm"
-              role="status"
-              aria-hidden="true"
-            ></span>
+            :disabled="isLoading">
+            <span v-if="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             <span v-if="!isLoading">
               Login <i class="bi bi-arrow-right ms-1"></i>
             </span>
             <span v-else>Authenticating...</span>
           </button>
-        </form>        
+        </form>
       </div>
     </div>
 
     <!-- Forgot Password Modal Backing -->
-    <div
-      v-if="showForgotModal"
-      class="modal fade show d-block"
-      tabindex="-1"
-      style="background: rgba(0, 0, 0, 0.6)"
-    >
+    <div v-if="showForgotModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.6)">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
           <div class="modal-header border-0 pb-0">
             <h5 class="modal-title fw-bold">Reset Your Password</h5>
-            <button
-              type="button"
-              class="btn-close"
-              @click="showForgotModal = false"
-              aria-label="Close"
-            ></button>
+            <button type="button" class="btn-close" @click="showForgotModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body py-4">
             <div v-if="resetSuccess" class="alert alert-success">
@@ -180,29 +148,15 @@ const handleResetPassword = () => {
               </p>
               <div class="mb-3">
                 <label class="form-label small fw-semibold">Email address</label>
-                <input
-                  v-model="resetEmail"
-                  type="email"
-                  class="form-control"
-                  placeholder="name@expressit.com"
-                />
+                <input v-model="resetEmail" type="email" class="form-control" placeholder="name@expressit.com" />
               </div>
             </div>
           </div>
           <div class="modal-footer border-0 pt-0" v-if="!resetSuccess">
-            <button
-              type="button"
-              class="btn btn-light"
-              @click="showForgotModal = false"
-            >
+            <button type="button" class="btn btn-light" @click="showForgotModal = false">
               Cancel
             </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              :disabled="!resetEmail"
-              @click="handleResetPassword"
-            >
+            <button type="button" class="btn btn-primary" :disabled="!resetEmail" @click="handleResetPassword">
               Send Reset Link
             </button>
           </div>

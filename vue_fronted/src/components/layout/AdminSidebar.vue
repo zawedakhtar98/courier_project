@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuth } from '@/services/auth'
+import { useAuthStore } from '@/stores/authStore'
 import logoImg from '@/assets/images/logo/logo.png'
 
 const props = defineProps({
@@ -13,7 +13,9 @@ const emit = defineEmits(['close-mobile', 'toggle-collapse'])
 
 const route = useRoute()
 const router = useRouter()
-const { currentUser, logout } = useAuth()
+const authStore = useAuthStore()
+const currentUser = authStore.user;
+const logout = authStore.logout;
 
 const isCurrentRoute = (name) => {
   return route.name === name

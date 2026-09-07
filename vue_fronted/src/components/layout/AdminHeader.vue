@@ -1,13 +1,15 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useAuth } from '@/services/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 const emit = defineEmits(['toggle-mobile-sidebar', 'open-new-shipment'])
 
 const router = useRouter()
 const route = useRoute()
-const { currentUser, logout } = useAuth()
+const authStore = useAuthStore()
+const currentUser = authStore.user;
+const logout = authStore.logout;
 
 const searchQuery = ref('')
 const notifications = ref([
