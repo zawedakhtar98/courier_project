@@ -145,4 +145,35 @@ const pageTitle = () => {
       </div>
     </div>
   </header>
+  <div id="flash-toast" class="toast-hidden"></div>
 </template>
+
+<style>
+#flash-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  background-color: #4CAF50;
+  /* Default green for success */
+  color: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: sans-serif;
+  z-index: 9999;
+
+  /* Animation setup */
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+  /* Prevents clicking when hidden */
+}
+
+/* Class added by JavaScript to show the toast */
+#flash-toast.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+</style>

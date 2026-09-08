@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import logoImg from '@/assets/images/logo/logo.png'
@@ -58,6 +58,11 @@ const handleResetPassword = () => {
     resetEmail.value = ''
   }, 2000)
 }
+onMounted(() => {
+  // authStore.checkAuth()
+  console.log("Base url: ");
+  console.log(import.meta.env.BASE_URL)
+})
 </script>
 
 <template>

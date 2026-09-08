@@ -3,6 +3,8 @@ import { ref } from "vue";
 import { login as loginService } from '@/services/auth';
 import { logout as logoutService } from '@/services/auth';
 import API from '@/services/ApiService';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref(null);
@@ -12,9 +14,9 @@ export const useAuthStore = defineStore('auth', () => {
     const checkAuth = async () => {
         try {
             // Adjust this endpoint if your backend uses a different route to fetch the authenticated user
-            debugger
+            // debugger
             const resp = await API.get('login-user');
-            debugger
+            // debugger
             if (resp.status === 200) {
                 user.value = resp.data;
                 isLogin.value = true;
@@ -29,14 +31,15 @@ export const useAuthStore = defineStore('auth', () => {
 
     const login = async (data) => {
         try {
-            debugger
+            // debugger
             const resp = await loginService(data);
-            debugger
+            // debugger
             if (resp?.status === 'success' || resp?.data?.user) {
                 user.value = resp.data?.user;
                 isLogin.value = true;
                 if (resp.data?.token) {
-                    localStorage.setItem('__sesion_token', resp.data.token);
+                    localStorage.setItem('__session_token', resp.data.token);
+                    toast.success("Successfully logged in!");
                 }
                 return true;
             }
@@ -51,7 +54,8 @@ export const useAuthStore = defineStore('auth', () => {
             await logoutService();
             user.value = null;
             isLogin.value = false;
-            localStorage.removeItem('__sesion_token');
+            localStorage.removeItem('__session_token');
+            toast.info("Successfully logged out!");
         } catch (err) {
             console.log(err);
         }

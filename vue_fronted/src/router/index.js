@@ -106,7 +106,6 @@ router.beforeEach(async (to, _from, next) => {
   // console.log(authStore.isReady, "asdsdas"); return false
   // On first load, check if user is already authenticated
   if (!authStore.isReady) {
-    debugger
     await authStore.checkAuth()
   }
 
