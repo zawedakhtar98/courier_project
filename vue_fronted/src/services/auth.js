@@ -3,10 +3,14 @@ import API from "./ApiService";
 const login = async (data) => {
     try {
         const resp = await API.post('login', data);
+
         return resp.data;
 
     } catch (err) {
-        console.log("error from login service: ", err);
+        if (err.response.status === 422) {
+            return { status: 422, message: "Invalid credentials" };
+        }
+        return err;
     }
 }
 

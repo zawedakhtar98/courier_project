@@ -30,23 +30,21 @@ export const useAuthStore = defineStore('auth', () => {
     };
 
     const login = async (data) => {
-        try {
-            // debugger
-            const resp = await loginService(data);
-            // debugger
-            if (resp?.status === 'success' || resp?.data?.user) {
-                user.value = resp.data?.user;
-                isLogin.value = true;
-                if (resp.data?.token) {
-                    localStorage.setItem('__session_token', resp.data.token);
-                    toast.success("Successfully logged in!");
-                }
-                return true;
+        const resp = await loginService(data);
+        if (resp?.status === 'success' || resp?.data?.user) {
+            user.value = resp.data?.user;
+            isLogin.value = true;
+            if (resp.data?.token) {
+                localStorage.setItem('__session_token', resp.data.token);
+                toast.success("Successfully logged in!");
             }
-            return false;
-        } catch (err) {
-            console.log(err);
+            return true;
         }
+        else if (resp?.status == 422) {
+            toast.error(resp?.message);
+            return resp;
+        }
+        return { status: false, message: "Invalid credentials" };
     }
 
     const logout = async () => {
@@ -56,6 +54,9 @@ export const useAuthStore = defineStore('auth', () => {
             isLogin.value = false;
             localStorage.removeItem('__session_token');
             toast.info("Successfully logged out!");
+            setTimeout(() => {
+                window.location.href = import.meta.env.BASE_URL;
+            }, 2000);
         } catch (err) {
             console.log(err);
         }
