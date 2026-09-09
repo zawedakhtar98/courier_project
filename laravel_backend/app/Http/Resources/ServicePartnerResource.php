@@ -17,11 +17,10 @@ class ServicePartnerResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => ucfirst($this->name),
             'service_code' => $this->service_code,
-            'status' => $this->status,
+            'status' => ucfirst($this->status),
             'created_at' => Carbon::parse($this->created_at)->format('d-m-Y'),
-            'updated_at' => Carbon::parse($this->updated_at)->format('d-m-Y'),
         ];
     }
 }

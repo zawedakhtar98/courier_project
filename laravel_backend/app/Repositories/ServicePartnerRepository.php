@@ -39,6 +39,6 @@ class ServicePartnerRepository implements ServicePartnerRepositoryInterface
 
     public function getAllServicePartner(int $perPage)
     {
-        return ServicePartner::paginate($perPage);
+        return ServicePartner::orderBy('id', 'desc')->paginate($perPage);
     }
 }
