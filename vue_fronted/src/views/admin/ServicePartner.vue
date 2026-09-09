@@ -1,175 +1,118 @@
 <script setup>
-import { ref, computed } from 'vue'
-
-const zones = ref([
-  {
-    id: 'ZN-01',
-    code: 'ZONE-NA',
-    name: 'DHL',
-    description: 'Direct air freight routes covering US, Canada & Mexico metro hubs.',
-    transitDays: '1-3 Days',
-    fuelSurcharge: 12.5,
-    rateMultiplier: 1.0,
-    status: 'Active',
-    countries: ['United States', 'Canada', 'Mexico'],
-  },
-  {
-    id: 'ZN-02',
-    code: 'ZONE-EU',
-    name: 'Express ITs',
-    description: 'Schengen zone expedited courier corridor via Frankfurt Hub.',
-    transitDays: '2-4 Days',
-    fuelSurcharge: 14.0,
-    rateMultiplier: 1.15,
-    status: 'Active',
-    countries: ['United Kingdom', 'Germany', 'France', 'Netherlands', 'Italy', 'Spain', 'Switzerland'],
-  },
-  {
-    id: 'ZN-03',
-    code: 'ZONE-ME',
-    name: 'UPS',
-    description: 'Gulf cooperation council cross-border customs cleared line.',
-    transitDays: '2-3 Days',
-    fuelSurcharge: 11.0,
-    rateMultiplier: 1.05,
-    status: 'Active',
-    countries: ['United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Kuwait', 'Oman', 'Bahrain'],
-  },
-])
-
+import { ref, computed, onMounted } from 'vue'
+import { getAllServicePartners } from '@/services/servicePartner';
+import { addNewServicePartner } from '@/services/servicePartner';
+import { useToast } from "vue-toastification";
+const toast = useToast();
+const servicePartnersList = ref([]);
+const isLoading = ref(true);
+const isSaving = ref(false);
 const searchQuery = ref('')
 const filterStatus = ref('All')
 const alertMessage = ref(null)
 
 // Modal states
-const showZoneModal = ref(false)
+const showPartnerModal = ref(false)
 const isEditing = ref(false)
 const showCountryMappingModal = ref(false)
-const selectedZone = ref(null)
+const selectedPartner = ref(null)
 
-const availableCountries = [
-  'United States', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'France',
-  'Netherlands', 'Italy', 'Spain', 'Switzerland', 'United Arab Emirates',
-  'Saudi Arabia', 'Qatar', 'Kuwait', 'Oman', 'Bahrain', 'Singapore',
-  'Japan', 'South Korea', 'Australia', 'Malaysia', 'Hong Kong',
-  'India', 'Bangladesh', 'Sri Lanka', 'Nepal', 'Brazil', 'Argentina',
-  'Chile', 'Colombia', 'Peru', 'New Zealand', 'South Africa', 'Sweden', 'Norway'
-]
-
-const formZone = ref({
+const partnerForm = ref({
   id: '',
-  code: '',
   name: '',
-  description: '',
-  transitDays: '2-4 Days',
-  fuelSurcharge: 12.0,
-  rateMultiplier: 1.0,
+  service_code: '',
   status: 'Active',
-  countries: [],
 })
 
-const countrySearch = ref('')
+onMounted(async () => {
+  isLoading.value = true;
+  try {
+    const resp = await getAllServicePartners(10, 1);
+    if (resp.status == 'success') {
+      servicePartnersList.value = resp.data;
+    }
+  } finally {
+    isLoading.value = false;
+  }
+})
 
-const filteredZones = computed(() => {
-  return zones.value.filter((z) => {
+const filteredservicePartnersList = computed(() => {
+  return servicePartnersList.value.filter((z) => {
     const matchesSearch =
       z.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      z.code.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      z.countries.some((c) => c.toLowerCase().includes(searchQuery.value.toLowerCase()))
+      z.service_code.toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesStatus = filterStatus.value === 'All' || z.status === filterStatus.value
     return matchesSearch && matchesStatus
   })
 })
 
-const totalCountriesMapped = computed(() => {
-  const allCountries = new Set()
-  zones.value.forEach((z) => z.countries.forEach((c) => allCountries.add(c)))
-  return allCountries.size
-})
+
 
 const showAlert = (msg) => {
   alertMessage.value = msg
   setTimeout(() => {
+
     alertMessage.value = null
   }, 3500)
 }
 
 const openAddModal = () => {
   isEditing.value = false
-  formZone.value = {
-    id: `ZN-${String(zones.value.length + 1).padStart(2, '0')}`,
-    code: 'ZONE-',
+  partnerForm.value = {
+    id: servicePartnersList.value.length + 1,
+    service_code: '',
     name: '',
-    description: '',
-    transitDays: '2-4 Days',
-    fuelSurcharge: 12.0,
-    rateMultiplier: 1.0,
-    status: 'Active',
-    countries: [],
+    status: 'Active'
   }
-  showZoneModal.value = true
+  showPartnerModal.value = true
 }
 
-const openEditModal = (zone) => {
+const openEditModal = (partner) => {
   isEditing.value = true
-  formZone.value = {
-    id: zone.id,
-    code: zone.code,
-    name: zone.name,
-    description: zone.description,
-    transitDays: zone.transitDays,
-    fuelSurcharge: zone.fuelSurcharge,
-    rateMultiplier: zone.rateMultiplier,
-    status: zone.status,
-    countries: [...zone.countries],
+  partnerForm.value = {
+    id: servicePartnersList.id,
+    service_code: servicePartnersList.service_code,
+    name: servicePartnersList.name,
+    status: servicePartnersList.status
   }
-  showZoneModal.value = true
+  showPartnerModal.value = true
 }
 
-const saveZone = () => {
-  if (!formZone.value.name || !formZone.value.code) {
-    alert('Please enter Zone Code and Zone Name.')
+const savePartner = async () => {
+  if (!partnerForm.value.name || !partnerForm.value.service_code) {
+    toast.error('Please enter service partner name and service partner code.')
     return
   }
 
-  if (isEditing.value) {
-    const idx = zones.value.findIndex((z) => z.id === formZone.value.id)
-    if (idx !== -1) {
-      zones.value[idx] = { ...zones.value[idx], ...formZone.value }
-      showAlert(`Zone ${formZone.value.name} updated successfully.`)
+  showPartnerModal.value = false
+  isSaving.value = true
+
+  try {
+    if (isEditing.value) {
+      const idx = servicePartnersList.value.findIndex((z) => z.id === partnerForm.value.id)
+      if (idx !== -1) {
+        servicePartnersList.value[idx] = { ...servicePartnersList.value[idx], ...partnerForm.value }
+        showAlert(`Partner ${partnerForm.value.name} updated successfully.`)
+      }
+    } else {
+      const resp = await addNewServicePartner(partnerForm.value);
+      if (resp.status == 'success') {
+        servicePartnersList.value.unshift({ ...partnerForm.value, id: resp.data?.id || servicePartnersList.value.length + 1 })
+        toast.success(resp.message);
+      } else {
+        toast.error(resp.message);
+      }
     }
-  } else {
-    zones.value.unshift({ ...formZone.value })
-    showAlert(`Zone ${formZone.value.name} created successfully.`)
-  }
-  showZoneModal.value = false
-}
-
-const toggleStatus = (zone) => {
-  zone.status = zone.status === 'Active' ? 'Inactive' : 'Active'
-  showAlert(`Zone "${zone.name}" is now ${zone.status}.`)
-}
-
-const deleteZone = (zone) => {
-  if (confirm(`Are you sure you want to delete zone "${zone.name}"?`)) {
-    zones.value = zones.value.filter((z) => z.id !== zone.id)
-    showAlert(`Zone "${zone.name}" removed successfully.`)
+  } finally {
+    isSaving.value = false
   }
 }
 
-const openCountryMapping = (zone) => {
-  selectedZone.value = zone
-  countrySearch.value = ''
-  showCountryMappingModal.value = true
-}
 
-const toggleCountryForSelectedZone = (country) => {
-  if (!selectedZone.value) return
-  const idx = selectedZone.value.countries.indexOf(country)
-  if (idx > -1) {
-    selectedZone.value.countries.splice(idx, 1)
-  } else {
-    selectedZone.value.countries.push(country)
+const deletePartner = (partner) => {
+  if (confirm(`Are you sure you want to delete partner "${servicePartnersList.name}"?`)) {
+    partners.value = partners.value.filter((z) => z.id !== servicePartnersList.id)
+    showAlert(`Partner "${servicePartnersList.name}" removed successfully.`)
   }
 }
 
@@ -179,6 +122,10 @@ const filteredAvailableCountries = computed(() => {
     c.toLowerCase().includes(countrySearch.value.toLowerCase())
   )
 })
+
+
+
+
 </script>
 
 <template>
@@ -220,7 +167,7 @@ const filteredAvailableCountries = computed(() => {
             <i class="bi bi-search text-muted"></i>
           </span>
           <input v-model="searchQuery" type="text" class="form-control bg-light border-start-0"
-            placeholder="Search by zone name..." />
+            placeholder="Search by partner name..." />
         </div>
 
         <!-- Status Filter Pills -->
@@ -235,7 +182,7 @@ const filteredAvailableCountries = computed(() => {
         </div>
       </div>
 
-      <!-- Zone Table -->
+      <!-- Partner Table -->
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
@@ -247,59 +194,95 @@ const filteredAvailableCountries = computed(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-if="filteredZones.length === 0">
-              <td colspan="7" class="text-center py-5 text-muted">
-                <i class="bi bi-folder-x fs-1 d-block mb-2 text-secondary"></i>
-                No matching records found
-              </td>
-            </tr>
-            <tr v-for="zone in filteredZones" :key="zone.id">
-              <td>
-                <div class="d-flex align-items-center gap-3">
-                  <div>
-                    <div class="fw-bold text-dark d-flex align-items-center gap-2">
-                      {{ zone.name }}
+            <template v-if="isLoading">
+              <tr v-for="i in 5" :key="'skel-' + i">
+                <td>
+                  <div class="placeholder-glow"><span
+                      class="placeholder col-8 rounded bg-secondary bg-opacity-25"></span></div>
+                </td>
+                <td>
+                  <div class="placeholder-glow"><span
+                      class="placeholder col-6 rounded bg-secondary bg-opacity-25"></span></div>
+                </td>
+                <td>
+                  <div class="placeholder-glow"><span
+                      class="placeholder col-4 rounded-pill bg-secondary bg-opacity-25"></span></div>
+                </td>
+                <td class="text-end">
+                  <div class="placeholder-glow"><span
+                      class="placeholder col-3 rounded bg-secondary bg-opacity-25"></span></div>
+                </td>
+              </tr>
+            </template>
+            <template v-else>
+              <tr v-if="isSaving && !isEditing">
+                <td>
+                  <div class="placeholder-glow"><span
+                      class="placeholder col-8 rounded bg-secondary bg-opacity-25"></span></div>
+                </td>
+                <td>
+                  <div class="placeholder-glow"><span
+                      class="placeholder col-6 rounded bg-secondary bg-opacity-25"></span></div>
+                </td>
+                <td>
+                  <div class="placeholder-glow"><span
+                      class="placeholder col-4 rounded-pill bg-secondary bg-opacity-25"></span></div>
+                </td>
+                <td class="text-end">
+                  <div class="placeholder-glow"><span
+                      class="placeholder col-3 rounded bg-secondary bg-opacity-25"></span></div>
+                </td>
+              </tr>
+              <tr v-if="filteredservicePartnersList.length === 0 && !isSaving">
+                <td colspan="7" class="text-center py-5 text-muted">
+                  <i class="bi bi-folder-x fs-1 d-block mb-2 text-secondary"></i>
+                  No matching records found
+                </td>
+              </tr>
+              <tr v-for="servicePartnersList in filteredservicePartnersList" :key="servicePartnersList.id">
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <div>
+                      <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                        {{ servicePartnersList.name }}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </td>
-              <td>
-                <div class="d-flex flex-wrap gap-1 align-items-center" style="max-width: 280px;">
-                  {{ zone.code }}
-                </div>
-              </td>
-              <td>
-                <button type="button" class="badge border-0 rounded-pill px-3 py-1 cursor-pointer"
-                  :class="zone.status === 'Active' ? 'bg-success text-white' : 'bg-secondary text-white'"
-                  @click="toggleStatus(zone)" title="Click to toggle status">
-                  {{ zone.status }}
-                </button>
-              </td>
-              <td class="text-end">
-                <div class="d-flex align-items-center justify-content-end gap-1">
-                  <!-- <button type="button" class="btn btn-sm btn-light text-primary p-2 rounded-2"
-                    @click="openCountryMapping(zone)" title="Map Countries">
-                    <i class="bi bi-globe"></i>
-                  </button> -->
-                  <button type="button" class="btn btn-sm btn-light text-secondary p-2 rounded-2"
-                    @click="openEditModal(zone)" title="Edit Zone">
-                    <i class="bi bi-pencil"></i>
+                </td>
+                <td>
+                  <div class="d-flex flex-wrap gap-1 align-items-center" style="max-width: 280px;">
+                    {{ servicePartnersList.service_code }}
+                  </div>
+                </td>
+                <td>
+                  <button type="button" class="badge border-0 rounded-pill px-3 py-1 cursor-pointer"
+                    :class="servicePartnersList.status === 'Active' ? 'bg-success text-white' : 'bg-secondary text-white'"
+                    title="Click to toggle status">
+                    {{ servicePartnersList.status }}
                   </button>
-                  <button type="button" class="btn btn-sm btn-light text-danger p-2 rounded-2" @click="deleteZone(zone)"
-                    title="Delete Zone">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
+                </td>
+                <td class="text-end">
+                  <div class="d-flex align-items-center justify-content-end gap-1">
+                    <button type="button" class="btn btn-sm btn-light text-secondary p-2 rounded-2"
+                      @click="openEditModal(servicePartnersList)" title="Edit Partner">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light text-danger p-2 rounded-2"
+                      @click="deletePartner(servicePartnersList)" title="Delete Partner">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Modal: Add / Edit Zone -->
-    <div v-if="showZoneModal" class="modal-backdrop fade show"></div>
-    <div v-if="showZoneModal" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <!-- Modal: Add / Edit Partner -->
+    <div v-if="showPartnerModal" class="modal-backdrop fade show"></div>
+    <div v-if="showPartnerModal" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content rounded-4 border-0 shadow-md">
           <div class="modal-header border-bottom px-4 py-3">
@@ -307,30 +290,30 @@ const filteredAvailableCountries = computed(() => {
               <i :class="isEditing ? 'bi-pencil-square' : 'bi-plus-circle'" class="text-primary me-2"></i>
               {{ isEditing ? 'Edit Service Partner' : 'Create New Service Partner' }}
             </h5>
-            <button type="button" class="btn-close" @click="showZoneModal = false"></button>
+            <button type="button" class="btn-close" @click="showPartnerModal = false"></button>
           </div>
           <div class="modal-body px-4 py-3">
             <div class="row g-3">
               <div class="col-md-12">
-                <label class="form-label small fw-semibold">Servive Partner Name <span
+                <label class="form-label small fw-semibold">Service Partner Name <span
                     class="text-danger">*</span></label>
-                <input v-model="formZone.name" type="text" class="form-control"
+                <input v-model="partnerForm.name" type="text" class="form-control"
                   placeholder="Enter service partner name" />
               </div>
               <div class="col-md-12">
-                <label class="form-label small fw-semibold">Servive Code<span class="text-danger">*</span></label>
-                <input v-model="formZone.name" type="text" class="form-control"
+                <label class="form-label small fw-semibold">Service Code<span class="text-danger">*</span></label>
+                <input v-model="partnerForm.service_code" type="text" class="form-control"
                   placeholder="Enter partner service code" />
               </div>
             </div>
           </div>
           <div class="modal-footer border-top px-4 py-3 bg-light rounded-bottom-4">
-            <button type="button" class="btn btn-light rounded-3 px-3" @click="showZoneModal = false">
+            <button type="button" class="btn btn-light rounded-3 px-3" @click="showPartnerModal = false">
               Cancel
             </button>
-            <button type="button" class="btn btn-primary rounded-3 px-4 shadow-sm" @click="saveZone">
+            <button type="button" class="btn btn-primary rounded-3 px-4 shadow-sm" @click="savePartner">
               <i class="bi bi-check2 me-1"></i>
-              {{ isEditing ? 'Save Changes' : 'Create Zone' }}
+              {{ isEditing ? 'Save Changes' : 'Create Partner' }}
             </button>
           </div>
         </div>
@@ -338,18 +321,20 @@ const filteredAvailableCountries = computed(() => {
     </div>
 
     <!-- Modal: Country Mapping -->
-    <div v-if="showCountryMappingModal && selectedZone" class="modal-backdrop fade show"></div>
-    <div v-if="showCountryMappingModal && selectedZone" class="modal fade show d-block" tabindex="-1" role="dialog"
+    <div v-if="showCountryMappingModal && selectedPartner" class="modal-backdrop fade show"></div>
+    <div v-if="showCountryMappingModal && selectedPartner" class="modal fade show d-block" tabindex="-1" role="dialog"
       aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content rounded-4 border-0 shadow-lg">
           <div class="modal-header border-bottom px-4 py-3">
             <div>
               <h5 class="modal-title fw-bold text-dark">
-                <i class="bi bi-globe me-2 text-primary"></i> Map Countries to {{ selectedZone.name }}
+                <i class="bi bi-globe me-2 text-primary"></i> Map Countries to {{ selectedservicePartnersList.name }}
               </h5>
-              <span class="text-muted small">Zone Code: <strong class="text-primary">{{ selectedZone.code }}</strong>
-                &bull; Currently Mapped: {{ selectedZone.countries.length }} countries</span>
+              <span class="text-muted small">Partner Code: <strong class="text-primary">{{
+                selectedservicePartnersList.code
+                  }}</strong>
+                &bull; Currently Mapped: {{ selectedservicePartnersList.countries.length }} countries</span>
             </div>
             <button type="button" class="btn-close" @click="showCountryMappingModal = false"></button>
           </div>
@@ -367,10 +352,10 @@ const filteredAvailableCountries = computed(() => {
                 <div v-for="country in filteredAvailableCountries" :key="country" class="col-6 col-md-4">
                   <div
                     class="d-flex align-items-center gap-2 p-2 rounded-3 border bg-white cursor-pointer transition-all"
-                    :class="{ 'border-primary bg-primary-subtle text-primary fw-semibold': selectedZone.countries.includes(country) }"
-                    @click="toggleCountryForSelectedZone(country)">
+                    :class="{ 'border-primary bg-primary-subtle text-primary fw-semibold': selectedservicePartnersList.countries.includes(country) }"
+                    @click="toggleCountryForSelectedPartner(country)">
                     <input type="checkbox" class="form-check-input mt-0"
-                      :checked="selectedZone.countries.includes(country)" />
+                      :checked="selectedservicePartnersList.countries.includes(country)" />
                     <span class="small text-truncate">{{ country }}</span>
                   </div>
                 </div>
@@ -378,7 +363,7 @@ const filteredAvailableCountries = computed(() => {
             </div>
           </div>
           <div class="modal-footer border-top px-4 py-3 bg-light rounded-bottom-4 d-flex justify-content-between">
-            <span class="small text-muted">{{ selectedZone.countries.length }} countries selected</span>
+            <span class="small text-muted">{{ selectedservicePartnersList.countries.length }} countries selected</span>
             <button type="button" class="btn btn-primary rounded-3 px-4 shadow-sm"
               @click="showCountryMappingModal = false">
               Done
