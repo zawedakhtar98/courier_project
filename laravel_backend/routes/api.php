@@ -1,12 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AdminController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
 
 Route::get('/users', [App\Http\Controllers\API\AuthController::class, 'index']);
 Route::post('/get-user-by-email', [App\Http\Controllers\API\AuthController::class, 'findByEmail']);
@@ -20,10 +15,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [App\Http\Controllers\API\AuthController::class, 'logout']);
 
     Route::prefix('admin')->group(function () {
+
+        //service partner
         Route::prefix('service-partner')->group(function () {
             Route::post('add-new', [AdminController::class, 'addNewServicePartner']);
-            Route::post('update/{id}', [AdminController::class, 'updateServicePartner']);
+            Route::put('update/{id}', [AdminController::class, 'updateServicePartner']);
             Route::get('getAll-partners', [AdminController::class, 'getAllServicePartners']);
+        });
+
+        //country Master
+        Route::prefix('country')->group(function () {
+            Route::post('add', [AdminController::class, 'addCountries']);
+            Route::put('update/{id}', [AdminController::class, 'updateCountry']);
+            Route::get('get-list', [AdminController::class, 'getCountryList']);
+            Route::delete('delete/{id}', [AdminController::class, 'deleteCountry']);
+            Route::put('update-status/{id}', [AdminController::class, 'updateCountryStatus']);
+        });
+
+        //Zone Master
+        Route::prefix('zone')->group(function () {
+            Route::post('add', [AdminController::class, 'addZone']);
+            Route::put('update/{id}', [AdminController::class, 'updateZone']);
+            Route::get('get-list', [AdminController::class, 'getZoneList']);
+            Route::post('map-countries', [AdminController::class, 'addZoneCountries']);
         });
     });
 });
