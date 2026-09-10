@@ -80,7 +80,7 @@ const router = createRouter({
           alias: 'countries',
           name: 'admin-countries',
           component: () => import('@/views/admin/CountryView.vue'),
-          meta: { title: 'Country List' },
+          meta: { title: 'Country Master' },
         },
         {
           path: 'settings/servicepartner',

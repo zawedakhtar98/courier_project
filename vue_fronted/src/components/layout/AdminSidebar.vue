@@ -112,7 +112,7 @@ const navSections = [
           },
           {
             name: 'admin-countries',
-            label: 'Country List',
+            label: 'Country Master',
             icon: 'bi-globe-americas',
           },
           {

@@ -1,4 +1,4 @@
-import API from "./ApiService";
+import API from "../ApiService";
 
 const getAllServicePartners = async (perPage, page) => {
     try {

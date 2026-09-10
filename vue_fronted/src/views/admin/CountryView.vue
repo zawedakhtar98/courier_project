@@ -1,177 +1,13 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getAllCountries } from '@/services/admin/CountryService'
+import { addCountry } from '@/services/admin/CountryService'
+import { useToast } from 'vue-toastification'
 
-const countries = ref([
-  {
-    id: 'CT-01',
-    name: 'United States',
-    iso2: 'US',
-    iso3: 'USA',
-    dialCode: '+1',
-    zoneCode: 'ZONE-NA',
-    zoneName: 'North America Priority',
-    currency: 'USD ($)',
-    customsDoc: 'Commercial Invoice + HS Codes',
-    status: 'Active',
-    flagEmoji: '🇺🇸',
-  },
-  {
-    id: 'CT-02',
-    name: 'Canada',
-    iso2: 'CA',
-    iso3: 'CAN',
-    dialCode: '+1',
-    zoneCode: 'ZONE-NA',
-    zoneName: 'North America Priority',
-    currency: 'CAD ($)',
-    customsDoc: 'CCI + Commercial Invoice',
-    status: 'Active',
-    flagEmoji: '🇨🇦',
-  },
-  {
-    id: 'CT-03',
-    name: 'United Kingdom',
-    iso2: 'GB',
-    iso3: 'GBR',
-    dialCode: '+44',
-    zoneCode: 'ZONE-EU',
-    zoneName: 'Western & Northern Europe',
-    currency: 'GBP (£)',
-    customsDoc: 'UK EORI + Commercial Invoice',
-    status: 'Active',
-    flagEmoji: '🇬🇧',
-  },
-  {
-    id: 'CT-04',
-    name: 'Germany',
-    iso2: 'DE',
-    iso3: 'DEU',
-    dialCode: '+49',
-    zoneCode: 'ZONE-EU',
-    zoneName: 'Western & Northern Europe',
-    currency: 'EUR (€)',
-    customsDoc: 'EU EORI + EUR.1 Certificate',
-    status: 'Active',
-    flagEmoji: '🇩🇪',
-  },
-  {
-    id: 'CT-05',
-    name: 'United Arab Emirates',
-    iso2: 'AE',
-    iso3: 'ARE',
-    dialCode: '+971',
-    zoneCode: 'ZONE-ME',
-    zoneName: 'Middle East & GCC Express',
-    currency: 'AED (د.إ)',
-    customsDoc: 'Attested Invoice + Certificate of Origin',
-    status: 'Active',
-    flagEmoji: '🇦🇪',
-  },
-  {
-    id: 'CT-06',
-    name: 'Saudi Arabia',
-    iso2: 'SA',
-    iso3: 'SAU',
-    dialCode: '+966',
-    zoneCode: 'ZONE-ME',
-    zoneName: 'Middle East & GCC Express',
-    currency: 'SAR (﷼)',
-    customsDoc: 'SABER Certificate + Saudi National ID',
-    status: 'Active',
-    flagEmoji: '🇸🇦',
-  },
-  {
-    id: 'CT-07',
-    name: 'Singapore',
-    iso2: 'SG',
-    iso3: 'SGP',
-    dialCode: '+65',
-    zoneCode: 'ZONE-APAC',
-    zoneName: 'Asia-Pacific Priority Hub',
-    currency: 'SGD (S$)',
-    customsDoc: 'TradeNet Permit + Invoice',
-    status: 'Active',
-    flagEmoji: '🇸🇬',
-  },
-  {
-    id: 'CT-08',
-    name: 'Australia',
-    iso2: 'AU',
-    iso3: 'AUS',
-    dialCode: '+61',
-    zoneCode: 'ZONE-APAC',
-    zoneName: 'Asia-Pacific Priority Hub',
-    currency: 'AUD (A$)',
-    customsDoc: 'Customs B374 + Biosecurity Dec',
-    status: 'Active',
-    flagEmoji: '🇦🇺',
-  },
-  {
-    id: 'CT-09',
-    name: 'India',
-    iso2: 'IN',
-    iso3: 'IND',
-    dialCode: '+91',
-    zoneCode: 'ZONE-SAARC',
-    zoneName: 'South Asia Regional Corridor',
-    currency: 'INR (₹)',
-    customsDoc: 'KYC + IEC + Commercial Invoice',
-    status: 'Active',
-    flagEmoji: '🇮🇳',
-  },
-  {
-    id: 'CT-10',
-    name: 'Japan',
-    iso2: 'JP',
-    iso3: 'JPN',
-    dialCode: '+81',
-    zoneCode: 'ZONE-APAC',
-    zoneName: 'Asia-Pacific Priority Hub',
-    currency: 'JPY (¥)',
-    customsDoc: 'Customs Declaration + Packing List',
-    status: 'Active',
-    flagEmoji: '🇯🇵',
-  },
-  {
-    id: 'CT-11',
-    name: 'France',
-    iso2: 'FR',
-    iso3: 'FRA',
-    dialCode: '+33',
-    zoneCode: 'ZONE-EU',
-    zoneName: 'Western & Northern Europe',
-    currency: 'EUR (€)',
-    customsDoc: 'EU EORI + Commercial Invoice',
-    status: 'Active',
-    flagEmoji: '🇫🇷',
-  },
-  {
-    id: 'CT-12',
-    name: 'Brazil',
-    iso2: 'BR',
-    iso3: 'BRA',
-    dialCode: '+55',
-    zoneCode: 'ZONE-LATAM',
-    zoneName: 'Latin America Freight',
-    currency: 'BRL (R$)',
-    customsDoc: 'CPF/CNPJ Tax ID Required',
-    status: 'Inactive',
-    flagEmoji: '🇧🇷',
-  },
-])
-
-const availableZones = [
-  { code: 'ZONE-NA', name: 'North America Priority' },
-  { code: 'ZONE-EU', name: 'Western & Northern Europe' },
-  { code: 'ZONE-ME', name: 'Middle East & GCC Express' },
-  { code: 'ZONE-APAC', name: 'Asia-Pacific Priority Hub' },
-  { code: 'ZONE-SAARC', name: 'South Asia Regional Corridor' },
-  { code: 'ZONE-LATAM', name: 'Latin America Freight' },
-  { code: 'UNASSIGNED', name: 'Unassigned / Direct' },
-]
+const countries = ref([])
+const toast = useToast();
 
 const searchQuery = ref('')
-const selectedZoneFilter = ref('All')
 const selectedStatusFilter = ref('All')
 const alertMessage = ref(null)
 
@@ -182,30 +18,24 @@ const countryToAssign = ref(null)
 const targetZoneCode = ref('')
 
 const formCountry = ref({
-  id: '',
   name: '',
-  iso2: '',
-  iso3: '',
-  dialCode: '+',
-  zoneCode: 'ZONE-NA',
-  zoneName: 'North America Priority',
-  currency: 'USD ($)',
-  customsDoc: '',
+  code: '',
   status: 'Active',
-  flagEmoji: '🌐',
 })
 
 const filteredCountries = computed(() => {
   return countries.value.filter((c) => {
     const matchesSearch =
       c.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      c.iso2.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      c.iso3.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      c.currency.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesZone = selectedZoneFilter.value === 'All' || c.zoneCode === selectedZoneFilter.value
+      c.code.toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesStatus = selectedStatusFilter.value === 'All' || c.status === selectedStatusFilter.value
-    return matchesSearch && matchesZone && matchesStatus
+    return matchesSearch && matchesStatus
   })
+})
+
+onMounted(async () => {
+  const response = await getAllCountries();
+  countries.value = response.data;
 })
 
 const showAlert = (msg) => {
@@ -218,17 +48,9 @@ const showAlert = (msg) => {
 const openAddModal = () => {
   isEditing.value = false
   formCountry.value = {
-    id: `CT-${String(countries.value.length + 1).padStart(2, '0')}`,
     name: '',
-    iso2: '',
-    iso3: '',
-    dialCode: '+',
-    zoneCode: 'ZONE-NA',
-    zoneName: 'North America Priority',
-    currency: 'USD ($)',
-    customsDoc: 'Commercial Invoice',
+    code: '',
     status: 'Active',
-    flagEmoji: '🌐',
   }
   showCountryModal.value = true
 }
@@ -239,16 +61,10 @@ const openEditModal = (country) => {
   showCountryModal.value = true
 }
 
-const onZoneSelectedInForm = () => {
-  const z = availableZones.find((item) => item.code === formCountry.value.zoneCode)
-  if (z) {
-    formCountry.value.zoneName = z.name
-  }
-}
 
-const saveCountry = () => {
-  if (!formCountry.value.name ) {
-    alert('Please enter Country Name.')
+const saveCountry = async () => {
+  if (!formCountry.value.name) {
+    toast.error('Please enter Country Name.');
     return
   }
 
@@ -260,26 +76,16 @@ const saveCountry = () => {
     }
   } else {
     countries.value.unshift({ ...formCountry.value })
-    showAlert(`Country ${formCountry.value.name} added to directory.`)
+
+    const resp = await addCountry(formCountry.value);
+
+    if (resp.status === 'success') {
+      toast.success(resp.message);
+    } else {
+      toast.error(resp.message);
+    }
   }
   showCountryModal.value = false
-}
-
-const openQuickZoneModal = (country) => {
-  countryToAssign.value = country
-  targetZoneCode.value = country.zoneCode
-  showAssignZoneModal.value = true
-}
-
-const applyZoneReassignment = () => {
-  if (!countryToAssign.value) return
-  const z = availableZones.find((item) => item.code === targetZoneCode.value)
-  if (z) {
-    countryToAssign.value.zoneCode = z.code
-    countryToAssign.value.zoneName = z.name
-    showAlert(`${countryToAssign.value.name} reassigned to ${z.name}.`)
-  }
-  showAssignZoneModal.value = false
 }
 
 const toggleCountryStatus = (country) => {
@@ -320,12 +126,13 @@ const getStatusBadge = (status) => {
         <div class="d-flex align-items-center gap-2 mb-1">
           <span class="badge bg-primary-subtle text-primary px-2 py-1 rounded-pill small fw-semibold">Settings</span>
           <i class="bi bi-chevron-right text-muted small"></i>
-          <span class="text-secondary small fw-medium">Country Directory</span>
+          <span class="text-secondary small fw-medium">Country Master</span>
         </div>
       </div>
 
-      <div class="d-flex align-items-center gap-2">       
-        <button class="btn btn-primary btn-sm rounded-3 px-3 py-2 shadow-sm d-flex align-items-center gap-1" @click="openAddModal">
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-primary btn-sm rounded-3 px-3 py-2 shadow-sm d-flex align-items-center gap-1"
+          @click="openAddModal">
           <i class="bi bi-plus-lg"></i>
           <span>Add Country</span>
         </button>
@@ -334,7 +141,8 @@ const getStatusBadge = (status) => {
 
     <!-- Alert Notification -->
     <transition name="fade">
-      <div v-if="alertMessage" class="alert alert-success d-flex align-items-center mb-4 shadow-sm rounded-3" role="alert">
+      <div v-if="alertMessage" class="alert alert-success d-flex align-items-center mb-4 shadow-sm rounded-3"
+        role="alert">
         <i class="bi bi-check-circle-fill me-2 fs-5 text-success"></i>
         <div>{{ alertMessage }}</div>
       </div>
@@ -349,12 +157,8 @@ const getStatusBadge = (status) => {
             <span class="input-group-text bg-light border-end-0">
               <i class="bi bi-search text-muted"></i>
             </span>
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="form-control bg-light border-start-0"
-              placeholder="Search by country and country code "
-            />
+            <input v-model="searchQuery" type="text" class="form-control bg-light border-start-0"
+              placeholder="Search by country and country code " />
           </div>
         </div>
 
@@ -387,44 +191,32 @@ const getStatusBadge = (status) => {
             </tr>
             <tr v-for="country in filteredCountries" :key="country.id">
               <td>
-                <div class="d-flex align-items-center gap-3">                  
+                <div class="d-flex align-items-center gap-3">
                   <div>
                     <div class="fw-bold text-dark d-flex align-items-center gap-2">
                       {{ country.name }}
                       <span class="badge bg-primary-subtle text-primary border font-monospace small px-2 py-0">
-                        {{ country.iso2 }}
+                        {{ country.code }}
                       </span>
                     </div>
                   </div>
                 </div>
               </td>
               <td>
-                <button
-                  type="button"
-                  class="badge border-0 rounded-pill px-3 py-1 cursor-pointer"
-                  :class="getStatusBadge(country.status)"
-                  @click="toggleCountryStatus(country)"
-                  title="Click to cycle status"
-                >
+                <button type="button" class="badge border-0 rounded-pill px-3 py-1 cursor-pointer"
+                  :class="getStatusBadge(country.status)" @click="toggleCountryStatus(country)"
+                  title="Click to cycle status">
                   {{ country.status }}
                 </button>
               </td>
               <td class="text-end">
-                <div class="d-flex align-items-center justify-content-end gap-1">                  
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-light text-secondary p-2 rounded-2"
-                    @click="openEditModal(country)"
-                    title="Edit Country"
-                  >
+                <div class="d-flex align-items-center justify-content-end gap-1">
+                  <button type="button" class="btn btn-sm btn-light text-secondary p-2 rounded-2"
+                    @click="openEditModal(country)" title="Edit Country">
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-light text-danger p-2 rounded-2"
-                    @click="deleteCountry(country)"
-                    title="Delete Country"
-                  >
+                  <button type="button" class="btn btn-sm btn-light text-danger p-2 rounded-2"
+                    @click="deleteCountry(country)" title="Delete Country">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
@@ -437,13 +229,7 @@ const getStatusBadge = (status) => {
 
     <!-- Modal: Add / Edit Country -->
     <div v-if="showCountryModal" class="modal-backdrop fade show"></div>
-    <div
-      v-if="showCountryModal"
-      class="modal fade show d-block"
-      tabindex="-1"
-      role="dialog"
-      aria-modal="true"
-    >
+    <div v-if="showCountryModal" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content rounded-4 border-0 shadow-md">
           <div class="modal-header border-bottom px-4 py-3">
@@ -457,22 +243,13 @@ const getStatusBadge = (status) => {
             <div class="row g-3">
               <div class="col-md-12">
                 <label class="form-label small fw-semibold">Country Name <span class="text-danger">*</span></label>
-                <input
-                  v-model="formCountry.name"
-                  type="text"
-                  class="form-control"
-                  placeholder="e.g. Singapore, Germany"
-                />
-              </div>  
+                <input v-model="formCountry.name" type="text" class="form-control"
+                  placeholder="e.g. Singapore, Germany" />
+              </div>
               <div class="col-md-12">
                 <label class="form-label small fw-semibold">Country Code <span class="text-danger">*</span></label>
-                <input
-                  v-model="formCountry.name"
-                  type="text"
-                  class="form-control"
-                  placeholder="Country Code"
-                />
-              </div>                          
+                <input v-model="formCountry.code" type="text" class="form-control" placeholder="Country Code" />
+              </div>
             </div>
           </div>
           <div class="modal-footer border-top px-4 py-3 bg-light rounded-bottom-4">
@@ -489,13 +266,8 @@ const getStatusBadge = (status) => {
 
     <!-- Modal: Quick Zone Reassignment -->
     <div v-if="showAssignZoneModal && countryToAssign" class="modal-backdrop fade show"></div>
-    <div
-      v-if="showAssignZoneModal && countryToAssign"
-      class="modal fade show d-block"
-      tabindex="-1"
-      role="dialog"
-      aria-modal="true"
-    >
+    <div v-if="showAssignZoneModal && countryToAssign" class="modal fade show d-block" tabindex="-1" role="dialog"
+      aria-modal="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow-lg">
           <div class="modal-header border-bottom px-4 py-3">
@@ -538,10 +310,12 @@ const getStatusBadge = (status) => {
 .cursor-pointer {
   cursor: pointer;
 }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

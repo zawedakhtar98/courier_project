@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getAllServicePartners } from '@/services/servicePartner';
-import { addNewServicePartner } from '@/services/servicePartner';
+import { getAllServicePartners } from '@/services/admin/servicePartner';
+import { addNewServicePartner } from '@/services/admin/servicePartner';
 import { useToast } from "vue-toastification";
 const toast = useToast();
 const servicePartnersList = ref([]);

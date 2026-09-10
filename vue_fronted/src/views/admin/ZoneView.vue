@@ -1,74 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useToast } from 'vue-toastification'
+import { addZone, getZoneList, updateZone, addZoneCountryMapping } from '@/services/admin/ZoneMasterService'
+import { getAllCountries } from '@/services/admin/CountryService'
 
-const zones = ref([
-  {
-    id: 'ZN-01',
-    code: 'ZONE-NA',
-    name: 'Zone_1',
-    description: 'Direct air freight routes covering US, Canada & Mexico metro hubs.',
-    transitDays: '1-3 Days',
-    fuelSurcharge: 12.5,
-    rateMultiplier: 1.0,
-    status: 'Active',
-    countries: ['United States', 'Canada', 'Mexico'],
-  },
-  {
-    id: 'ZN-02',
-    code: 'ZONE-EU',
-    name: 'Zone_2',
-    description: 'Schengen zone expedited courier corridor via Frankfurt Hub.',
-    transitDays: '2-4 Days',
-    fuelSurcharge: 14.0,
-    rateMultiplier: 1.15,
-    status: 'Active',
-    countries: ['United Kingdom', 'Germany', 'France', 'Netherlands', 'Italy', 'Spain', 'Switzerland'],
-  },
-  {
-    id: 'ZN-03',
-    code: 'ZONE-ME',
-    name: 'Zone_3',
-    description: 'Gulf cooperation council cross-border customs cleared line.',
-    transitDays: '2-3 Days',
-    fuelSurcharge: 11.0,
-    rateMultiplier: 1.05,
-    status: 'Active',
-    countries: ['United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Kuwait', 'Oman', 'Bahrain'],
-  },
-  {
-    id: 'ZN-04',
-    code: 'ZONE-APAC',
-    name: 'Zone_4',
-    description: 'High-frequency commercial lanes connecting East & South East Asia.',
-    transitDays: '3-5 Days',
-    fuelSurcharge: 15.5,
-    rateMultiplier: 1.25,
-    status: 'Active',
-    countries: ['Singapore', 'Japan', 'South Korea', 'Australia', 'Malaysia', 'Hong Kong'],
-  },
-  {
-    id: 'ZN-05',
-    code: 'ZONE-SAARC',
-    name: 'Zone_5',
-    description: 'Subcontinent express line with overland & direct cargo links.',
-    transitDays: '2-4 Days',
-    fuelSurcharge: 9.5,
-    rateMultiplier: 0.95,
-    status: 'Active',
-    countries: ['India', 'Bangladesh', 'Sri Lanka', 'Nepal'],
-  },
-  {
-    id: 'ZN-06',
-    code: 'ZONE-LATAM',
-    name: 'Zone_6',
-    description: 'Central & South American destinations with customs broker support.',
-    transitDays: '4-7 Days',
-    fuelSurcharge: 16.5,
-    rateMultiplier: 1.35,
-    status: 'Inactive',
-    countries: ['Brazil', 'Argentina', 'Chile', 'Colombia', 'Peru'],
-  },
-])
+const toast = useToast();
+
+const zones = ref([]);
 
 const searchQuery = ref('')
 const filterStatus = ref('All')
@@ -80,25 +18,11 @@ const isEditing = ref(false)
 const showCountryMappingModal = ref(false)
 const selectedZone = ref(null)
 
-const availableCountries = [
-  'United States', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'France',
-  'Netherlands', 'Italy', 'Spain', 'Switzerland', 'United Arab Emirates',
-  'Saudi Arabia', 'Qatar', 'Kuwait', 'Oman', 'Bahrain', 'Singapore',
-  'Japan', 'South Korea', 'Australia', 'Malaysia', 'Hong Kong',
-  'India', 'Bangladesh', 'Sri Lanka', 'Nepal', 'Brazil', 'Argentina',
-  'Chile', 'Colombia', 'Peru', 'New Zealand', 'South Africa', 'Sweden', 'Norway'
-]
+const availableCountries = ref([]);
 
 const formZone = ref({
-  id: '',
-  code: '',
   name: '',
-  description: '',
-  transitDays: '2-4 Days',
-  fuelSurcharge: 12.0,
-  rateMultiplier: 1.0,
-  status: 'Active',
-  countries: [],
+  status: 'Active'
 })
 
 const countrySearch = ref('')
@@ -107,7 +31,6 @@ const filteredZones = computed(() => {
   return zones.value.filter((z) => {
     const matchesSearch =
       z.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      z.code.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       z.countries.some((c) => c.toLowerCase().includes(searchQuery.value.toLowerCase()))
     const matchesStatus = filterStatus.value === 'All' || z.status === filterStatus.value
     return matchesSearch && matchesStatus
@@ -158,10 +81,27 @@ const openEditModal = (zone) => {
   }
   showZoneModal.value = true
 }
+onMounted(() => {
+  fetchZoneList();
+  fetchCountries();
+})
+const fetchZoneList = async () => {
+  const resp = await getZoneList();
+  if (resp.status === 'success') {
+    zones.value = resp.data;
+  }
+}
 
-const saveZone = () => {
+const fetchCountries = async () => {
+  const resp = await getAllCountries();
+  if (resp.status === 'success') {
+    availableCountries.value = resp.data;
+  }
+}
+
+const saveZone = async () => {
   if (!formZone.value.name || !formZone.value.code) {
-    alert('Please enter Zone Code and Zone Name.')
+    toast.error('Please enter Zone Code and Zone Name.')
     return
   }
 
@@ -169,11 +109,16 @@ const saveZone = () => {
     const idx = zones.value.findIndex((z) => z.id === formZone.value.id)
     if (idx !== -1) {
       zones.value[idx] = { ...zones.value[idx], ...formZone.value }
-      showAlert(`Zone ${formZone.value.name} updated successfully.`)
+      toast.success(`Zone ${formZone.value.name} updated successfully.`)
     }
   } else {
-    zones.value.unshift({ ...formZone.value })
-    showAlert(`Zone ${formZone.value.name} created successfully.`)
+    const resp = await addZone(formZone.value);
+    if (resp.status === 'success') {
+      zones.value.unshift({ ...formZone.value })
+      toast.success(`Zone ${formZone.value.name} created successfully.`)
+    } else {
+      toast.error(resp.message)
+    }
   }
   showZoneModal.value = false
 }
@@ -196,20 +141,30 @@ const openCountryMapping = (zone) => {
   showCountryMappingModal.value = true
 }
 
-const toggleCountryForSelectedZone = (country) => {
+const toggleCountryForSelectedZone = async (country) => {
   if (!selectedZone.value) return
-  const idx = selectedZone.value.countries.indexOf(country)
+  const idx = selectedZone.value.countries.indexOf(country.name)
   if (idx > -1) {
     selectedZone.value.countries.splice(idx, 1)
   } else {
-    selectedZone.value.countries.push(country)
+    const payload = {
+      zone_id: selectedZone.value.id,
+      country_id: country.id
+    }
+    const resp = await addZoneCountryMapping(payload)
+    if (resp.status === 'success') {
+      selectedZone.value.countries.push(country.name)
+      toast.success(resp.message)
+    } else {
+      toast.error(resp.message)
+    }
   }
 }
 
 const filteredAvailableCountries = computed(() => {
-  if (!countrySearch.value) return availableCountries
-  return availableCountries.filter((c) =>
-    c.toLowerCase().includes(countrySearch.value.toLowerCase())
+  if (!countrySearch.value) return availableCountries.value
+  return availableCountries.value.filter((c) =>
+    c.name.toLowerCase().includes(countrySearch.value.toLowerCase())
   )
 })
 </script>
@@ -409,14 +364,14 @@ const filteredAvailableCountries = computed(() => {
 
             <div class="p-3 bg-light rounded-3 border" style="max-height: 320px; overflow-y: auto;">
               <div class="row g-2">
-                <div v-for="country in filteredAvailableCountries" :key="country" class="col-6 col-md-4">
+                <div v-for="country in filteredAvailableCountries" :key="country.id" class="col-6 col-md-4">
                   <div
                     class="d-flex align-items-center gap-2 p-2 rounded-3 border bg-white cursor-pointer transition-all"
-                    :class="{ 'border-primary bg-primary-subtle text-primary fw-semibold': selectedZone.countries.includes(country) }"
+                    :class="{ 'border-primary bg-primary-subtle text-primary fw-semibold': selectedZone.countries.includes(country.name) }"
                     @click="toggleCountryForSelectedZone(country)">
                     <input type="checkbox" class="form-check-input mt-0"
-                      :checked="selectedZone.countries.includes(country)" />
-                    <span class="small text-truncate">{{ country }}</span>
+                      :checked="selectedZone.countries.includes(country.name)" />
+                    <span class="small text-truncate">{{ country.name }}</span>
                   </div>
                 </div>
               </div>
