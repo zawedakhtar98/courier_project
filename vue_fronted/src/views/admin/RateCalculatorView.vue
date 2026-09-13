@@ -1,6 +1,8 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getAllCountries } from '@/services/admin/CountryService'
+
 
 const router = useRouter()
 
@@ -13,7 +15,8 @@ const showRechargeModal = ref(false)
 const rechargeAmount = ref(500)
 
 // Calculator Form State
-const calcDate = ref('2026-08-13')
+const todayDate = new Date().toISOString().split('T')[0]
+const calcDate = ref(todayDate)
 const destination = ref('ALBANIA')
 const pincode = ref('')
 const city = ref('')
@@ -22,8 +25,7 @@ const goodsType = ref('NDox')
 
 // Box Rows State
 const boxRows = ref([
-  { actWt: 2, length: 20, width: 20, height: 20, volWt: 1.60, chgWt: 2.00 },
-  { actWt: 1, length: 20, width: 15, height: 19, volWt: 1.14, chgWt: 1.50 }
+  { actWt: 0, length: 0, width: 0, height: 0, volWt: 0, chgWt: 0 }
 ])
 
 // Volumetric calculations
@@ -63,6 +65,20 @@ const deleteBox = (index) => {
 const handleFieldChange = (row) => {
   calculateRowVolWt(row)
 }
+
+const countries = ref([]);
+
+// on mounted
+onMounted(() => {
+  fetchCountries();
+});
+
+const fetchCountries = async () => {
+  const resp = await getAllCountries();
+  if (resp.status === 'success') {
+    countries.value = resp.data;
+  }
+};
 
 // Totals Computed Row
 const totalPCS = computed(() => boxRows.value.length)
@@ -171,8 +187,10 @@ const bookShipment = (rate) => {
   }))
 
   router.push({
-    name: 'admin-add-new-shipment',
+    name: 'admin-shipments',
     query: {
+      pickup_date: calcDate.value,
+      action: 'new',
       destination: destination.value,
       service: rate.service,
       goodsType: goodsType.value,
@@ -221,7 +239,7 @@ const bookShipment = (rate) => {
           <label class="form-label small fw-bold text-danger text-uppercase mb-1">
             <i class="bi bi-calendar-event me-1"></i> Date
           </label>
-          <input v-model="calcDate" type="date" class="form-control form-control-custom" />
+          <input v-model="calcDate" type="date" class="form-control form-control-custom" :min="todayDate" />
         </div>
 
         <!-- Destination Country -->
@@ -230,12 +248,14 @@ const bookShipment = (rate) => {
             <i class="bi bi-geo-alt-fill me-1"></i> Destination
           </label>
           <select v-model="destination" class="form-select form-select-custom text-uppercase">
-            <option value="ALBANIA">Albania</option>
+            <option value="" selected>Select Destination</option>
+            <option v-for="country in countries" :key="country.id" :value="country.name">{{ country.name }}</option>
+            <!-- <option value="ALBANIA">Albania</option>
             <option value="SINGAPORE">Singapore</option>
             <option value="UNITED STATES">United States</option>
             <option value="AUSTRIA">Austria</option>
             <option value="GERMANY">Germany</option>
-            <option value="INDIA">India</option>
+            <option value="INDIA">India</option> -->
           </select>
         </div>
 

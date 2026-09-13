@@ -38,24 +38,14 @@ const router = createRouter({
           component: () => import('@/views/admin/ShipmentsView.vue'),
           meta: { title: 'Shipment Management' },
         },
-        {
-          path: 'add-new-shipment',
-          name: 'add-new-shipment',
-          component: () => import('@/views/admin/ShipmentsForm.vue'),
-          meta: { title: 'Shipment Management' },
-        },
+
         {
           path: 'rate-calculator',
           name: 'rate-calculator',
           component: () => import('@/views/admin/RateCalculatorView.vue'),
           meta: { title: 'Rate Calculator' },
         },
-        {
-          path: 'add-new-shipment',
-          name: 'admin-add-new-shipment',
-          component: () => import('@/views/admin/AddNewShipmentView.vue'),
-          meta: { title: 'Add New Shipment' },
-        },
+
         {
           path: 'users',
           name: 'admin-users',

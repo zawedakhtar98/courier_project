@@ -8,6 +8,7 @@ use App\Http\Resources\CountryResource;
 use App\Http\Resources\ServicePartnerResource;
 use App\Http\Resources\ZoneMasterResource;
 use App\Models\Country;
+use App\Models\ServicePartnerZoneRate;
 use App\Models\ZoneCountryMapping;
 use App\Models\ZoneMaster;
 use App\Services\ServicePartnerServices;
@@ -260,5 +261,111 @@ class AdminController extends Controller
         ]);
 
         return ApiResponse::success([], "Zone Country Mapped successfully!");
+    }
+
+    public function saveServicePartnerRates(Request $request)
+    {
+        $request->validate([
+            'service_partner_id' => 'required|integer',
+            'rates' => 'required|array',
+        ]);
+
+        $partnerId = $request->service_partner_id;
+
+        // Delete existing rates for this partner to replace them with the new bulk upload
+        ServicePartnerZoneRate::where('service_partner_id', $partnerId)->delete();
+
+        $ratesToInsert = [];
+        foreach ($request->rates as $rateData) {
+            $ratesToInsert[] = [
+                'service_partner_id' => $partnerId,
+                'zone_id' => $rateData['zone_id'],
+                'package_type' => $rateData['package_type'],
+                'weight_from' => $rateData['weight_from'],
+                'weight_to' => $rateData['weight_to'],
+                'rate' => $rateData['rate'],
+                'rate_type' => $rateData['rate_type'],
+                'currency' => $rateData['currency'] ?? 'INR',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        ServicePartnerZoneRate::insert($ratesToInsert);
+
+        return ApiResponse::success([], "Rates saved successfully!");
+    }
+
+    public function getServicePartnerRates($servicePartnerId)
+    {
+        $rates = ServicePartnerZoneRate::where('service_partner_id', $servicePartnerId)->get();
+        return ApiResponse::success($rates, "Rates fetched successfully!");
+    }
+
+    public function saveShipment(Request $request)
+    {
+        $validated = $request->validate([
+            'awb_number' => 'required|string',
+            'service_partner_id' => 'nullable|integer',
+            'user_id' => 'nullable|integer',
+            'pickup_date' => 'nullable|date',
+
+            // Sender Details
+            'sender_name' => 'nullable|string',
+            'sender_company_name' => 'nullable|string',
+            'sender_contact_person_name' => 'nullable|string',
+            'sender_address_line_1' => 'nullable|string',
+            'sender_address_line_2' => 'nullable|string',
+            'sender_address_line_3' => 'nullable|string',
+            'sender_city' => 'nullable|string',
+            'sender_state' => 'nullable|string',
+            'sender_pincode' => 'nullable|string',
+            'sender_type' => 'nullable|in:individual,business',
+            'sender_kyc_type' => 'nullable|in:aadhaar,passport,gstin',
+            'sender_kyc_number' => 'nullable|string',
+            'sender_telephone' => 'nullable|string',
+            'sender_email' => 'nullable|email',
+
+            // Receiver Details
+            'receiver_name' => 'nullable|string',
+            'receiver_company_name' => 'nullable|string',
+            'receiver_contact_person_name' => 'nullable|string',
+            'receiver_address_line_1' => 'nullable|string',
+            'receiver_address_line_2' => 'nullable|string',
+            'receiver_address_line_3' => 'nullable|string',
+            'receiver_city' => 'nullable|string',
+            'receiver_state' => 'nullable|string',
+            'receiver_pincode' => 'nullable|string',
+            'receiver_type' => 'nullable|in:individual,business',
+            'receiver_vat_tax_id' => 'nullable|string',
+            'receiver_telephone' => 'nullable|string',
+            'receiver_email' => 'nullable|email',
+            'receiver_country_id' => 'nullable|integer',
+
+            // Metadata
+            'payment_status' => 'nullable|in:paid,pending,cancel',
+            'status' => 'nullable|in:draft,pending,cancel,intransit,delivered',
+            'created_by' => 'nullable|in:employee,admin,customer',
+            'goods_type' => 'nullable|string',
+            'actual_weight' => 'nullable|numeric',
+            'chargeable_weight' => 'nullable|numeric',
+            'shipment_total_cost' => 'nullable|numeric',
+        ]);
+
+        try {
+            // Adjust the Model name according to your actual setup
+            $shipment = \App\Models\ShipmentDetail::create($validated);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Shipment stored successfully',
+                'data' => $shipment
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error storing shipment: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

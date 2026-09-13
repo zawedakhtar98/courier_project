@@ -1,27 +1,12 @@
-<script>
-export function defaultSlabData() {
-  return [
-    { weight: '0.500', zones: ['1,214', '1,206', '1,366', '1,289', '1,609', '1,788', '1,460', '3,309', '1,607', '2,471', '3,343', '1,586', '2,752', '1,642'] },
-    { weight: '1.000', zones: ['1,461', '1,441', '1,657', '1,442', '1,983', '2,132', '1,684', '4,221', '1,822', '3,215', '3,854', '1,779', '3,416', '1,694'] },
-    { weight: '1.500', zones: ['1,707', '1,705', '1,946', '1,594', '2,349', '2,467', '1,910', '5,123', '1,990', '3,572', '4,362', '1,959', '3,944', '2,006'] },
-    { weight: '2.000', zones: ['1,953', '1,962', '2,235', '1,745', '2,713', '2,804', '2,135', '6,027', '2,227', '3,931', '4,867', '2,136', '4,472', '2,306'] },
-    { weight: '2.500', zones: ['2,242', '2,228', '2,386', '1,895', '2,813', '3,143', '2,362', '6,934', '2,473', '4,292', '5,375', '2,388', '5,000', '2,619'] },
-    { weight: '3.000', zones: ['2,433', '2,436', '2,651', '2,137', '3,049', '3,413', '2,667', '7,882', '2,732', '4,663', '5,590', '2,634', '5,489', '2,863'] },
-    { weight: '3.500', zones: ['2,623', '2,644', '2,915', '2,381', '3,285', '3,684', '2,971', '8,830', '2,991', '5,036', '5,804', '2,880', '5,979', '3,109'] }
-  ]
-}
-</script>
-
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getAllServicePartners } from '@/services/admin/servicePartner';
+import { getZoneList } from '@/services/admin/ZoneMasterService';
+import { saveServicePartnerRates, getServicePartnerRates } from '@/services/admin/ServicePartnerRateService';
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
-const servicePartners = [
-  'DHL EXPRESS',
-  'FedEx International',
-  'Aramex Worldwide',
-  'UPS Worldwide',
-  'DTDC Global',
-]
+const servicePartners = ref([]);
 
 const packageTypes = [
   'NONDOC',
@@ -32,48 +17,80 @@ const packageTypes = [
 ]
 
 const rateTypes = [
-  'Slab',
   'Flat',
   'Per KG',
-]
+];
 
-// 14 Available Zone Masters
-const availableZoneMasters = Array.from({ length: 14 }, (_, i) => ({
-  id: i + 1,
-  name: `Zone ${i + 1}`,
-  code: `ZONE-${String(i + 1).padStart(2, '0')}`,
-}))
+const availableZoneMasters = ref([]);
 
-// Main Rate Groups State
-const rateGroups = ref([
-  {
-    id: 'grp-dhl-1',
-    service: 'DHL EXPRESS',
-    packageType: 'NONDOC',
-    rateType: 'Slab',
-    zoneCount: 14,
-    status: 'Active',
-    rows: defaultSlabData(),
-  },
-  {
-    id: 'grp-fedex-1',
-    service: 'FedEx International',
-    packageType: 'DOC',
-    rateType: 'Slab',
-    zoneCount: 14,
-    status: 'Active',
-    rows: [
-      { weight: '0.500', zones: ['950', '980', '1,100', '1,050', '1,320', '1,450', '1,200', '2,800', '1,350', '2,100', '2,900', '1,300', '2,400', '1,400'] },
-      { weight: '1.000', zones: ['1,180', '1,220', '1,390', '1,290', '1,650', '1,800', '1,450', '3,600', '1,590', '2,750', '3,400', '1,520', '2,950', '1,500'] },
-      { weight: '1.500', zones: ['1,420', '1,460', '1,680', '1,480', '1,980', '2,150', '1,700', '4,400', '1,800', '3,200', '3,900', '1,750', '3,500', '1,800'] },
-    ],
-  },
-])
-
-const expandedCouriers = ref({
-  'grp-dhl-1': true,
-  'grp-fedex-1': false,
+onMounted(async () => {
+  const res = await getAllServicePartners();
+  if (res.status === 'success') {
+    servicePartners.value = res.data;
+  }
+  const zone = await getZoneList();
+  if (zone.status === 'success') {
+    availableZoneMasters.value = zone.data.map((z) => ({
+      id: z.id,
+      name: z.name,
+    }))
+  }
+  await fetchAllRates();
 })
+
+
+const rateGroups = ref([])
+const expandedCouriers = ref({})
+
+const fetchAllRates = async () => {
+  rateGroups.value = [];
+  expandedCouriers.value = {};
+
+  for (const partner of servicePartners.value) {
+    try {
+      const res = await getServicePartnerRates(partner.id);
+      if (res.status === 'success' && res.data && res.data.length > 0) {
+        const grouped = {};
+        res.data.forEach(row => {
+          const key = row.package_type;
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(row);
+        });
+
+        Object.keys(grouped).forEach(pkgType => {
+          const rows = grouped[pkgType];
+          const weightGroups = {};
+          rows.forEach(r => {
+            const w = Number(r.weight_to).toFixed(3);
+            if (!weightGroups[w]) weightGroups[w] = { weight: w, zones: Array(availableZoneMasters.value.length).fill('—') };
+
+            const zIdx = availableZoneMasters.value.findIndex(z => z.id === r.zone_id);
+            if (zIdx !== -1) {
+              weightGroups[w].zones[zIdx] = r.rate;
+            }
+          });
+
+          const uiRows = Object.values(weightGroups).sort((a, b) => Number(a.weight) - Number(b.weight));
+
+          const groupId = `grp-${partner.id}-${pkgType}`;
+          rateGroups.value.push({
+            id: groupId,
+            servicePartnerId: partner.id,
+            service: partner.name,
+            packageType: pkgType,
+            rateType: rows[0].rate_type,
+            zoneCount: availableZoneMasters.value.length,
+            status: 'Active',
+            rows: uiRows
+          });
+          expandedCouriers.value[groupId] = true;
+        });
+      }
+    } catch (e) {
+      console.error('Failed to fetch rates for', partner.name);
+    }
+  }
+}
 
 const toggleCourier = (id) => {
   expandedCouriers.value[id] = !expandedCouriers.value[id]
@@ -90,7 +107,7 @@ const editingGroupId = ref(null)
 const editingRowIndex = ref(null)
 
 const formRateSlab = ref({
-  servicePartner: 'DHL EXPRESS',
+  servicePartnerId: '',
   packageType: 'NONDOC',
   rateType: 'Slab',
   weightFrom: '0.00',
@@ -109,10 +126,10 @@ const sortedSelectedZones = computed(() => {
 })
 
 const filteredZoneMastersList = computed(() => {
-  if (!zoneSearchFilter.value.trim()) return availableZoneMasters
+  if (!zoneSearchFilter.value.trim()) return availableZoneMasters.value
   const q = zoneSearchFilter.value.toLowerCase().trim()
-  return availableZoneMasters.filter(
-    (z) => z.name.toLowerCase().includes(q) || z.code.toLowerCase().includes(q)
+  return availableZoneMasters.value.filter(
+    (z) => z.name.toLowerCase().includes(q)
   )
 })
 
@@ -133,7 +150,7 @@ const toggleZone = (zoneId) => {
 }
 
 const selectAllZones = () => {
-  formRateSlab.value.selectedZones = availableZoneMasters.map((z) => z.id)
+  formRateSlab.value.selectedZones = availableZoneMasters.value.map((z) => z.id)
 }
 
 const deselectAllZones = () => {
@@ -171,14 +188,14 @@ const openAddModal = () => {
   bulkRateValue.value = ''
   zoneSearchFilter.value = ''
 
-  const allZones = availableZoneMasters.map((z) => z.id)
+  const allZones = availableZoneMasters.value.map((z) => z.id)
   const defaultRates = {
     1: '1214', 2: '1206', 3: '1366', 4: '1289', 5: '1609', 6: '1788', 7: '1460',
     8: '3309', 9: '1607', 10: '2471', 11: '3343', 12: '1586', 13: '2752', 14: '1642'
   }
 
   formRateSlab.value = {
-    servicePartner: 'DHL EXPRESS',
+    servicePartnerId: '',
     packageType: 'NONDOC',
     rateType: 'Slab',
     weightFrom: '0.00',
@@ -210,21 +227,21 @@ const openEditModal = (group, rowIdx) => {
   }
 
   formRateSlab.value = {
-    servicePartner: group.service,
+    servicePartnerId: group.servicePartnerId,
     packageType: group.packageType,
     rateType: group.rateType,
     weightFrom: '0.00',
     weightTo: row ? String(row.weight) : '0.500',
     currency: '₹',
     status: group.status,
-    selectedZones: selected.length > 0 ? selected : availableZoneMasters.map((z) => z.id),
+    selectedZones: selected.length > 0 ? selected : availableZoneMasters.value.map((z) => z.id),
     zoneRates: ratesMap,
   }
   showRateSlabModal.value = true
 }
 
-const saveRateSlab = () => {
-  if (!formRateSlab.value.servicePartner) {
+const saveRateSlab = async () => {
+  if (!formRateSlab.value.servicePartnerId) {
     alert('Please select a Service Partner.')
     return
   }
@@ -234,9 +251,8 @@ const saveRateSlab = () => {
     return
   }
 
-  // Construct zones array for 14 zones
   const zoneValues = []
-  for (let i = 1; i <= 14; i++) {
+  for (let i = 1; i <= availableZoneMasters.value.length; i++) {
     const rateVal = formRateSlab.value.zoneRates[i]
     if (rateVal !== undefined && rateVal !== '') {
       const numVal = Number(String(rateVal).replace(/,/g, ''))
@@ -253,27 +269,28 @@ const saveRateSlab = () => {
   }
 
   let targetGroup = rateGroups.value.find(
-    (g) => g.service === formRateSlab.value.servicePartner && g.packageType === formRateSlab.value.packageType
+    (g) => g.servicePartnerId === formRateSlab.value.servicePartnerId && g.packageType === formRateSlab.value.packageType
   )
 
+  const partner = servicePartners.value.find(p => p.id === formRateSlab.value.servicePartnerId)
+
   if (!targetGroup) {
-    const newGroupId = `grp-${Date.now()}`
+    const newGroupId = `grp-${partner.id}-${formRateSlab.value.packageType}`
     targetGroup = {
       id: newGroupId,
-      service: formRateSlab.value.servicePartner,
+      servicePartnerId: partner.id,
+      service: partner.name,
       packageType: formRateSlab.value.packageType,
       rateType: formRateSlab.value.rateType,
-      zoneCount: 14,
+      zoneCount: availableZoneMasters.value.length,
       status: formRateSlab.value.status,
       rows: [newRow],
     }
     rateGroups.value.unshift(targetGroup)
     expandedCouriers.value[newGroupId] = true
-    showAlert(`Mapped new rate slab for ${formRateSlab.value.servicePartner} successfully.`)
   } else {
     if (isEditing.value && editingRowIndex.value !== null && targetGroup.rows[editingRowIndex.value]) {
       targetGroup.rows[editingRowIndex.value] = newRow
-      showAlert(`Updated rate slab row for ${targetGroup.service}.`)
     } else {
       const existingIdx = targetGroup.rows.findIndex((r) => String(r.weight) === weightFormatted)
       if (existingIdx > -1) {
@@ -282,8 +299,43 @@ const saveRateSlab = () => {
         targetGroup.rows.push(newRow)
         targetGroup.rows.sort((a, b) => Number(a.weight) - Number(b.weight))
       }
-      showAlert(`Saved rate slab for ${targetGroup.service} (${formRateSlab.value.packageType}).`)
     }
+  }
+
+  // Now sync ALL rates for this service partner to backend
+  const ratesToSave = [];
+  const partnerGroups = rateGroups.value.filter(g => g.servicePartnerId === partner.id);
+
+  partnerGroups.forEach(g => {
+    g.rows.forEach(r => {
+      r.zones.forEach((rateVal, zoneIndex) => {
+        if (rateVal !== '—') {
+          ratesToSave.push({
+            zone_id: availableZoneMasters.value[zoneIndex].id,
+            package_type: g.packageType,
+            weight_from: 0,
+            weight_to: Number(r.weight),
+            rate: Number(String(rateVal).replace(/,/g, '')),
+            rate_type: g.rateType,
+            currency: 'INR'
+          })
+        }
+      })
+    })
+  })
+
+  try {
+    const res = await saveServicePartnerRates({
+      service_partner_id: partner.id,
+      rates: ratesToSave
+    });
+    if (res.status === 'success') {
+      showAlert(`Rates successfully synced to backend for ${partner.name}!`);
+    } else {
+      toast.error(res.message || 'Failed to sync rates');
+    }
+  } catch (e) {
+    toast.error('Error saving rates');
   }
 
   showRateSlabModal.value = false
@@ -505,8 +557,9 @@ const filteredRateGroups = computed(() => {
                   <div class="col-md-4">
                     <label class="form-label small fw-semibold">Service Partner <span
                         class="text-danger">*</span></label>
-                    <select v-model="formRateSlab.servicePartner" class="form-select" required>
-                      <option v-for="p in servicePartners" :key="p" :value="p">{{ p }}</option>
+                    <select v-model="formRateSlab.servicePartnerId" class="form-select" required>
+                      <option value="" selected>Select Service Partner</option>
+                      <option v-for="p in servicePartners" :key="p.id" :value="p.id">{{ p.name }}</option>
                     </select>
                   </div>
 
@@ -695,7 +748,7 @@ const filteredRateGroups = computed(() => {
                       <label class="form-label text-muted small mb-1" style="font-size: 0.75rem;">Rate Amount</label>
                       <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white fw-bold text-secondary">{{ formRateSlab.currency
-                          }}</span>
+                        }}</span>
                         <input v-model="formRateSlab.zoneRates[zoneId]" type="text"
                           class="form-control bg-white fw-semibold" placeholder="0.00" required />
                       </div>
@@ -717,7 +770,7 @@ const filteredRateGroups = computed(() => {
                 <button type="submit"
                   class="btn btn-primary rounded-3 px-4 shadow-sm fw-semibold d-flex align-items-center gap-1">
                   <i class="bi bi-check2"></i>
-                  <span>{{ isEditing ? 'Save Changes' : 'Submit Rate Slab' }}</span>
+                  <span>{{ isEditing ? 'Save Changes' : 'Submit Zone Rate' }}</span>
                 </button>
               </div>
             </div>

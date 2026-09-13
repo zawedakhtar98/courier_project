@@ -1,5 +1,15 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { saveShipment } from '../../services/admin/ShipmentService'
+
+const props = defineProps({
+    initialData: {
+        type: Object,
+        default: () => ({})
+    }
+})
+
+const emit = defineEmits(['close', 'save-shipment'])
 
 // ----------------------------------------------------
 // Global Mock State & Data
@@ -97,7 +107,7 @@ const handleAwbSearch = () => {
     )
     if (foundShipment) {
         showAlert(`Found Shipment: AWB ${foundShipment.awbNo} (${foundShipment.status}) to ${foundShipment.destination}`)
-        activeTab.value = 'shipments'
+        emit('close')
         return
     }
 
@@ -107,7 +117,7 @@ const handleAwbSearch = () => {
     )
     if (foundDraft) {
         showAlert(`Found Draft: AWB ${foundDraft.awbNo} for Customer ${foundDraft.customer}`)
-        activeTab.value = 'drafts'
+        // We could handle draft loading here instead, or keep as is.
         return
     }
 
@@ -128,36 +138,37 @@ const processRecharge = () => {
 
 // Step 1: Shipper Details
 const shipperForm = ref({
-    customerAccount: 'OVS1704-EXPRESS IT\'S',
-    companyName: 'Sam Web Solutio',
-    contactPerson: 'Test',
-    address1: 'Test one',
-    address2: 'Test one',
+    customerAccount: '',
+    companyName: '',
+    contactPerson: '',
+    address1: '',
+    address2: '',
     address3: '',
-    pincode: '700001',
-    city: 'Kolkata',
-    state: 'WB',
-    telephone: '8947582597',
+    pincode: '',
+    city: '',
+    state: '',
+    telephone: '',
     email: '',
-    kycType: 'Aadhaar Number',
-    kycNo: '224855584525'
+    kycType: '',
+    kycNo: '',
+    pickup_date: ''
 })
 
 // Step 2: Consignee Details
 const consigneeForm = ref({
-    destination: 'AUSTRIA',
-    isoCode: 'AT',
-    consigneeType: 'Business',
-    companyName: 'SOFINA ASIA PRIVATE LIMITED',
-    contactPerson: 'CELINE CHAN',
-    address1: '108',
-    address2: 'AMOY',
-    address3: 'STREET',
-    zipcode: '069928',
-    city: 'SINGAPORE', // Mocked user inputs matching reference
-    state: 'SINGAPORE',
-    telephone: '+6580708618',
-    email: 'celine.chan@sofinagroup.com',
+    destination: '',
+    isoCode: '',
+    consigneeType: '',
+    companyName: '',
+    contactPerson: '',
+    address1: '',
+    address2: '',
+    address3: '',
+    zipcode: '',
+    city: '', // Mocked user inputs matching reference
+    state: '',
+    telephone: '',
+    email: '',
     vatTaxId: ''
 })
 
@@ -206,10 +217,39 @@ watch(() => serviceForm.value.service, (newService) => {
 
 // Box Details List
 const boxRows = ref([
-    { boxNo: 1, actWt: 2, length: 30, width: 30, height: 50, volWt: 9.00, chgWt: 9.00 },
-    { boxNo: 2, actWt: 2, length: 40, width: 40, height: 60, volWt: 19.20, chgWt: 19.50 },
-    { boxNo: 3, actWt: 2, length: 40, width: 40, height: 60, volWt: 19.20, chgWt: 19.50 }
+    { boxNo: 1, actWt: 0, length: 0, width: 0, height: 0, volWt: 0, chgWt: 0 }
 ])
+
+onMounted(() => {
+    if (props.initialData && Object.keys(props.initialData).length > 0) {
+        if (props.initialData.destination) consigneeForm.value.destination = props.initialData.destination
+        if (props.initialData.city) consigneeForm.value.city = props.initialData.city
+        if (props.initialData.state) consigneeForm.value.state = props.initialData.state
+        if (props.initialData.service) serviceForm.value.service = props.initialData.service
+        if (props.initialData.goodsType) serviceForm.value.goodsType = props.initialData.goodsType
+
+        if (props.initialData.boxes) {
+            try {
+                const parsed = JSON.parse(props.initialData.boxes)
+                boxRows.value = parsed.map((b, i) => {
+                    const row = {
+                        boxNo: i + 1,
+                        actWt: Number(b.actWt) || 0,
+                        length: Number(b.length) || 0,
+                        width: Number(b.width) || 0,
+                        height: Number(b.height) || 0,
+                        volWt: 0,
+                        chgWt: 0
+                    }
+                    recalculateBoxRow(row)
+                    return row
+                })
+            } catch (e) {
+                console.error("Failed to parse box rows from initialData", e)
+            }
+        }
+    }
+})
 
 // Calculate specific box row volumetric and chargeable weights
 const recalculateBoxRow = (row) => {
@@ -374,10 +414,10 @@ const handleFileUpload = (type, event) => {
             const sizeStr = (file.size / 1024).toFixed(1) + ' KB'
             if (type === 'kyc') {
                 kycFile.value = { name: file.name, size: sizeStr }
-                showAlert('KYC Document uploaded successfully')
+                showAlert('KYC Document Front Side uploaded successfully')
             } else {
                 invoiceFile.value = { name: file.name, size: sizeStr }
-                showAlert('Custom Invoice uploaded successfully')
+                showAlert('KYC Document Back Side uploaded successfully')
             }
         }
     }
@@ -393,39 +433,91 @@ const removeFile = (type) => {
 }
 
 // Step 5 Actions
-const triggerCreateLabel = () => {
+const SaveShimentDetails = async () => {
     // Check wallet balance
-    const bookingFee = 200.00
-    if (walletBalance.value < bookingFee) {
-        showAlert(`Insufficient credit balance. Cost of booking is ₹${bookingFee}. Recharge to continue.`, 'danger')
-        return
-    }
-
-    // Deduct fee
-    walletBalance.value = parseFloat((walletBalance.value - bookingFee).toFixed(2))
-
     const newAwb = 'EXP-AWB-' + Math.floor(10000 + Math.random() * 90000)
+    const bookingFee = totalChargeableWeight.value * 100;
 
     const record = {
-        id: 'SHIP-' + Math.floor(100 + Math.random() * 900),
+        // --- Backend DB Schema Fields ---
+        awb_number: newAwb,
+        service_partner_id: null,
+        user_id: null,
+
+        // Sender Details
+        sender_name: shipperForm.value.contactPerson || shipperForm.value.companyName,
+        sender_company_name: shipperForm.value.companyName,
+        sender_contact_person_name: shipperForm.value.contactPerson,
+        sender_address_line_1: shipperForm.value.address1,
+        sender_address_line_2: shipperForm.value.address2,
+        sender_address_line_3: shipperForm.value.address3,
+        sender_city: shipperForm.value.city,
+        sender_state: shipperForm.value.state,
+        sender_pincode: shipperForm.value.zipcode,
+        sender_type: shipperForm.value.shipperType === 'Company' ? 'business' : 'individual',
+        sender_kyc_type: shipperForm.value.kycType ? shipperForm.value.kycType.toLowerCase() : null,
+        sender_kyc_number: shipperForm.value.kycNo,
+        sender_telephone: shipperForm.value.telephone,
+        sender_email: shipperForm.value.email,
+
+        // Receiver Details
+        receiver_name: consigneeForm.value.contactPerson || consigneeForm.value.companyName,
+        receiver_company_name: consigneeForm.value.companyName,
+        receiver_contact_person_name: consigneeForm.value.contactPerson,
+        receiver_address_line_1: consigneeForm.value.address1,
+        receiver_address_line_2: consigneeForm.value.address2,
+        receiver_address_line_3: consigneeForm.value.address3,
+        receiver_city: consigneeForm.value.city,
+        receiver_state: consigneeForm.value.state,
+        receiver_pincode: consigneeForm.value.zipcode,
+        receiver_type: consigneeForm.value.consigneeType === 'Company' ? 'business' : 'individual',
+        receiver_vat_tax_id: consigneeForm.value.vatTaxId,
+        receiver_telephone: consigneeForm.value.telephone,
+        receiver_email: consigneeForm.value.email,
+        receiver_country_id: null,
+
+        // Metadata
+        payment_status: 'paid',
+        status: generateLabelToggle.value ? 'pending' : 'draft',
+        created_by: 'admin',
+        goods_type: serviceForm.value.goodsType,
+        actual_weight: totalActualWeight.value,
+        chargeable_weight: totalChargeableWeight.value,
+        shipment_total_cost: bookingFee,
+
+        // --- Frontend UI Table Required Fields ---
         awbNo: newAwb,
-        sender: shipperForm.value.companyName || shipperForm.value.contactPerson,
-        consignee: consigneeForm.value.companyName || consigneeForm.value.contactPerson,
+        shipDate: new Date().toISOString().split('T')[0],
         destination: consigneeForm.value.destination,
-        service: serviceForm.value.service,
-        weight: totalChargeableWeight.value,
+        serviceName: serviceForm.value.service,
+        networkNo: '',
         pcs: totalPcs.value,
-        date: new Date().toLocaleDateString('en-GB').replace(/\//g, '-'),
-        status: generateLabelToggle.value ? 'Label Generated' : 'Pending Dispatch',
-        labelGenerated: generateLabelToggle.value
+        actWeight: totalActualWeight.value,
+        chgWeight: totalChargeableWeight.value,
+        manifestNo: '',
+        manifestDate: '-',
+        mfStatus: 'Pending',
+        pickup_date: shipperForm.value.pickup_date
     }
 
-    shipmentsList.value.unshift(record)
-    showAlert(`Label Created successfully! AWB: ${newAwb}. Fee: ₹${bookingFee} deducted from wallet.`)
+    try {
+        await saveShipment(record)
 
-    // Reset form and jump back
-    resetFormState()
-    activeTab.value = 'shipments'
+        // Match table format
+        const tableRecord = {
+            ...record,
+            mfStatus: 'Pending'
+        }
+        emit('save-shipment', tableRecord)
+        showAlert(`Label Created successfully! AWB: ${newAwb}. Fee: ₹${bookingFee} deducted from wallet.`)
+
+        // Reset form and close component
+        resetFormState()
+        emit('close')
+    } catch (error) {
+        console.error("Error saving shipment:", error)
+        showAlert("Failed to save shipment to the server.", "danger")
+    }
 }
 
 const triggerDraftBooking = () => {
@@ -447,13 +539,14 @@ const triggerDraftBooking = () => {
     draftsList.value.unshift(record)
     showAlert(`Draft Saved successfully! AWB: ${newAwb}`)
 
-    // Reset form and jump
+    // Reset form and close
     resetFormState()
-    activeTab.value = 'drafts'
+    emit('close')
 }
 
 const triggerCancel = () => {
     resetFormState()
+    emit('close')
     showAlert('Booking process cancelled and reset', 'danger')
 }
 
@@ -463,14 +556,10 @@ const resetFormState = () => {
     invoiceFile.value = null
     // Keep box items default
     boxRows.value = [
-        { boxNo: 1, actWt: 2, length: 30, width: 30, height: 50, volWt: 9.00, chgWt: 9.00 },
-        { boxNo: 2, actWt: 2, length: 40, width: 40, height: 60, volWt: 19.20, chgWt: 19.50 },
-        { boxNo: 3, actWt: 2, length: 40, width: 40, height: 60, volWt: 19.20, chgWt: 19.50 }
+        { boxNo: 1, actWt: 0, length: 0, width: 0, height: 0, volWt: 0, chgWt: 0 }
     ]
     invoiceRows.value = [
-        { boxNo: 1, description: 'TESI HAMMER', hsnCode: '82071900', htsCode: '82071900', unit: 'PCS', qty: 1, rate: 22, amount: 22 },
-        { boxNo: 1, description: 'TESI HAMMER', hsnCode: '82071900', htsCode: '82071900', unit: 'PCS', qty: 1, rate: 22, amount: 22 },
-        { boxNo: 1, description: 'TESI HAMMER', hsnCode: '82071900', htsCode: '82071900', unit: 'PCS', qty: 1, rate: 22, amount: 22 }
+        { boxNo: 1, description: '', hsnCode: '', htsCode: '', unit: 'PCS', qty: 1, rate: 0, amount: 0 }
     ]
 }
 
@@ -624,6 +713,8 @@ const loadDraft = (draft) => {
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Pincode <span
                                         class="text-danger">*</span></label>
+
+                                <input v-model="shipperForm.pickup_date" type="hidden" class="form-control" />
                                 <input v-model="shipperForm.pincode" type="text" class="form-control" />
                             </div>
                             <div class="col-md-4">
@@ -649,10 +740,10 @@ const loadDraft = (draft) => {
                                 <label class="form-label small fw-bold">KYC Type <span
                                         class="text-danger">*</span></label>
                                 <select v-model="shipperForm.kycType" class="form-select">
-                                    <option>Aadhaar Number</option>
-                                    <option>PAN Card</option>
-                                    <option>GSTIN</option>
-                                    <option>Passport</option>
+                                    <option value="aadhaar">Aadhaar Number</option>
+                                    <option value="pan">PAN Card</option>
+                                    <option value="gstin">GSTIN</option>
+                                    <option value="passport">Passport</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -942,7 +1033,7 @@ const loadDraft = (draft) => {
                                             <select v-model.number="invItem.boxNo"
                                                 class="form-select form-select-sm text-center">
                                                 <option v-for="b in boxRows" :key="b.boxNo" :value="b.boxNo">{{ b.boxNo
-                                                    }}</option>
+                                                }}</option>
                                             </select>
                                         </td>
                                         <td>
@@ -1124,7 +1215,7 @@ const loadDraft = (draft) => {
                                         <i class="bi bi-file-earmark-check text-success fs-2 mb-2"></i>
                                         <span class="fw-semibold text-dark text-truncate" style="max-width: 220px;">{{
                                             kycFile.name
-                                            }}</span>
+                                        }}</span>
                                         <span class="text-muted small mb-2">{{ kycFile.size }}</span>
                                         <button type="button" @click.stop="removeFile('kyc')"
                                             class="btn btn-sm btn-outline-danger px-3 py-1 rounded-pill">
@@ -1153,7 +1244,7 @@ const loadDraft = (draft) => {
                                         <i class="bi bi-file-earmark-check text-success fs-2 mb-2"></i>
                                         <span class="fw-semibold text-dark text-truncate" style="max-width: 220px;">{{
                                             invoiceFile.name
-                                            }}</span>
+                                        }}</span>
                                         <span class="text-muted small mb-2">{{ invoiceFile.size }}</span>
                                         <button type="button" @click.stop="removeFile('invoice')"
                                             class="btn btn-sm btn-outline-danger px-3 py-1 rounded-pill">
@@ -1207,7 +1298,7 @@ const loadDraft = (draft) => {
                             class="btn btn-next-custom px-4 py-2 rounded-3 fw-bold">
                             Next &rarr;
                         </button>
-                        <button v-if="currentStep >= 5" @click="nextStep" type="button"
+                        <button v-if="currentStep >= 5" @click="SaveShimentDetails" type="button"
                             class="btn btn-next-custom px-4 py-2 rounded-3 fw-bold">
                             <i class="bi bi-calendar-check me-2"></i> Book Now
                         </button>
@@ -1223,7 +1314,7 @@ const loadDraft = (draft) => {
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0 text-dark-accent">Draft Bookings History</h5>
                 <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3">{{ draftsList.length
-                    }}
+                }}
                     Drafts</span>
             </div>
 
@@ -1257,7 +1348,7 @@ const loadDraft = (draft) => {
                             <td>
                                 <span class="badge bg-info-subtle text-info border border-info border-opacity-25">{{
                                     draft.service
-                                    }}</span>
+                                }}</span>
                             </td>
                             <td>
                                 <div class="fw-semibold text-dark">{{ draft.weight }} kg</div>
@@ -1304,27 +1395,27 @@ const loadDraft = (draft) => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="shipment in shipmentsList" :key="shipment.id">
+                        <tr v-for="shipment in shipmentsList" :key="shipment.awb_number || shipment.id">
                             <td>
-                                <div class="fw-bold text-primary">{{ shipment.awbNo }}</div>
-                                <span class="badge bg-light text-secondary border small">{{ shipment.id }}</span>
+                                <div class="fw-bold text-primary">{{ shipment.awb_number || shipment.awbNo }}</div>
                             </td>
-                            <td>{{ shipment.date }}</td>
+                            <td>{{ shipment.shipDate || shipment.date }}</td>
                             <td>
-                                <span class="fw-semibold text-dark">{{ shipment.sender }}</span>
+                                <span class="fw-semibold text-dark">{{ shipment.sender_name || shipment.sender }}</span>
                             </td>
                             <td>
-                                <div>{{ shipment.consignee }}</div>
+                                <div>{{ shipment.receiver_name || shipment.consignee }}</div>
                                 <span class="badge bg-light text-secondary border small">{{ shipment.destination
                                     }}</span>
                             </td>
                             <td>
                                 <span
                                     class="badge bg-primary-subtle text-primary border border-primary border-opacity-10">{{
-                                    shipment.service }}</span>
+                                        shipment.serviceName || shipment.service }}</span>
                             </td>
                             <td>
-                                <div class="fw-semibold text-dark">{{ shipment.weight }} kg</div>
+                                <div class="fw-semibold text-dark">{{ shipment.actual_weight || shipment.weight }} kg
+                                </div>
                                 <span class="text-muted small">{{ shipment.pcs }} pcs</span>
                             </td>
                             <td>

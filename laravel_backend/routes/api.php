@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('update/{id}', [AdminController::class, 'updateServicePartner']);
             Route::get('getAll-partners', [AdminController::class, 'getAllServicePartners']);
         });
+        Route::post('/shipments/save', [AdminController::class, 'saveShipment']);
 
         //country Master
         Route::prefix('country')->group(function () {
