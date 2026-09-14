@@ -90,11 +90,11 @@ const router = createRouter({
           meta: { title: 'Service Partner List' },
         },
         {
-          path: 'settings/service-partner-rate-slab',
-          alias: 'service-partner-rate-slab',
-          name: 'service-partner-rate-slab',
-          component: () => import('@/views/admin/ServicePartnerRateSlab.vue'),
-          meta: { title: 'Service Partner Rate Slab List' },
+          path: 'settings/service-partner-zone-rate',
+          alias: 'service-partner-zone-rate',
+          name: 'service-partner-zone-rate',
+          component: () => import('@/views/admin/ServicePartnerZoneRate.vue'),
+          meta: { title: 'Service Partner Zone Rate List' },
         },
       ],
     }

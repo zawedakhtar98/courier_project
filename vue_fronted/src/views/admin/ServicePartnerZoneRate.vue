@@ -1,48 +1,38 @@
 <script>
 export function defaultSlabData() {
   return [
-    { weight: '0.500', zones: ['1,214', '1,206', '1,366', '1,289', '1,609', '1,788', '1,460', '3,309', '1,607', '2,471', '3,343', '1,586', '2,752', '1,642'] },
-    { weight: '1.000', zones: ['1,461', '1,441', '1,657', '1,442', '1,983', '2,132', '1,684', '4,221', '1,822', '3,215', '3,854', '1,779', '3,416', '1,694'] },
-    { weight: '1.500', zones: ['1,707', '1,705', '1,946', '1,594', '2,349', '2,467', '1,910', '5,123', '1,990', '3,572', '4,362', '1,959', '3,944', '2,006'] },
-    { weight: '2.000', zones: ['1,953', '1,962', '2,235', '1,745', '2,713', '2,804', '2,135', '6,027', '2,227', '3,931', '4,867', '2,136', '4,472', '2,306'] },
-    { weight: '2.500', zones: ['2,242', '2,228', '2,386', '1,895', '2,813', '3,143', '2,362', '6,934', '2,473', '4,292', '5,375', '2,388', '5,000', '2,619'] },
-    { weight: '3.000', zones: ['2,433', '2,436', '2,651', '2,137', '3,049', '3,413', '2,667', '7,882', '2,732', '4,663', '5,590', '2,634', '5,489', '2,863'] },
-    { weight: '3.500', zones: ['2,623', '2,644', '2,915', '2,381', '3,285', '3,684', '2,971', '8,830', '2,991', '5,036', '5,804', '2,880', '5,979', '3,109'] }
+    { weight: '0.500', zones: ['1,214', '1,206', '1,366', '1,289', '1,609', '1,788', '1,460', '3,309', '1,607', '2,471', '3,343', '1,586', '2,752', '1,642', '1,642'] },
+    { weight: '1.000', zones: ['1,461', '1,441', '1,657', '1,442', '1,983', '2,132', '1,684', '4,221', '1,822', '3,215', '3,854', '1,779', '3,416', '1,694', '1,694'] },
+    { weight: '1.500', zones: ['1,707', '1,705', '1,946', '1,594', '2,349', '2,467', '1,910', '5,123', '1,990', '3,572', '4,362', '1,959', '3,944', '2,006', '2,006'] },
+    { weight: '2.000', zones: ['1,953', '1,962', '2,235', '1,745', '2,713', '2,804', '2,135', '6,027', '2,227', '3,931', '4,867', '2,136', '4,472', '2,306', '2,306'] },
+    { weight: '2.500', zones: ['2,242', '2,228', '2,386', '1,895', '2,813', '3,143', '2,362', '6,934', '2,473', '4,292', '5,375', '2,388', '5,000', '2,619', '2,619'] },
+    { weight: '3.000', zones: ['2,433', '2,436', '2,651', '2,137', '3,049', '3,413', '2,667', '7,882', '2,732', '4,663', '5,590', '2,634', '5,489', '2,863', '2,863'] },
+    { weight: '3.500', zones: ['2,623', '2,644', '2,915', '2,381', '3,285', '3,684', '2,971', '8,830', '2,991', '5,036', '5,804', '2,880', '5,979', '3,109', '3,109'] }
   ]
 }
 </script>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { RATE_TYPES, DOCUMENT_TYPE, CURRENCIES } from '@/constant'
+import { getZoneList } from '@/services/admin/ZoneMasterService'
+import { getAllServicePartners } from '@/services/admin/servicePartner'
+import { useToast } from 'vue-toastification'
 
-const servicePartners = [
-  'DHL EXPRESS',
-  'FedEx International',
-  'Aramex Worldwide',
-  'UPS Worldwide',
-  'DTDC Global',
-]
+const toast = useToast();
+const servicePartnersList = ref([]);
+const zoneMastersList = ref([]);
 
-const packageTypes = [
-  'NONDOC',
-  'DOC',
-  'Parcel',
-  'Heavy Cargo',
-  'Fragile',
-]
+onMounted(async () => {
+  zoneMastersList.value = await getZoneList();
+  servicePartnersList.value = await getAllServicePartners();
 
-const rateTypes = [
-  'Slab',
-  'Flat',
-  'Per KG',
-]
+})
 
-// 14 Available Zone Masters
-const availableZoneMasters = Array.from({ length: 14 }, (_, i) => ({
-  id: i + 1,
-  name: `Zone ${i + 1}`,
-  code: `ZONE-${String(i + 1).padStart(2, '0')}`,
-}))
+const packageTypes = DOCUMENT_TYPE;
+
+const rateTypes = RATE_TYPES;
+
 
 // Main Rate Groups State
 const rateGroups = ref([
@@ -53,7 +43,7 @@ const rateGroups = ref([
     rateType: 'Slab',
     zoneCount: 14,
     status: 'Active',
-    rows: defaultSlabData(),
+    rows: [],
   },
   {
     id: 'grp-fedex-1',
@@ -90,14 +80,14 @@ const editingGroupId = ref(null)
 const editingRowIndex = ref(null)
 
 const formRateSlab = ref({
-  servicePartner: 'DHL EXPRESS',
-  packageType: 'NONDOC',
-  rateType: 'Slab',
+  servicePartner: '',
+  packageType: '',
+  rateType: '',
   weightFrom: '0.00',
   weightTo: '0.500',
-  currency: '₹',
+  currency: '',
   status: 'Active',
-  selectedZones: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  selectedZones: [],
   zoneRates: {},
 })
 
@@ -105,16 +95,14 @@ const bulkRateValue = ref('')
 const zoneSearchFilter = ref('')
 
 const sortedSelectedZones = computed(() => {
-  return [...formRateSlab.value.selectedZones].sort((a, b) => a - b)
+  const sortedIds = [...formRateSlab.value.selectedZones].sort((a, b) => a - b)
+  const allZones = zoneMastersList.value?.data || []
+  return sortedIds.map(id => {
+    const zone = allZones.find(z => z.id === id)
+    return zone || { id, name: `Zone ${id}` }
+  })
 })
 
-const filteredZoneMastersList = computed(() => {
-  if (!zoneSearchFilter.value.trim()) return availableZoneMasters
-  const q = zoneSearchFilter.value.toLowerCase().trim()
-  return availableZoneMasters.filter(
-    (z) => z.name.toLowerCase().includes(q) || z.code.toLowerCase().includes(q)
-  )
-})
 
 const isZoneSelected = (zoneId) => {
   return formRateSlab.value.selectedZones.includes(zoneId)
@@ -133,7 +121,7 @@ const toggleZone = (zoneId) => {
 }
 
 const selectAllZones = () => {
-  formRateSlab.value.selectedZones = availableZoneMasters.map((z) => z.id)
+  formRateSlab.value.selectedZones = zoneMastersList.value.data.map((z) => z.id)
 }
 
 const deselectAllZones = () => {
@@ -171,25 +159,31 @@ const openAddModal = () => {
   bulkRateValue.value = ''
   zoneSearchFilter.value = ''
 
-  const allZones = availableZoneMasters.map((z) => z.id)
-  const defaultRates = {
-    1: '1214', 2: '1206', 3: '1366', 4: '1289', 5: '1609', 6: '1788', 7: '1460',
-    8: '3309', 9: '1607', 10: '2471', 11: '3343', 12: '1586', 13: '2752', 14: '1642'
-  }
 
   formRateSlab.value = {
-    servicePartner: 'DHL EXPRESS',
-    packageType: 'NONDOC',
-    rateType: 'Slab',
+    servicePartner: '',
+    packageType: '',
+    rateType: '',
     weightFrom: '0.00',
     weightTo: '0.500',
     currency: '₹',
     status: 'Active',
-    selectedZones: allZones,
-    zoneRates: defaultRates,
+    selectedZones: [],
+    zoneRates: {},
   }
   showRateSlabModal.value = true
 }
+
+const isFormValid = computed(() => {
+  return formRateSlab.value.servicePartner !== '' &&
+    formRateSlab.value.packageType !== '' &&
+    formRateSlab.value.rateType !== '' &&
+    Number(formRateSlab.value.weightTo) > 0 &&
+    Number(formRateSlab.value.weightFrom) >= 0 &&
+    Number(formRateSlab.value.weightFrom) < Number(formRateSlab.value.weightTo) &&
+    formRateSlab.value.selectedZones.length > 0 &&
+    Object.keys(formRateSlab.value.zoneRates).length === formRateSlab.value.selectedZones.length
+})
 
 const openEditModal = (group, rowIdx) => {
   isEditing.value = true
@@ -198,16 +192,16 @@ const openEditModal = (group, rowIdx) => {
   bulkRateValue.value = ''
   zoneSearchFilter.value = ''
 
-  const row = group.rows[rowIdx ?? 0]
-  const ratesMap = {}
-  const selected = []
+  // const row = group.rows[rowIdx ?? 0]
+  // const ratesMap = {}
+  // const selected = []
 
-  if (row) {
-    row.zones.forEach((val, idx) => {
-      ratesMap[idx + 1] = String(val).replace(/,/g, '')
-      selected.push(idx + 1)
-    })
-  }
+  // if (row) {
+  //   row.zones.forEach((val, idx) => {
+  //     ratesMap[idx + 1] = String(val).replace(/,/g, '')
+  //     selected.push(idx + 1)
+  //   })
+  // }
 
   formRateSlab.value = {
     servicePartner: group.service,
@@ -217,58 +211,67 @@ const openEditModal = (group, rowIdx) => {
     weightTo: row ? String(row.weight) : '0.500',
     currency: '₹',
     status: group.status,
-    selectedZones: selected.length > 0 ? selected : availableZoneMasters.map((z) => z.id),
-    zoneRates: ratesMap,
+    selectedZones: [],
+    zoneRates: {}, //ratesMap,
   }
   showRateSlabModal.value = true
 }
 
 const saveRateSlab = () => {
-  if (!formRateSlab.value.servicePartner) {
-    alert('Please select a Service Partner.')
-    return
+  if (isFormValid) {
+    console.log(formRateSlab.value);
+    toast.success('Rate slab updated successfully.');
+  } else {
+    toast.error('All field are mandatory.');
   }
+  return false;
 
-  if (formRateSlab.value.selectedZones.length === 0) {
-    alert('Please select at least one Zone Master.')
-    return
-  }
+  // if (!formRateSlab.value.servicePartner) {
+  //   alert('Please select a Service Partner.')
+  //   return
+  // }
 
-  // Construct zones array for 14 zones
-  const zoneValues = []
-  for (let i = 1; i <= 14; i++) {
-    const rateVal = formRateSlab.value.zoneRates[i]
-    if (rateVal !== undefined && rateVal !== '') {
-      const numVal = Number(String(rateVal).replace(/,/g, ''))
-      zoneValues.push(!isNaN(numVal) ? numVal.toLocaleString() : String(rateVal))
-    } else {
-      zoneValues.push('—')
-    }
-  }
+  // if (formRateSlab.value.selectedZones.length === 0) {
+  //   alert('Please select at least one Zone Master.')
+  //   return
+  // }
 
-  const weightFormatted = Number(formRateSlab.value.weightTo || 0.5).toFixed(3)
-  const newRow = {
-    weight: weightFormatted,
-    zones: zoneValues,
-  }
+  // // Construct zones array for 14 zones
+  // const zoneValues = []
+  // for (let i = 1; i <= 14; i++) {
+  //   const rateVal = formRateSlab.value.zoneRates[i]
+  //   if (rateVal !== undefined && rateVal !== '') {
+  //     const numVal = Number(String(rateVal).replace(/,/g, ''))
+  //     zoneValues.push(!isNaN(numVal) ? numVal.toLocaleString() : String(rateVal))
+  //   } else {
+  //     zoneValues.push('—')
+  //   }
+  // }
+
+  // const weightFormatted = Number(formRateSlab.value.weightTo || 0.5).toFixed(3)
+  // const newRow = {
+  //   weight: weightFormatted,
+  //   zones: zoneValues,
+  // }
 
   let targetGroup = rateGroups.value.find(
     (g) => g.service === formRateSlab.value.servicePartner && g.packageType === formRateSlab.value.packageType
   )
 
   if (!targetGroup) {
-    const newGroupId = `grp-${Date.now()}`
-    targetGroup = {
-      id: newGroupId,
-      service: formRateSlab.value.servicePartner,
-      packageType: formRateSlab.value.packageType,
-      rateType: formRateSlab.value.rateType,
-      zoneCount: 14,
-      status: formRateSlab.value.status,
-      rows: [newRow],
-    }
-    rateGroups.value.unshift(targetGroup)
-    expandedCouriers.value[newGroupId] = true
+    //   const newGroupId = `grp-${Date.now()}`
+    //   targetGroup = {
+    //     id: newGroupId,
+    //     service: formRateSlab.value.servicePartner,
+    //     packageType: formRateSlab.value.packageType,
+    //     rateType: formRateSlab.value.rateType,
+    //     zoneCount: 14,
+    //     status: formRateSlab.value.status,
+    //     rows: [newRow],
+    //   }
+    //   console.log(formRateSlab.value)
+    //   rateGroups.value.unshift(targetGroup)
+    //   expandedCouriers.value[newGroupId] = true
     showAlert(`Mapped new rate slab for ${formRateSlab.value.servicePartner} successfully.`)
   } else {
     if (isEditing.value && editingRowIndex.value !== null && targetGroup.rows[editingRowIndex.value]) {
@@ -320,16 +323,16 @@ const filteredRateGroups = computed(() => {
         <div class="d-flex align-items-center gap-2 mb-1">
           <span class="badge bg-primary-subtle text-primary px-2 py-1 rounded-pill small fw-semibold">Settings</span>
           <i class="bi bi-chevron-right text-muted small"></i>
-          <span class="text-secondary small fw-medium">Rate Slab Master</span>
+          <span class="text-secondary small fw-medium">Zone Rate</span>
         </div>
-        <h4 class="fw-bold mb-0 text-dark">Map Service Partner Rate Slabs</h4>
+        <h4 class="fw-bold mb-0 text-dark">Service Partner Zone Rate</h4>
       </div>
 
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-primary btn-sm rounded-3 px-3 py-2 shadow-sm d-flex align-items-center gap-2 fw-semibold"
           @click="openAddModal">
           <i class="bi bi-plus-circle"></i>
-          <span>Map New Partner Rate Slab</span>
+          <span>Map Service Partner Zone Rate</span>
         </button>
       </div>
     </div>
@@ -473,7 +476,7 @@ const filteredRateGroups = computed(() => {
       </div>
     </div>
 
-    <!-- MODAL: MAP SERVICE PARTNER RATE SLAB (DYNAMIC ZONE RATES) -->
+    <!-- MODAL:  SERVICE PARTNER RATE  (DYNAMIC ZONE RATES) -->
     <div v-if="showRateSlabModal" class="modal-backdrop fade show"></div>
     <div v-if="showRateSlabModal" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
@@ -483,7 +486,7 @@ const filteredRateGroups = computed(() => {
             <div>
               <h5 class="modal-title fw-bold text-dark mb-0">
                 <i :class="isEditing ? 'bi-pencil-square' : 'bi-plus-circle'" class="text-primary me-2"></i>
-                {{ isEditing ? 'Edit Map Service Partner Rate Slab' : 'Map Service Partner Rate Slab' }}
+                {{ isEditing ? 'Edit Map Service Partner Zone Rate' : 'Map Service Partner Zone Rate' }}
               </h5>
               <span class="text-muted small">
                 Configure rate slabs, multi-select zones, and dynamically set zone pricing.
@@ -506,7 +509,9 @@ const filteredRateGroups = computed(() => {
                     <label class="form-label small fw-semibold">Service Partner <span
                         class="text-danger">*</span></label>
                     <select v-model="formRateSlab.servicePartner" class="form-select" required>
-                      <option v-for="p in servicePartners" :key="p" :value="p">{{ p }}</option>
+                      <option value="" selected disabled>Select Service Partner</option>
+                      <option v-for="p in servicePartnersList.data" :key="p.id" :value="p.id">{{ p.name }}
+                      </option>
                     </select>
                   </div>
 
@@ -514,6 +519,7 @@ const filteredRateGroups = computed(() => {
                   <div class="col-md-4">
                     <label class="form-label small fw-semibold">Package Type <span class="text-danger">*</span></label>
                     <select v-model="formRateSlab.packageType" class="form-select" required>
+                      <option value="" selected disabled>Select Package Type</option>
                       <option v-for="pt in packageTypes" :key="pt" :value="pt">{{ pt }}</option>
                     </select>
                   </div>
@@ -522,12 +528,13 @@ const filteredRateGroups = computed(() => {
                   <div class="col-md-4">
                     <label class="form-label small fw-semibold">Rate Type <span class="text-danger">*</span></label>
                     <select v-model="formRateSlab.rateType" class="form-select" required>
+                      <option value="" selected disabled>Select Rate Type</option>
                       <option v-for="rt in rateTypes" :key="rt" :value="rt">{{ rt }}</option>
                     </select>
                   </div>
 
                   <!-- Weight From -->
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                     <label class="form-label small fw-semibold">Weight From (kg)</label>
                     <div class="input-group">
                       <input v-model="formRateSlab.weightFrom" type="number" step="0.001" min="0" class="form-control"
@@ -537,7 +544,7 @@ const filteredRateGroups = computed(() => {
                   </div>
 
                   <!-- Weight To -->
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                     <label class="form-label small fw-semibold">Weight To (kg) <span
                         class="text-danger">*</span></label>
                     <div class="input-group">
@@ -548,23 +555,13 @@ const filteredRateGroups = computed(() => {
                   </div>
 
                   <!-- Currency -->
-                  <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Currency Prefix</label>
+                  <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Currency</label>
                     <select v-model="formRateSlab.currency" class="form-select">
-                      <option value="₹">₹ (INR)</option>
-                      <option value="$">$ (USD)</option>
-                      <option value="€">€ (EUR)</option>
-                      <option value="£">£ (GBP)</option>
-                      <option value="AED ">AED</option>
-                    </select>
-                  </div>
-
-                  <!-- Status -->
-                  <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Status</label>
-                    <select v-model="formRateSlab.status" class="form-select">
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
+                      <option v-for="c in CURRENCIES" :key="c.value" :value="c.value"
+                        :selected="c.value === formRateSlab.currency">
+                        {{ c.label }}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -577,7 +574,7 @@ const filteredRateGroups = computed(() => {
                     <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
                       <i class="bi bi-grid-3x3-gap-fill text-primary"></i> Zone Master (Multi-Select)
                       <span class="badge bg-primary rounded-pill small ms-1">
-                        {{ formRateSlab.selectedZones.length }} / {{ availableZoneMasters.length }} Selected
+                        {{ formRateSlab.selectedZones.length }} / {{ zoneMastersList.length }} Selected
                       </span>
                     </h6>
                     <span class="text-muted small">Select zones to dynamically generate their rate inputs below.</span>
@@ -605,8 +602,7 @@ const filteredRateGroups = computed(() => {
                 <!-- Zone Checkbox Chips Grid -->
                 <div class="zone-chips-container p-2 rounded-3 bg-light border">
                   <div class="row g-2">
-                    <div v-for="zone in filteredZoneMastersList" :key="zone.id"
-                      class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <div v-for="zone in zoneMastersList.data" :key="zone.id" class="col-6 col-sm-4 col-md-3 col-lg-2">
                       <div
                         class="zone-chip p-2 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer transition-all"
                         :class="{
@@ -621,7 +617,7 @@ const filteredRateGroups = computed(() => {
                         <span class="badge font-monospace small px-1 py-0"
                           :class="isZoneSelected(zone.id) ? 'bg-white text-primary' : 'bg-light text-muted'"
                           style="font-size: 0.65rem;">
-                          {{ zone.code }}
+                          {{ zone.name }}
                         </span>
                       </div>
                     </div>
@@ -670,33 +666,34 @@ const filteredRateGroups = computed(() => {
                     Please select one or more zones from the Zone Master above to dynamically create rate input fields.
                   </p>
                   <button type="button" class="btn btn-sm btn-primary rounded-pill px-4" @click="selectAllZones">
-                    <i class="bi bi-check-all me-1"></i> Select All 14 Zones
+                    <i class="bi bi-check-all me-1"></i> Select All Zones
                   </button>
                 </div>
 
                 <!-- Dynamic Rate Input Cards Grid -->
                 <div v-else class="row g-3">
-                  <div v-for="zoneId in sortedSelectedZones" :key="zoneId" class="col-6 col-sm-4 col-md-3 col-lg-2">
+                  <div v-for="zone in sortedSelectedZones" :key="zone.id" :data="sortedSelectedZones"
+                    class="col-6 col-sm-4 col-md-3 col-lg-2">
                     <div class="dynamic-rate-box p-3 rounded-3 border bg-light h-100 position-relative">
                       <!-- Remove zone button -->
                       <button type="button" class="btn btn-link p-0 text-muted position-absolute top-0 end-0 mt-1 me-2"
-                        @click="removeSelectedZone(zoneId)" title="Deselect Zone">
+                        @click="removeSelectedZone(zone.id)" title="Deselect Zone">
                         <i class="bi bi-x-circle-fill text-danger opacity-50 hover-opacity-100"></i>
                       </button>
 
                       <div class="d-flex align-items-center gap-1 mb-2">
-                        <span class="fw-bold small text-dark">Zone {{ zoneId }}</span>
+                        <span class="fw-bold small text-dark">{{ zone.name }}</span>
                         <span class="badge bg-secondary-subtle text-secondary font-monospace"
                           style="font-size: 0.65rem;">
-                          ZN-{{ String(zoneId).padStart(2, '0') }}
+                          ZN-{{ String(zone.id).padStart(2, '0') }}
                         </span>
                       </div>
 
                       <label class="form-label text-muted small mb-1" style="font-size: 0.75rem;">Rate Amount</label>
                       <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white fw-bold text-secondary">{{ formRateSlab.currency
-                          }}</span>
-                        <input v-model="formRateSlab.zoneRates[zoneId]" type="text"
+                        }}</span>
+                        <input v-model="formRateSlab.zoneRates[zone.id]" type="number"
                           class="form-control bg-white fw-semibold" placeholder="0.00" required />
                       </div>
                     </div>
@@ -714,10 +711,10 @@ const filteredRateGroups = computed(() => {
                 <button type="button" class="btn btn-light rounded-3 px-3 border" @click="showRateSlabModal = false">
                   Cancel
                 </button>
-                <button type="submit"
+                <button type="submit" :disabled="!isFormValid"
                   class="btn btn-primary rounded-3 px-4 shadow-sm fw-semibold d-flex align-items-center gap-1">
                   <i class="bi bi-check2"></i>
-                  <span>{{ isEditing ? 'Save Changes' : 'Submit Rate Slab' }}</span>
+                  <span>{{ isEditing ? 'Save Changes' : 'Submit Rate' }}</span>
                 </button>
               </div>
             </div>

@@ -121,8 +121,8 @@ const navSections = [
             icon: 'bi-grid-1x2',
           },
           {
-            name: 'service-partner-rate-slab',
-            label: 'Map Partner Rate Slab',
+            name: 'service-partner-zone-rate',
+            label: 'Service Partner Zone Rate',
             // icon: 'bi-graph-up-arrow',
             icon: 'bi bi-file-earmark-spreadsheet',
           },
