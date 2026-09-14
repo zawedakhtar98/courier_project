@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AdminController;
+use App\Http\Controllers\API\ShipmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/users', [App\Http\Controllers\API\AuthController::class, 'index']);
@@ -21,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('add-new', [AdminController::class, 'addNewServicePartner']);
             Route::put('update/{id}', [AdminController::class, 'updateServicePartner']);
             Route::get('getAll-partners', [AdminController::class, 'getAllServicePartners']);
+            // Route::get('getAll', [ShipmentController::class, 'getAllServicePartners']);
         });
 
         //country Master
@@ -37,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('add', [AdminController::class, 'addZone']);
             Route::put('update/{id}', [AdminController::class, 'updateZone']);
             Route::get('get-list', [AdminController::class, 'getZoneList']);
-            Route::post('map-countries', [AdminController::class, 'addZoneCountries']);
+            Route::post('map-countries', [AdminController::class, 'MapZoneWithCountry']);
         });
     });
 });

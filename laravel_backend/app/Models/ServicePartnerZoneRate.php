@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ServicePartnerRateSlab extends Model
+class ServicePartnerZoneRate extends Model
 {
     use HasFactory;
 
@@ -23,13 +23,16 @@ class ServicePartnerRateSlab extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'mapping_id',
+        'service_partner_id',
+        'zone_id',
         'package_type',
         'weight_from',
         'weight_to',
         'rate',
         'rate_type',
         'currency',
+        'max_transit_days',
+        'min_transit_days',
     ];
 
     /**
@@ -44,21 +47,5 @@ class ServicePartnerRateSlab extends Model
             'weight_to' => 'decimal:2',
             'rate' => 'decimal:2',
         ];
-    }
-
-    /**
-     * Get the country rate mapping that owns the rate slab.
-     */
-    public function countryRate(): BelongsTo
-    {
-        return $this->belongsTo(ServicePartnerCountryRate::class, 'mapping_id');
-    }
-
-    /**
-     * Alias for countryRate relation.
-     */
-    public function mapping(): BelongsTo
-    {
-        return $this->countryRate();
     }
 }

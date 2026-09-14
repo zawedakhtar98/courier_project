@@ -10,17 +10,20 @@ use App\Http\Resources\ZoneMasterResource;
 use App\Models\Country;
 use App\Models\ZoneCountryMapping;
 use App\Models\ZoneMaster;
+use App\Services\CountryService;
 use App\Services\ServicePartnerServices;
+use App\Services\ZoneMasterService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
-    public function __construct(protected ServicePartnerServices $servicePartnerServices)
-    {
-        $this->servicePartnerServices = $servicePartnerServices;
-    }
+    public function __construct(
+        protected ServicePartnerServices $servicePartnerServices,
+        protected ZoneMasterService $zoneMasterService,
+        protected CountryService $countryService
+    ) {}
 
     public function addNewServicePartner(Request $request)
     {
@@ -115,7 +118,7 @@ class AdminController extends Controller
             'short_name' => $request->code,
             'status' => 'active'
         ];
-        $country_data = Country::create($data);
+        $country_data = $this->countryService->create($data);
         return ApiResponse::success(CountryResource::make($country_data), $request->name . " created successfully!");
     }
 
@@ -142,19 +145,19 @@ class AdminController extends Controller
             'name' => $request->name,
             'short_name' => $request->code
         ];
-        $country_data = Country::where('id', $id)->update($data);
+        $this->countryService->update($data, $id);
         return ApiResponse::success([], $request->name . "Updated successfully!");
     }
 
     public function getCountryList()
     {
-        $country_data = Country::all();
+        $country_data = $this->countryService->findAll();
         return ApiResponse::success(CountryResource::collection($country_data), "Countries fetched successfully!");
     }
 
     public function deleteCountry(Request $request)
     {
-        Country::where('id', $request->id)->delete();
+        $country_data = $this->countryService->delete($request->id);
         return ApiResponse::success([], "Country deleted successfully!");
     }
 
@@ -173,8 +176,8 @@ class AdminController extends Controller
         $data = [
             'status' => $request->status
         ];
-        $country_data = Country::where('id', $request->id)->update($data);
-        return ApiResponse::success([], $request->name . " updated successfully!");
+        $this->countryService->update($data, $request->id);
+        return ApiResponse::success([], " updated successfully!");
     }
 
     // Zone Master Functionality
@@ -189,7 +192,7 @@ class AdminController extends Controller
             ]
         );
 
-        $zone = ZoneMaster::create([
+        $zone = $this->zoneMasterService->create([
             'zone_name' => $request->name,
             'status' => 'active'
         ]);
@@ -207,26 +210,23 @@ class AdminController extends Controller
                 'name.required' => 'Enter Zone name'
             ]
         );
-
-        $zone = ZoneMaster::where('id', $id)->update([
-            'zone_name' => $request->name
-        ]);
+        $zone = $this->zoneMasterService->update(['zone_name' => $request->name], $id);
         return ApiResponse::success(ZoneMasterResource::make($zone), "Zone updated successfully!");
     }
 
     public function getZoneList()
     {
-        $zone = ZoneMaster::with('mapCountries')->get();
+        $zone = $this->zoneMasterService->getAllZone();
         return ApiResponse::success(ZoneMasterResource::collection($zone), "Zone list fetched successfully!");
     }
 
-    public function deleteZone(Request $request)
+    public function deleteZone($id)
     {
-        ZoneMaster::where('id', $request->id)->delete();
+        $this->zoneMasterService->deleteZone($id);
         return ApiResponse::success([], "Zone deleted successfully!");
     }
 
-    public function addZoneCountries(Request $request)
+    public function MapZoneWithCountry(Request $request)
     {
         $request->validate(
             [
@@ -239,12 +239,12 @@ class AdminController extends Controller
             ]
         );
 
-        $zone = ZoneMaster::where('id', $request->zone_id)->first();
+        $zone = $this->zoneMasterService->findById($request->zone_id);
         if (!$zone) {
             return ApiResponse::error([], "Zone not found");
         }
 
-        $country = Country::where('id', $request->country_id)->first();
+        $country = $this->countryService->findById($request->country_id);
         if (!$country) {
             return ApiResponse::error([], "Country not found");
         }
