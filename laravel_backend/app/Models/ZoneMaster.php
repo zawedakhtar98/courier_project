@@ -18,4 +18,9 @@ class ZoneMaster extends Model
     {
         return $this->belongsToMany(Country::class, 'zone_country_mapping', 'zone_id', 'country_id');
     }
+
+    public function zoneRates()
+    {
+        return $this->hasMany(ServicePartnerZoneRate::class, 'zone_id');
+    }
 }

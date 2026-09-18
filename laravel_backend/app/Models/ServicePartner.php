@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ServicePartner extends Model
@@ -45,16 +46,14 @@ class ServicePartner extends Model
     ];
 
     /**
-     * Get the country rate mappings for the service partner.
-     */
-    public function countryRates(): HasMany
-    {
-        return $this->hasMany(ServicePartnerCountryRate::class, 'service_partner_id');
-    }
-
-    /**
      * Get the shipments associated with the service partner.
      */
+
+    public function zoneRates(): HasMany
+    {
+        return $this->hasMany(ServicePartnerZoneRate::class, 'service_partner_id');
+    }
+
     public function shipments(): HasMany
     {
         return $this->hasMany(ShipmentDetail::class, 'service_partner_id');

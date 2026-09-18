@@ -37,8 +37,15 @@ class ServicePartnerRepository implements ServicePartnerRepositoryInterface
         return ServicePartner::where('status', $status)->get();
     }
 
-    public function getAllServicePartner(int $perPage)
+    public function getAllServicePartner(int $perPage = 10)
     {
         return ServicePartner::orderBy('id', 'desc')->paginate($perPage);
+    }
+
+    public function getAllServicePartnerWithZoneRates(int $perPage = 10)
+    {
+        return ServicePartner::with('zoneRates.zone')
+            ->whereHas('zoneRates')
+            ->paginate($perPage);
     }
 }

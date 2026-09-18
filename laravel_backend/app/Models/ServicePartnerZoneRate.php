@@ -48,4 +48,14 @@ class ServicePartnerZoneRate extends Model
             'rate' => 'decimal:2',
         ];
     }
+
+    public function servicePartner(): BelongsTo
+    {
+        return $this->belongsTo(ServicePartner::class);
+    }
+
+    public function zone(): BelongsTo
+    {
+        return $this->belongsTo(ZoneMaster::class);
+    }
 }

@@ -39,8 +39,8 @@ class ServicePartnerServices
         return $this->servicePartnerRepository->findByName($name);
     }
 
-    public function findServicePartnerByStatus(string $status)
+    public function getAllServicePartnerWithZoneRates(int $perPage)
     {
-        return $this->servicePartnerRepository->findByStatus($status);
+        return $this->servicePartnerRepository->getAllServicePartnerWithZoneRates($perPage);
     }
 }

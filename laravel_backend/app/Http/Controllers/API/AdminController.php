@@ -6,15 +6,18 @@ use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CountryResource;
 use App\Http\Resources\ServicePartnerResource;
+use App\Http\Resources\ServicePartnerZoneWiserateResource;
 use App\Http\Resources\ZoneMasterResource;
 use App\Models\Country;
 use App\Models\ZoneCountryMapping;
 use App\Models\ZoneMaster;
 use App\Services\CountryService;
 use App\Services\ServicePartnerServices;
+use App\Services\ServicePartnerZoneRateService;
 use App\Services\ZoneMasterService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
@@ -22,7 +25,8 @@ class AdminController extends Controller
     public function __construct(
         protected ServicePartnerServices $servicePartnerServices,
         protected ZoneMasterService $zoneMasterService,
-        protected CountryService $countryService
+        protected CountryService $countryService,
+        protected ServicePartnerZoneRateService $servicePartnerZoneRateService
     ) {}
 
     public function addNewServicePartner(Request $request)
@@ -260,5 +264,74 @@ class AdminController extends Controller
         ]);
 
         return ApiResponse::success([], "Zone Country Mapped successfully!");
+    }
+
+    // Service Partner Zone Rate Functionality
+    public function addServicePartnerZoneRate(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'servicePartner'   => 'required|integer',
+                'packageType'      => 'required|string',
+                'rateType'         => 'required|string',
+                'weightFrom'       => 'required|numeric',
+                'weightTo'         => 'required|numeric',
+                'currency'         => 'required|string',
+                'status'           => 'required|string',
+                'selectedZones'    => 'required|array',
+                'zoneRates'        => 'required|array',
+            ],
+            [
+                'servicePartner.required' => 'Select Service Partner',
+                'packageType.required' => 'Select Package Type',
+                'rateType.required' => 'Select Rate Type',
+                'weightFrom.required' => 'Enter Weight From',
+                'weightTo.required' => 'Enter Weight To',
+                'currency.required' => 'Select Currency',
+                'selectedZones.required' => 'Select Zones',
+                'zoneRates.required' => 'Enter Zone Rates',
+            ]
+        );
+        try {
+            DB::beginTransaction();
+            $rows = [];
+            $now = now();
+
+            foreach ($validated['selectedZones'] as $zoneId) {
+                // zoneRates keys come in as strings (json object keys)
+                $rate = $validated['zoneRates'][$zoneId] ?? $validated['zoneRates'][(string) $zoneId] ?? null;
+
+                if ($rate === null) {
+                    continue; // skip zones with no rate provided
+                }
+
+                $rows[] = [
+                    'service_partner_id' => $validated['servicePartner'],
+                    'zone_id'            => $zoneId,
+                    'package_type'       => $validated['packageType'],
+                    'weight_from'        => $validated['weightFrom'],
+                    'weight_to'          => $validated['weightTo'],
+                    'rate'               => $rate,
+                    'rate_type'          => $validated['rateType'],
+                    'currency'           => ($validated['currency'] === '₹') ? 'INR' : 'USD',
+                    'created_at'         => $now,
+                    'updated_at'         => $now,
+                ];
+            }
+            $this->servicePartnerZoneRateService->create($rows);
+            DB::commit();
+            return ApiResponse::success([], "Service Partner Zone Rate created successfully!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            if ($e instanceof \Illuminate\Database\QueryException && $e->errorInfo[1] == 1062) {
+                return ApiResponse::error('A rate configuration for this package type and weight range already exists.');
+            }
+            return ApiResponse::error($e->getMessage());
+        }
+    }
+    public function getServicePartnerZoneWiseRate(Request $request)
+    {
+        $servicePartnerZoneRates = $this->servicePartnerServices->getAllServicePartnerWithZoneRates($request->per_page ?? 20);
+        return ApiResponse::success(ServicePartnerZoneWiserateResource::collection($servicePartnerZoneRates), "Service Partner Zone Rates fetched successfully!");
     }
 }

@@ -22,7 +22,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('add-new', [AdminController::class, 'addNewServicePartner']);
             Route::put('update/{id}', [AdminController::class, 'updateServicePartner']);
             Route::get('getAll-partners', [AdminController::class, 'getAllServicePartners']);
-            // Route::get('getAll', [ShipmentController::class, 'getAllServicePartners']);
+            Route::post('add-zone-rates', [AdminController::class, 'addServicePartnerZoneRate']);
+            Route::get('get-zone-wise-rate', [AdminController::class, 'getServicePartnerZoneWiseRate']);
         });
 
         //country Master
