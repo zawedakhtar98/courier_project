@@ -18,16 +18,11 @@ import { RATE_TYPES, DOCUMENT_TYPE, CURRENCIES } from '@/constant'
 import { getZoneList } from '@/services/admin/ZoneMasterService'
 import { getAllServicePartners } from '@/services/admin/servicePartner'
 import { useToast } from 'vue-toastification'
+import { addServicePartnerZoneRate, getServicePartnerZoneRate } from '@/services/admin/servicePartnerZoneRate'
 
 const toast = useToast();
 const servicePartnersList = ref([]);
 const zoneMastersList = ref([]);
-
-onMounted(async () => {
-  zoneMastersList.value = await getZoneList();
-  servicePartnersList.value = await getAllServicePartners();
-
-})
 
 const packageTypes = DOCUMENT_TYPE;
 
@@ -35,30 +30,31 @@ const rateTypes = RATE_TYPES;
 
 
 // Main Rate Groups State
-const rateGroups = ref([
-  {
-    id: 'grp-dhl-1',
-    service: 'DHL EXPRESS',
-    packageType: 'NONDOC',
-    rateType: 'Slab',
-    zoneCount: 14,
-    status: 'Active',
-    rows: [],
-  },
-  {
-    id: 'grp-fedex-1',
-    service: 'FedEx International',
-    packageType: 'DOC',
-    rateType: 'Slab',
-    zoneCount: 14,
-    status: 'Active',
-    rows: [
-      { weight: '0.500', zones: ['950', '980', '1,100', '1,050', '1,320', '1,450', '1,200', '2,800', '1,350', '2,100', '2,900', '1,300', '2,400', '1,400'] },
-      { weight: '1.000', zones: ['1,180', '1,220', '1,390', '1,290', '1,650', '1,800', '1,450', '3,600', '1,590', '2,750', '3,400', '1,520', '2,950', '1,500'] },
-      { weight: '1.500', zones: ['1,420', '1,460', '1,680', '1,480', '1,980', '2,150', '1,700', '4,400', '1,800', '3,200', '3,900', '1,750', '3,500', '1,800'] },
-    ],
-  },
-])
+// const rateGroups = ref([
+//   {
+//     id: 'grp-dhl-1',
+//     service: 'DHL EXPRESS',
+//     packageType: 'NONDOC',
+//     rateType: 'Slab',
+//     zoneCount: 14,
+//     status: 'Active',
+//     rows: [],
+//   },
+//   {
+//     id: '1',
+//     service: 'FedEx International',
+//     packageType: 'DOC',
+//     rateType: 'Slab',
+//     zoneCount: 14,
+//     status: 'Active',
+//     rows: [
+//       { weight: '0.500', zones: ['950', '980', '1,100', '1,050', '1,320', '1,450', '1,200', '2,800', '1,350', '2,100', '2,900', '1,300', '2,400', '1,400'] },
+//       { weight: '1.000', zones: ['1,180', '1,220', '1,390', '1,290', '1,650', '1,800', '1,450', '3,600', '1,590', '2,750', '3,400', '1,520', '2,950', '1,500'] },
+//       { weight: '1.500', zones: ['1,420', '1,460', '1,680', '1,480', '1,980', '2,150', '1,700', '4,400', '1,800', '3,200', '3,900', '1,750', '3,500', '1,800'] },
+//     ],
+//   },
+// ])
+const rateGroups = ref([]);
 
 const expandedCouriers = ref({
   'grp-dhl-1': true,
@@ -110,8 +106,11 @@ const isZoneSelected = (zoneId) => {
 
 const toggleZone = (zoneId) => {
   const idx = formRateSlab.value.selectedZones.indexOf(zoneId)
+  console.log('zoneId', zoneId);
+  console.log(idx);
   if (idx > -1) {
     formRateSlab.value.selectedZones.splice(idx, 1)
+    delete formRateSlab.value.zoneRates[zoneId]
   } else {
     formRateSlab.value.selectedZones.push(zoneId)
     if (formRateSlab.value.zoneRates[zoneId] === undefined) {
@@ -126,12 +125,14 @@ const selectAllZones = () => {
 
 const deselectAllZones = () => {
   formRateSlab.value.selectedZones = []
+  formRateSlab.value.zoneRates = {}
 }
 
 const removeSelectedZone = (zoneId) => {
   const idx = formRateSlab.value.selectedZones.indexOf(zoneId)
   if (idx > -1) {
     formRateSlab.value.selectedZones.splice(idx, 1)
+    delete formRateSlab.value.zoneRates[zoneId]
   }
 }
 
@@ -175,121 +176,68 @@ const openAddModal = () => {
 }
 
 const isFormValid = computed(() => {
+  const hasValidRates = formRateSlab.value.selectedZones.length > 0 &&
+    formRateSlab.value.selectedZones.every(zId => {
+      const rate = formRateSlab.value.zoneRates[zId];
+      return rate !== undefined && rate !== '' && Number(rate) > 0;
+    });
+
   return formRateSlab.value.servicePartner !== '' &&
     formRateSlab.value.packageType !== '' &&
     formRateSlab.value.rateType !== '' &&
     Number(formRateSlab.value.weightTo) > 0 &&
     Number(formRateSlab.value.weightFrom) >= 0 &&
     Number(formRateSlab.value.weightFrom) < Number(formRateSlab.value.weightTo) &&
-    formRateSlab.value.selectedZones.length > 0 &&
-    Object.keys(formRateSlab.value.zoneRates).length === formRateSlab.value.selectedZones.length
+    hasValidRates;
 })
 
 const openEditModal = (group, rowIdx) => {
-  isEditing.value = true
-  editingGroupId.value = group.id
-  editingRowIndex.value = rowIdx ?? 0
-  bulkRateValue.value = ''
-  zoneSearchFilter.value = ''
+  // isEditing.value = true
+  // editingGroupId.value = group.id
+  // editingRowIndex.value = rowIdx ?? 0
+  // bulkRateValue.value = ''
+  // zoneSearchFilter.value = ''
 
-  // const row = group.rows[rowIdx ?? 0]
-  // const ratesMap = {}
-  // const selected = []
+  // // const row = group.rows[rowIdx ?? 0]
+  // // const ratesMap = {}
+  // // const selected = []
 
-  // if (row) {
-  //   row.zones.forEach((val, idx) => {
-  //     ratesMap[idx + 1] = String(val).replace(/,/g, '')
-  //     selected.push(idx + 1)
-  //   })
+  // // if (row) {
+  // //   row.zones.forEach((val, idx) => {
+  // //     ratesMap[idx + 1] = String(val).replace(/,/g, '')
+  // //     selected.push(idx + 1)
+  // //   })
+  // // }
+
+  // formRateSlab.value = {
+  //   servicePartner: group.service,
+  //   packageType: group.packageType,
+  //   rateType: group.rateType,
+  //   weightFrom: '0.00',
+  //   weightTo: row ? String(row.weight) : '0.500',
+  //   currency: '₹',
+  //   status: group.status,
+  //   selectedZones: [],
+  //   zoneRates: {}, //ratesMap,
   // }
-
-  formRateSlab.value = {
-    servicePartner: group.service,
-    packageType: group.packageType,
-    rateType: group.rateType,
-    weightFrom: '0.00',
-    weightTo: row ? String(row.weight) : '0.500',
-    currency: '₹',
-    status: group.status,
-    selectedZones: [],
-    zoneRates: {}, //ratesMap,
-  }
-  showRateSlabModal.value = true
+  // showRateSlabModal.value = true
 }
 
-const saveRateSlab = () => {
-  if (isFormValid) {
-    console.log(formRateSlab.value);
-    toast.success('Rate slab updated successfully.');
+const saveZoneWiseRate = async () => {
+  formRateSlab.value.selectedZones.sort((a, b) => a - b);
+
+  if (isFormValid.value) {
+    const res = await addServicePartnerZoneRate(formRateSlab.value)
+    if (res.status === 'success') {
+      toast.success(res.message);
+      showRateSlabModal.value = false;
+    } else {
+      toast.error(res.message);
+    }
+
   } else {
     toast.error('All field are mandatory.');
   }
-  return false;
-
-  // if (!formRateSlab.value.servicePartner) {
-  //   alert('Please select a Service Partner.')
-  //   return
-  // }
-
-  // if (formRateSlab.value.selectedZones.length === 0) {
-  //   alert('Please select at least one Zone Master.')
-  //   return
-  // }
-
-  // // Construct zones array for 14 zones
-  // const zoneValues = []
-  // for (let i = 1; i <= 14; i++) {
-  //   const rateVal = formRateSlab.value.zoneRates[i]
-  //   if (rateVal !== undefined && rateVal !== '') {
-  //     const numVal = Number(String(rateVal).replace(/,/g, ''))
-  //     zoneValues.push(!isNaN(numVal) ? numVal.toLocaleString() : String(rateVal))
-  //   } else {
-  //     zoneValues.push('—')
-  //   }
-  // }
-
-  // const weightFormatted = Number(formRateSlab.value.weightTo || 0.5).toFixed(3)
-  // const newRow = {
-  //   weight: weightFormatted,
-  //   zones: zoneValues,
-  // }
-
-  let targetGroup = rateGroups.value.find(
-    (g) => g.service === formRateSlab.value.servicePartner && g.packageType === formRateSlab.value.packageType
-  )
-
-  if (!targetGroup) {
-    //   const newGroupId = `grp-${Date.now()}`
-    //   targetGroup = {
-    //     id: newGroupId,
-    //     service: formRateSlab.value.servicePartner,
-    //     packageType: formRateSlab.value.packageType,
-    //     rateType: formRateSlab.value.rateType,
-    //     zoneCount: 14,
-    //     status: formRateSlab.value.status,
-    //     rows: [newRow],
-    //   }
-    //   console.log(formRateSlab.value)
-    //   rateGroups.value.unshift(targetGroup)
-    //   expandedCouriers.value[newGroupId] = true
-    showAlert(`Mapped new rate slab for ${formRateSlab.value.servicePartner} successfully.`)
-  } else {
-    if (isEditing.value && editingRowIndex.value !== null && targetGroup.rows[editingRowIndex.value]) {
-      targetGroup.rows[editingRowIndex.value] = newRow
-      showAlert(`Updated rate slab row for ${targetGroup.service}.`)
-    } else {
-      const existingIdx = targetGroup.rows.findIndex((r) => String(r.weight) === weightFormatted)
-      if (existingIdx > -1) {
-        targetGroup.rows[existingIdx] = newRow
-      } else {
-        targetGroup.rows.push(newRow)
-        targetGroup.rows.sort((a, b) => Number(a.weight) - Number(b.weight))
-      }
-      showAlert(`Saved rate slab for ${targetGroup.service} (${formRateSlab.value.packageType}).`)
-    }
-  }
-
-  showRateSlabModal.value = false
 }
 
 const toggleGroupStatus = (group) => {
@@ -303,7 +251,7 @@ const deleteGroup = (group) => {
     showAlert(`Rate slab for "${group.service}" deleted successfully.`)
   }
 }
-
+// const filteredRateGroups = ref([]);
 const filteredRateGroups = computed(() => {
   return rateGroups.value.filter((g) => {
     const matchesSearch =
@@ -313,6 +261,50 @@ const filteredRateGroups = computed(() => {
     return matchesSearch && matchesStatus
   })
 })
+
+
+const isLoading = ref(true);
+
+onMounted(async () => {
+  zoneMastersList.value = await getZoneList();
+  servicePartnersList.value = await getAllServicePartners();
+
+  const res = await getServicePartnerZoneRate(10, 1);
+
+  if (res.status === 'success' && res.data) {
+    // Flatten the data in case the resource returns an array of packages for each service partner
+    const flattenedData = Array.isArray(res.data) ? res.data.flat() : [];
+
+    rateGroups.value = flattenedData.map((group, index) => {
+      // Ensure group exists
+      if (!group) return null;
+
+      // Map API rows to frontend format
+      const mappedRows = (group.rows || []).map(row => {
+        // Convert object of zones to array of values in order to ensure deterministic rendering
+        const zoneValues = Object.values(row.zones || {});
+        return {
+          weightFrom: row.weight_from, // keep it if needed for editing
+          weightTo: row.weight_to,
+          zones: zoneValues,
+          zoneKeys: Object.keys(row.zones || {}) // keep keys if needed for headers
+        };
+      });
+
+      return {
+        id: group.id + '-' + index, // Ensure unique ID in case of same service partner ID for different package types
+        service: group.service,
+        packageType: group.packageType,
+        rateType: group.rateType,
+        zoneCount: group.zoneCount,
+        status: group.status,
+        rows: mappedRows,
+      };
+    }).filter(Boolean);
+  }
+  isLoading.value = false;
+
+});
 </script>
 
 <template>
@@ -385,14 +377,23 @@ const filteredRateGroups = computed(() => {
           </thead>
 
           <tbody>
-            <tr v-if="filteredRateGroups.length === 0">
+            <tr v-if="isLoading">
+              <td colspan="6" class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary mb-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="small">Loading rate slabs...</div>
+              </td>
+            </tr>
+
+            <tr v-else-if="filteredRateGroups.length === 0">
               <td colspan="6" class="text-center py-5 text-muted">
                 <i class="bi bi-folder-x fs-1 d-block mb-2 text-secondary"></i>
                 No matching service partner rate slabs found.
               </td>
             </tr>
 
-            <template v-for="group in filteredRateGroups" :key="group.id">
+            <template v-else v-for="group in filteredRateGroups" :key="group.id">
               <!-- ACCORDION PARENT ROW -->
               <tr class="main-row cursor-pointer" @click="toggleCourier(group.id)"
                 :aria-expanded="expandedCouriers[group.id]">
@@ -422,10 +423,10 @@ const filteredRateGroups = computed(() => {
 
                 <td class="text-end">
                   <div class="d-flex align-items-center justify-content-end gap-1" @click.stop>
-                    <button type="button" class="btn btn-sm btn-light text-primary p-2 rounded-2"
+                    <!-- <button type="button" class="btn btn-sm btn-light text-primary p-2 rounded-2"
                       @click="openEditModal(group)" title="Add/Edit Slab">
                       <i class="bi bi-pencil"></i>
-                    </button>
+                    </button> -->
                     <button type="button" class="btn btn-sm btn-light text-danger p-2 rounded-2"
                       @click="deleteGroup(group)" title="Delete Slab">
                       <i class="bi bi-trash"></i>
@@ -440,7 +441,7 @@ const filteredRateGroups = computed(() => {
                   <div class="inner-table p-3 bg-light border-top border-bottom">
                     <div class="d-flex justify-content-between align-items-center mb-2 px-1">
                       <span class="small fw-bold text-secondary text-uppercase tracking-wider">
-                        <i class="bi bi-table me-1 text-primary"></i> {{ group.service }} &bull; Weight Slabs (14 Zones)
+                        <i class="bi bi-table me-1 text-primary"></i> {{ group.service }} &bull;
                       </span>
                       <span class="badge bg-white text-muted border small">
                         {{ group.rows.length }} Slab Rows
@@ -451,15 +452,17 @@ const filteredRateGroups = computed(() => {
                       <table class="table table-responsive table-bordered table-hover mb-0">
                         <thead class="bg-light">
                           <tr>
+                            <th class="sticky-col">From Weight (kg)</th>
                             <th class="sticky-col">To Weight (kg)</th>
-                            <th v-for="zone in group.zoneCount" :key="zone">
-                              Zone {{ zone }}
+                            <th v-for="zone in (group.rows[0]?.zoneKeys || [])" :key="zone">
+                              {{ zone }}
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr v-for="(row, index) in group.rows" :key="index">
-                            <td class="sticky-col weight-cell fw-bold">{{ row.weight }}</td>
+                            <td class="sticky-col weight-cell fw-bold">{{ row.weightFrom }}</td>
+                            <td class="sticky-col weight-cell fw-bold">{{ row.weightTo }}</td>
                             <td v-for="(val, zIdx) in row.zones" :key="zIdx">
                               {{ val }}
                             </td>
@@ -496,7 +499,7 @@ const filteredRateGroups = computed(() => {
           </div>
 
           <!-- Modal Body Form -->
-          <form @submit.prevent="saveRateSlab" class="d-flex flex-column" style="overflow-y: auto;">
+          <form @submit.prevent="saveZoneWiseRate" class="d-flex flex-column" style="overflow-y: auto;">
             <div class="modal-body px-4 py-4">
               <!-- Top Row: General Settings -->
               <div class="card border border-light-subtle rounded-3 p-3 mb-4 bg-white shadow-sm">
