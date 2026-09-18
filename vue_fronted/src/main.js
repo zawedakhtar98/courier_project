@@ -9,6 +9,8 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
+import vSelect from 'vue-select';
+import 'vue-select/dist/vue-select.css';
 
 const app = createApp(App)
 app.use(router)
@@ -18,4 +20,5 @@ app.use(Toast, {
     timeout: 3000,
     closeOnClick: true
 });
+app.component('v-select', vSelect);
 app.mount('#app')

@@ -39,12 +39,6 @@ const router = createRouter({
           meta: { title: 'Shipment Management' },
         },
         {
-          path: 'add-new-shipment',
-          name: 'add-new-shipment',
-          component: () => import('@/views/admin/ShipmentsForm.vue'),
-          meta: { title: 'Shipment Management' },
-        },
-        {
           path: 'rate-calculator',
           name: 'rate-calculator',
           component: () => import('@/views/admin/RateCalculatorView.vue'),
@@ -101,21 +95,20 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to, _from) => {
   const authStore = useAuthStore()
-  // console.log(authStore.isReady, "asdsdas"); return false
+
   // On first load, check if user is already authenticated
   if (!authStore.isReady) {
     await authStore.checkAuth()
   }
 
   if (to.meta.requiresAuth && !authStore.isLogin) {
-    next({ name: 'login' })
+    return { name: 'login' }
   } else if (to.meta.requiresGuest && authStore.isLogin) {
-    next({ name: 'admin-dashboard' })
-  } else {
-    next()
+    return { name: 'admin-dashboard' }
   }
+  // else: allow navigation (no return needed)
 })
 
 export default router

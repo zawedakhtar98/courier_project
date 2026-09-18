@@ -1,29 +1,51 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { DOCUMENT_TYPE } from '@/constant'
+import { getAllCountries } from '@/services/admin/CountryService';
 
 const router = useRouter()
 
 // ----------------------------------------------------
 // Global Mock State
 // ----------------------------------------------------
+const countryList = ref([]);
+
+const getCountryList = async () => {
+  try {
+    const response = await getAllCountries();
+    countryList.value = response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+function getLocalDateString(date = new Date()) {
+  return new Intl.DateTimeFormat('en-CA').format(date);
+}
+
+const currentDate = ref(getLocalDateString());
+
+onMounted(async () => {
+  await getCountryList();
+  console.log(currentDate.value)
+})
+
 const walletBalance = ref(408.61)
 const searchAwbQuery = ref('')
 const showRechargeModal = ref(false)
 const rechargeAmount = ref(500)
 
 // Calculator Form State
-const calcDate = ref('2026-08-13')
-const destination = ref('ALBANIA')
+const shipmentDate = getLocalDateString();
+const destination = ref('')
 const pincode = ref('')
 const city = ref('')
 const state = ref('')
-const goodsType = ref('NDox')
+const packageType = ref('')
 
 // Box Rows State
 const boxRows = ref([
-  { actWt: 2, length: 20, width: 20, height: 20, volWt: 1.60, chgWt: 2.00 },
-  { actWt: 1, length: 20, width: 15, height: 19, volWt: 1.14, chgWt: 1.50 }
+  { actWt: 0.00, length: 0, width: 0, height: 0, volWt: 0, chgWt: 0 }
 ])
 
 // Volumetric calculations
@@ -39,7 +61,7 @@ const calculateRowVolWt = (row) => {
 }
 
 const addBox = () => {
-  const newRow = { actWt: 1, length: 10, width: 10, height: 10, volWt: 0.20, chgWt: 1.00 }
+  const newRow = { actWt: 0.00, length: 0, width: 0, height: 0, volWt: 0, chgWt: 0 }
   calculateRowVolWt(newRow)
   boxRows.value.push(newRow)
 }
@@ -105,7 +127,6 @@ const rateResults = ref([])
 
 const getRates = () => {
   // Populate mock rates based on user selections
-  const destIso = destination.value.substring(0, 3)
   rateResults.value = [
     {
       id: 'rate-fedex',
@@ -115,7 +136,7 @@ const getRates = () => {
       logoText: 'FedEx',
       logoColor: '#4D148C',
       available: true,
-      iso: destIso,
+      iso: '',
       details: {
         deliveryType: 'Drop off *',
         transitTime: '3-5 Business Days',
@@ -175,7 +196,7 @@ const bookShipment = (rate) => {
     query: {
       destination: destination.value,
       service: rate.service,
-      goodsType: goodsType.value,
+      packageType: packageType.value,
       city: city.value,
       state: state.value,
       boxes: JSON.stringify(simplifiedBoxes)
@@ -221,22 +242,23 @@ const bookShipment = (rate) => {
           <label class="form-label small fw-bold text-danger text-uppercase mb-1">
             <i class="bi bi-calendar-event me-1"></i> Date
           </label>
-          <input v-model="calcDate" type="date" class="form-control form-control-custom" />
+          <input v-model="shipmentDate" :min="currentDate" :value="shipmentDate" type="date"
+            class="form-control form-control-custom" />
         </div>
 
         <!-- Destination Country -->
         <div class="col-12 col-sm-6 col-md-4 col-lg-2.4">
           <label class="form-label small fw-bold text-danger text-uppercase mb-1">
-            <i class="bi bi-geo-alt-fill me-1"></i> Destination
+            <i class="bi bi-geo-alt-fill me-1"></i> Destination <span class="text-danger">*</span>
           </label>
-          <select v-model="destination" class="form-select form-select-custom text-uppercase">
-            <option value="ALBANIA">Albania</option>
-            <option value="SINGAPORE">Singapore</option>
-            <option value="UNITED STATES">United States</option>
-            <option value="AUSTRIA">Austria</option>
-            <option value="GERMANY">Germany</option>
-            <option value="INDIA">India</option>
-          </select>
+          <!-- <select v-model="destination" class="form-select form-select-custom"> -->
+          <!-- <option value="" selected disabled>Select Destination</option> -->
+          <!-- <option v-for="country in countryList" :key="country.id" :value="country.id">
+              {{ country.name }}
+            </option> -->
+          <!-- </select> -->
+          <v-select :options="countryList" v-model="destination" :reduce="country => country.id" label="name"
+            placeholder="Search Destination..." />
         </div>
 
         <!-- Pincode -->
@@ -270,18 +292,19 @@ const bookShipment = (rate) => {
         <div class="col-12 col-md-3">
           <div class="d-flex flex-column h-100">
             <label class="form-label small fw-bold text-danger text-uppercase mb-1">
-              <i class="bi bi-journal-text me-1"></i> Goods Type
+              <i class="bi bi-journal-text me-1"></i> Package Type <span class="text-danger">*</span>
             </label>
-            <select v-model="goodsType" class="form-select form-select-custom mb-2">
-              <option value="NDox">NDox</option>
-              <option value="Dox">Dox</option>
+            <select v-model="packageType" class="form-select form-select-custom mb-2">
+              <option value="" selected disabled>Select Package Type</option>
+              <option v-for="(item, index) in DOCUMENT_TYPE" :key="index" :value="item">{{ item
+              }}</option>
             </select>
 
-            <div
+            <!-- <div
               class="goods-info d-flex align-items-start gap-1 p-2 bg-light rounded-3 text-danger-emphasis small mt-2">
               <i class="bi bi-exclamation-circle-fill text-danger mt-0.5"></i>
               <span>Goods Type Info</span>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -598,6 +621,51 @@ const bookShipment = (rate) => {
   border-color: #dc3545;
   background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+}
+
+/* Custom styling for vue-select to match form-control-custom */
+:deep(.v-select .vs__dropdown-toggle) {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  padding: 0.25rem 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  background-color: #fcfcfc;
+}
+
+:deep(.v-select.vs--open .vs__dropdown-toggle),
+:deep(.v-select .vs__search:focus) {
+  border-color: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+:deep(.vs__selected-options:focus) {
+  border: 1px solid #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12) !important;
+}
+
+:deep(.v-select .vs__selected) {
+  margin: 2px;
+  padding: 0 0.25rem;
+}
+
+:deep(.v-select .vs__search) {
+  margin: 4px;
+  padding: 0 0.25rem;
+}
+
+:deep(.v-select .vs__dropdown-menu) {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+}
+
+:deep(.v-select .vs__dropdown-option--highlight) {
+  background-color: #e02229;
+  color: white;
 }
 
 .header-panel {

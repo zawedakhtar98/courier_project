@@ -231,6 +231,7 @@ const saveZoneWiseRate = async () => {
     if (res.status === 'success') {
       toast.success(res.message);
       showRateSlabModal.value = false;
+      await fetchRateGroups();
     } else {
       toast.error(res.message);
     }
@@ -265,10 +266,8 @@ const filteredRateGroups = computed(() => {
 
 const isLoading = ref(true);
 
-onMounted(async () => {
-  zoneMastersList.value = await getZoneList();
-  servicePartnersList.value = await getAllServicePartners();
-
+const fetchRateGroups = async () => {
+  isLoading.value = true;
   const res = await getServicePartnerZoneRate(10, 1);
 
   if (res.status === 'success' && res.data) {
@@ -303,7 +302,13 @@ onMounted(async () => {
     }).filter(Boolean);
   }
   isLoading.value = false;
+};
 
+onMounted(async () => {
+  zoneMastersList.value = await getZoneList();
+  servicePartnersList.value = await getAllServicePartners();
+
+  await fetchRateGroups();
 });
 </script>
 

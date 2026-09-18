@@ -942,7 +942,7 @@ const loadDraft = (draft) => {
                                             <select v-model.number="invItem.boxNo"
                                                 class="form-select form-select-sm text-center">
                                                 <option v-for="b in boxRows" :key="b.boxNo" :value="b.boxNo">{{ b.boxNo
-                                                    }}</option>
+                                                }}</option>
                                             </select>
                                         </td>
                                         <td>
@@ -1124,7 +1124,7 @@ const loadDraft = (draft) => {
                                         <i class="bi bi-file-earmark-check text-success fs-2 mb-2"></i>
                                         <span class="fw-semibold text-dark text-truncate" style="max-width: 220px;">{{
                                             kycFile.name
-                                            }}</span>
+                                        }}</span>
                                         <span class="text-muted small mb-2">{{ kycFile.size }}</span>
                                         <button type="button" @click.stop="removeFile('kyc')"
                                             class="btn btn-sm btn-outline-danger px-3 py-1 rounded-pill">
@@ -1153,7 +1153,7 @@ const loadDraft = (draft) => {
                                         <i class="bi bi-file-earmark-check text-success fs-2 mb-2"></i>
                                         <span class="fw-semibold text-dark text-truncate" style="max-width: 220px;">{{
                                             invoiceFile.name
-                                            }}</span>
+                                        }}</span>
                                         <span class="text-muted small mb-2">{{ invoiceFile.size }}</span>
                                         <button type="button" @click.stop="removeFile('invoice')"
                                             class="btn btn-sm btn-outline-danger px-3 py-1 rounded-pill">
@@ -1223,7 +1223,7 @@ const loadDraft = (draft) => {
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0 text-dark-accent">Draft Bookings History</h5>
                 <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3">{{ draftsList.length
-                    }}
+                }}
                     Drafts</span>
             </div>
 
@@ -1257,7 +1257,7 @@ const loadDraft = (draft) => {
                             <td>
                                 <span class="badge bg-info-subtle text-info border border-info border-opacity-25">{{
                                     draft.service
-                                    }}</span>
+                                }}</span>
                             </td>
                             <td>
                                 <div class="fw-semibold text-dark">{{ draft.weight }} kg</div>
@@ -1316,12 +1316,12 @@ const loadDraft = (draft) => {
                             <td>
                                 <div>{{ shipment.consignee }}</div>
                                 <span class="badge bg-light text-secondary border small">{{ shipment.destination
-                                    }}</span>
+                                }}</span>
                             </td>
                             <td>
                                 <span
                                     class="badge bg-primary-subtle text-primary border border-primary border-opacity-10">{{
-                                    shipment.service }}</span>
+                                        shipment.service }}</span>
                             </td>
                             <td>
                                 <div class="fw-semibold text-dark">{{ shipment.weight }} kg</div>
@@ -1603,7 +1603,7 @@ const loadDraft = (draft) => {
 
 /* Stepper Completed State */
 .step-item.completed .step-circle {
-    background-color: #6c757d;
+    background-color: var(--primary-color);
     color: #ffffff;
 }
 
