@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AdminController;
+use App\Http\Controllers\API\RateController;
 use App\Http\Controllers\API\ShipmentController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,4 +44,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('map-countries', [AdminController::class, 'MapZoneWithCountry']);
         });
     });
+
+    Route::post('calculate-rate', [RateController::class, 'calculateRate']);
 });
