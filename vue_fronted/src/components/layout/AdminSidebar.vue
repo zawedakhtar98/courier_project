@@ -126,6 +126,16 @@ const navSections = [
             // icon: 'bi-graph-up-arrow',
             icon: 'bi bi-file-earmark-spreadsheet',
           },
+          {
+            name: 'shipment-charges-master',
+            label: 'Shipment Charges Master',
+            icon: 'bi bi-database',
+          },
+          {
+            name: 'shipment-charges',
+            label: 'Shipment Charges',
+            icon: 'bi bi-layers',
+          },
         ],
       },
     ],

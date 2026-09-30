@@ -3,8 +3,10 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { DOCUMENT_TYPE } from '@/constant'
 import { getAllCountries } from '@/services/admin/CountryService';
+import { useToast } from 'vue-toastification';
 
 const router = useRouter()
+const toast = useToast();
 
 // ----------------------------------------------------
 // Global Mock State
@@ -27,13 +29,8 @@ const currentDate = ref(getLocalDateString());
 
 onMounted(async () => {
   await getCountryList();
-  console.log(currentDate.value)
 })
 
-const walletBalance = ref(408.61)
-const searchAwbQuery = ref('')
-const showRechargeModal = ref(false)
-const rechargeAmount = ref(500)
 
 // Calculator Form State
 const shipmentDate = getLocalDateString();
@@ -48,7 +45,11 @@ const boxRows = ref([
   { actWt: 0.00, length: 0, width: 0, height: 0, volWt: 0, chgWt: 0 }
 ])
 
-// Volumetric calculations
+
+// Volumetric calculationsc
+const actual_weight = ref(0.0);
+const chargable_weight = ref(0.0);
+
 const calculateRowVolWt = (row) => {
   if (row.length && row.width && row.height) {
     row.volWt = parseFloat(((row.length * row.width * row.height) / 5000).toFixed(2))
@@ -56,8 +57,10 @@ const calculateRowVolWt = (row) => {
     row.volWt = 0
   }
   const maxWt = Math.max(row.actWt || 0, row.volWt)
+  actual_weight.value = maxWt;
   // Round up to nearest 0.5 kg
   row.chgWt = parseFloat((Math.ceil(maxWt * 2) / 2).toFixed(2))
+  chargable_weight.value = row.chgWt;
 }
 
 const addBox = () => {
@@ -76,7 +79,7 @@ const duplicateBox = (index) => {
 
 const deleteBox = (index) => {
   if (boxRows.value.length <= 1) {
-    showAlert('At least one box row is required', 'danger')
+    toast.error('At least one box row is required')
     return
   }
   boxRows.value.splice(index, 1)
@@ -101,32 +104,38 @@ const totalChgWt = computed(() => {
   return parseFloat(sum.toFixed(2))
 })
 
-// Search AWB / Recharge logic
-const alertMessage = ref(null)
-const showAlert = (text, type = 'success') => {
-  alertMessage.value = { type, text }
-  setTimeout(() => {
-    alertMessage.value = null
-  }, 4000)
-}
-
-const handleAwbSearch = () => {
-  if (!searchAwbQuery.value) return
-  showAlert(`AWB Number "${searchAwbQuery.value}" search initialized. (No results)`, 'danger')
-}
-
-const processRecharge = () => {
-  walletBalance.value += rechargeAmount.value
-  showRechargeModal.value = false
-  showAlert(`Recharged ₹${rechargeAmount.value}. New Balance: ₹${walletBalance.value}`)
-}
-
 // Results display state
 const showResults = ref(false)
 const rateResults = ref([])
 
+const RateCalFormInput = computed(() => ({
+  shipment_date: currentDate.value,
+  destination: destination.value,
+  pincode: pincode.value,
+  state: state.value,
+  city: city.value,
+  package_type: packageType.value,
+  actual_weight: totalActWt.value,
+  chargable_weight: totalChgWt.value,
+  boxes: boxRows.value,
+}));
+
 const getRates = () => {
+  if (!RateCalFormInput.value.destination) {
+    toast.error('Please select destination');
+    return;
+  }
+  if (!RateCalFormInput.value.package_type) {
+    toast.error('Please select package type');
+    return;
+  }
+  if (!RateCalFormInput.value.shipment_date) {
+    toast.error('Please select shipment date');
+    return;
+  }
+
   // Populate mock rates based on user selections
+  console.log(RateCalFormInput.value);
   rateResults.value = [
     {
       id: 'rate-fedex',
@@ -152,7 +161,7 @@ const getRates = () => {
       logoText: 'DHL',
       logoColor: '#FFCC00',
       available: true,
-      iso: destIso,
+      iso: '',
       details: {
         deliveryType: 'Pickup *',
         transitTime: '2-4 Business Days',
@@ -168,7 +177,7 @@ const getRates = () => {
       logoText: 'UPS',
       logoColor: '#351C15',
       available: true,
-      iso: destIso,
+      iso: '',
       details: {
         deliveryType: 'Drop off *',
         transitTime: '4-6 Business Days',
@@ -178,7 +187,7 @@ const getRates = () => {
     }
   ]
   showResults.value = true
-  showAlert('Rates calculated successfully!')
+  toast.success('Rates calculated successfully!')
 }
 
 // Booking navigation route handler
@@ -207,22 +216,6 @@ const bookShipment = (rate) => {
 
 <template>
   <div class="container-fluid p-0">
-
-    <!-- Top Alert System -->
-    <transition name="fade">
-      <div v-if="alertMessage"
-        class="alert position-fixed top-0 start-50 translate-middle-x mt-5 z-3 shadow-lg rounded-3 border-0 px-4 py-3"
-        :class="alertMessage.type === 'success' ? 'bg-success text-white' : 'bg-danger text-white'"
-        style="width: 90%; max-width: 480px;">
-        <div class="d-flex align-items-center gap-2">
-          <i class="bi"
-            :class="alertMessage.type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
-          <div class="fw-semibold text-break flex-fill">{{ alertMessage.text }}</div>
-          <button type="button" class="btn-close btn-close-white ms-auto" @click="alertMessage = null"></button>
-        </div>
-      </div>
-    </transition>
-
 
     <!-- MAIN RATE CALCULATOR CARD -->
     <div class="custom-card p-4 mb-4 bg-white shadow-sm border-0">
@@ -553,53 +546,7 @@ const bookShipment = (rate) => {
           <i class="bi bi-chevron-down"></i>
         </a>
       </div>
-
     </div>
-
-    <!-- Recharge Wallet Modal -->
-    <div v-if="showRechargeModal" class="modal fade show d-block" tabindex="-1"
-      style="background: rgba(15, 23, 42, 0.6); z-index: 1060;">
-      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
-          <div class="modal-header bg-danger text-white p-3 px-4">
-            <h5 class="modal-title fw-bold">
-              <i class="bi bi-wallet2 me-2"></i> Recharge Wallet
-            </h5>
-            <button type="button" class="btn-close btn-close-white" @click="showRechargeModal = false"></button>
-          </div>
-          <form @submit.prevent="processRecharge">
-            <div class="modal-body p-4">
-              <div class="mb-3">
-                <label class="form-label small fw-bold">Enter Amount (₹)</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light fw-bold">₹</span>
-                  <input v-model.number="rechargeAmount" type="number" class="form-control fw-bold fs-5 text-center"
-                    min="10" max="10000" required />
-                </div>
-                <div class="text-muted small mt-2 text-center">
-                  Recommended:
-                  <button type="button" @click="rechargeAmount = 200"
-                    class="btn btn-xs btn-outline-secondary py-0 px-2 small rounded-pill m-1">₹200</button>
-                  <button type="button" @click="rechargeAmount = 500"
-                    class="btn btn-xs btn-outline-secondary py-0 px-2 small rounded-pill m-1">₹500</button>
-                  <button type="button" @click="rechargeAmount = 1000"
-                    class="btn btn-xs btn-outline-secondary py-0 px-2 small rounded-pill m-1">₹1000</button>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer bg-light p-3 px-4 justify-content-between">
-              <button type="button" class="btn btn-outline-secondary rounded-3" @click="showRechargeModal = false">
-                Cancel
-              </button>
-              <button type="submit" class="btn btn-recharge px-4 py-2 fw-semibold">
-                Proceed Recharge
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
   </div>
 </template>
 

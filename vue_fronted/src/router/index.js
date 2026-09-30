@@ -90,6 +90,20 @@ const router = createRouter({
           component: () => import('@/views/admin/ServicePartnerZoneRate.vue'),
           meta: { title: 'Service Partner Zone Rate List' },
         },
+        {
+          path: 'settings/shipment-charges-master',
+          alias: 'shipment-charges-master',
+          name: 'shipment-charges-master',
+          component: () => import('@/views/admin/ShipmentChargesMaster.vue'),
+          meta: { title: 'Shipment Charges Master' },
+        },
+        {
+          path: 'settings/shipment-charges',
+          alias: 'shipment-charges',
+          name: 'shipment-charges',
+          component: () => import('@/views/admin/ShipmentAdditionalCharges.vue'),
+          meta: { title: 'Shipment Additional Charges' },
+        },
       ],
     }
   ],
