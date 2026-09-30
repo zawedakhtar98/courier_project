@@ -4,8 +4,10 @@ namespace App\Repositories;
 
 use App\Models\ServicePartnerZoneRate;
 use App\Models\ZoneCountryMapping;
+use App\Repositories\Interface\RateCalRepositoryInterface;
+use Illuminate\Support\Facades\Log;
 
-class RateCalRepository
+class RateCalRepository implements RateCalRepositoryInterface
 {
 
     public function calculateRate(array $condition)
@@ -37,6 +39,9 @@ class RateCalRepository
                 ->where('weight_from', '<=', $billableWt)
                 ->where('weight_to', '>=', $billableWt)
                 ->get();
+            $servicePartner = $rates->pluck('service_partner_id')->unique();
+            Log::info("servicepartner");
+            Log::info($servicePartner);
             return $rates;
         }
         return [];

@@ -2,37 +2,34 @@
 
 namespace App\Services;
 
-use App\Models\Country;
+use App\Repositories\Interface\CountryRepositoryInterface;
 
 class CountryService
 {
+    public function __construct(protected CountryRepositoryInterface $countryRepository) {}
 
-    public function create($data)
+    public function create(array $data)
     {
-        return Country::create($data);
+        return $this->countryRepository->create($data);
     }
 
-    public function update($data, $id)
+    public function update(array $data, int $id)
     {
-        $country = Country::find($id);
-        $country->update($data);
-        return $country;
+        return $this->countryRepository->update($data, $id);
     }
 
-    public function delete($id)
+    public function delete(int $id)
     {
-        $country = Country::find($id);
-        $country->delete();
-        return $country;
+        return $this->countryRepository->delete($id);
     }
 
     public function findAll()
     {
-        return Country::all();
+        return $this->countryRepository->findAll();
     }
 
-    public function findById($id)
+    public function findById(int $id)
     {
-        return Country::find($id);
+        return $this->countryRepository->findById($id);
     }
 }

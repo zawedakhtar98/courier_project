@@ -3,8 +3,9 @@
 namespace App\Repositories;
 
 use App\Models\ZoneMaster;
+use App\Repositories\Interface\ZoneMasterRepositoryInterface;
 
-class ZoneMasterRepository
+class ZoneMasterRepository implements ZoneMasterRepositoryInterface
 {
 
     public function getAllZone()
@@ -27,7 +28,7 @@ class ZoneMasterRepository
         return ZoneMaster::destroy($id);
     }
 
-    public function findById($id)
+    public function findById(int $id)
     {
         return ZoneMaster::find($id);
     }

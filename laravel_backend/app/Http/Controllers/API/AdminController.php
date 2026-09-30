@@ -14,6 +14,8 @@ use App\Models\ZoneMaster;
 use App\Services\CountryService;
 use App\Services\ServicePartnerServices;
 use App\Services\ServicePartnerZoneRateService;
+use App\Services\ShipmentAdditionalChargeService;
+use App\Services\ShipmentChargesMasterService;
 use App\Services\ZoneMasterService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -26,7 +28,9 @@ class AdminController extends Controller
         protected ServicePartnerServices $servicePartnerServices,
         protected ZoneMasterService $zoneMasterService,
         protected CountryService $countryService,
-        protected ServicePartnerZoneRateService $servicePartnerZoneRateService
+        protected ServicePartnerZoneRateService $servicePartnerZoneRateService,
+        protected ShipmentAdditionalChargeService $shipmentAdditionalChargeService,
+        protected ShipmentChargesMasterService $shipmentChargesMasterService,
     ) {}
 
     public function addNewServicePartner(Request $request)

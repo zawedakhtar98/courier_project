@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\ZoneMasterRepository;
+use App\Repositories\Interface\ZoneMasterRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ZoneMasterService
@@ -10,7 +10,7 @@ class ZoneMasterService
     /**
      * Create a new class instance.
      */
-    public function __construct(protected ZoneMasterRepository $zoneMasterRepository)
+    public function __construct(protected ZoneMasterRepositoryInterface $zoneMasterRepository)
     {
         $this->zoneMasterRepository = $zoneMasterRepository;
     }
