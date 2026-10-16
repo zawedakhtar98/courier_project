@@ -275,8 +275,12 @@ onMounted(() => {
   if (route.query.service) {
     serviceForm.value.service = String(route.query.service)
   }
-  if (route.query.goodsType) {
-    serviceForm.value.goodsType = String(route.query.goodsType)
+  if (route.query.goodsType || route.query.packageType) {
+    const rawType = String(route.query.goodsType || route.query.packageType).toUpperCase()
+    serviceForm.value.goodsType = rawType.includes('NON') ? 'NDox' : (rawType.includes('DOX') ? 'Dox' : rawType)
+  }
+  if (route.query.pincode || route.query.zipcode) {
+    consigneeForm.value.zipcode = String(route.query.pincode || route.query.zipcode)
   }
 
   // Pre-load boxes if sent in JSON format

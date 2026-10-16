@@ -280,12 +280,14 @@ const fetchRateGroups = async () => {
 
       // Map API rows to frontend format
       const mappedRows = (group.rows || []).map(row => {
+        console.log(group.rows);
         // Convert object of zones to array of values in order to ensure deterministic rendering
         const zoneValues = Object.values(row.zones || {});
         return {
           weightFrom: row.weight_from, // keep it if needed for editing
           weightTo: row.weight_to,
           zones: zoneValues,
+          rateType: row.rate_type,
           zoneKeys: Object.keys(row.zones || {}) // keep keys if needed for headers
         };
       });
@@ -375,7 +377,7 @@ onMounted(async () => {
               <th width="40"></th>
               <th>Service Partner</th>
               <th>Package Type</th>
-              <th>Rate Type</th>
+              <!-- <th>Rate Type</th> -->
               <th>Status</th>
               <th class="text-end">Actions</th>
             </tr>
@@ -414,9 +416,9 @@ onMounted(async () => {
                   <span class="nondoc-badge">{{ group.packageType }}</span>
                 </td>
 
-                <td>
+                <!-- <td>
                   <span class="badge bg-light text-dark border font-monospace">{{ group.rateType }}</span>
-                </td>
+                </td> -->
 
                 <td>
                   <button type="button" class="badge border-0 rounded-pill px-3 py-1 cursor-pointer"
@@ -459,6 +461,7 @@ onMounted(async () => {
                           <tr>
                             <th class="sticky-col">From Weight (kg)</th>
                             <th class="sticky-col">To Weight (kg)</th>
+                            <th class="sticky-col">Rate Type</th>
                             <th v-for="zone in (group.rows[0]?.zoneKeys || [])" :key="zone">
                               {{ zone }}
                             </th>
@@ -468,6 +471,7 @@ onMounted(async () => {
                           <tr v-for="(row, index) in group.rows" :key="index">
                             <td class="sticky-col weight-cell fw-bold">{{ row.weightFrom }}</td>
                             <td class="sticky-col weight-cell fw-bold">{{ row.weightTo }}</td>
+                            <td class="sticky-col">{{ row.rateType }}</td>
                             <td v-for="(val, zIdx) in row.zones" :key="zIdx">
                               {{ val }}
                             </td>

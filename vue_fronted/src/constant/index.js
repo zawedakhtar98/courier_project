@@ -1,5 +1,5 @@
 const RATE_TYPES = [
-    'Flat', 'Per Kg'
+    'Flat', 'Per_Kg'
 ]
 
 const DOCUMENT_TYPE = [

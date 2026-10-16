@@ -121,6 +121,9 @@ const RateCalFormInput = computed(() => ({
 }));
 
 const getRates = () => {
+  console.log('box length')
+  console.log(RateCalFormInput.value.boxes.length);
+  console.log('box length end')
   if (!RateCalFormInput.value.destination) {
     toast.error('Please select destination');
     return;
@@ -134,8 +137,25 @@ const getRates = () => {
     return;
   }
 
+  if (!RateCalFormInput.value.boxes.length) {
+    toast.error('Please add at least one box');
+    return;
+  }
+  const invalidBoxIndex = RateCalFormInput.value.boxes.findIndex(
+    box => !(Number(box.actWt) > 0 && Number(box.length) > 0 && Number(box.width) > 0 && Number(box.height) > 0)
+  );
+  if (invalidBoxIndex !== -1) {
+    toast.error(
+      RateCalFormInput.value.boxes.length > 1
+        ? `Weight and box diamentioned should be greater than 0 for all the box fields, Please check in Box ${invalidBoxIndex + 1}`
+        : 'Weight and box diamentioned should be greater than 0 for all the box fields, Please check in Box 1'
+    );
+    return;
+  }
+
+
+
   // Populate mock rates based on user selections
-  console.log(RateCalFormInput.value);
   rateResults.value = [
     {
       id: 'rate-fedex',
@@ -206,6 +226,8 @@ const bookShipment = (rate) => {
       destination: destination.value,
       service: rate.service,
       packageType: packageType.value,
+      goodsType: packageType.value,
+      pincode: pincode.value,
       city: city.value,
       state: state.value,
       boxes: JSON.stringify(simplifiedBoxes)
@@ -244,12 +266,6 @@ const bookShipment = (rate) => {
           <label class="form-label small fw-bold text-danger text-uppercase mb-1">
             <i class="bi bi-geo-alt-fill me-1"></i> Destination <span class="text-danger">*</span>
           </label>
-          <!-- <select v-model="destination" class="form-select form-select-custom"> -->
-          <!-- <option value="" selected disabled>Select Destination</option> -->
-          <!-- <option v-for="country in countryList" :key="country.id" :value="country.id">
-              {{ country.name }}
-            </option> -->
-          <!-- </select> -->
           <v-select :options="countryList" v-model="destination" :reduce="country => country.id" label="name"
             placeholder="Search Destination..." />
         </div>
