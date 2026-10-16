@@ -17,9 +17,4 @@ class ShipmentChargesMaster extends Model
         'sort_order',
         'status',
     ];
-
-    public function zoneWiseCharge()
-    {
-        return $this->hasMany(ServicePartnerZoneWiseCharges::class, 'charge_type_id', 'id');
-    }
 }

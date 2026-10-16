@@ -43,6 +43,19 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('get-list', [AdminController::class, 'getZoneList']);
             Route::post('map-countries', [AdminController::class, 'MapZoneWithCountry']);
         });
+
+        //Shipment Charges Master
+        Route::prefix('shipment-charges-master')->group(function () {
+            Route::post('add', [AdminController::class, 'addShipmentChargesMaster']);
+            Route::delete('delete/{id}', [AdminController::class, 'deleteShipmentChargesMaster']);
+            Route::get('get-list', [AdminController::class, 'getAllShipmentChargeMaster']);
+        });
+        //Additional charges maped with service partner
+        Route::prefix('shipment-additional-charges')->group(function () {
+            Route::post('add', [AdminController::class, 'addShipmentAdditionalCharge']);
+            Route::delete('delete/{id}', [AdminController::class, 'deleteShipmentAdditionalCharge']);
+            Route::get('get-list', [AdminController::class, 'getServicePartnerAdditionalCharges']);
+        });
     });
 
     Route::post('calculate-rate', [RateController::class, 'calculateRate']);

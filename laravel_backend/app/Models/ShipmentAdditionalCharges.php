@@ -8,12 +8,18 @@ class ShipmentAdditionalCharges extends Model
 {
     protected $table = 'shipment_additional_charges';
     protected $fillable = [
+        'service_partner_id',
         'service_partner_zone_rate_id', // this id below is from service_partner_rate_slab table
         'charge_type_id', // this id below is from shipment_charges_master table
         'value', //value of the charge
         'status',
         'sort_order', //execution order for the calculation loop
     ];
+
+    public function servicePartner()
+    {
+        return $this->belongsTo(ServicePartner::class, 'service_partner_id', 'id');
+    }
 
     public function shipmentChargeType()
     {

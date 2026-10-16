@@ -9,20 +9,20 @@ class ShipmentChargesMasterService
 {
 
     public function __construct(private ShipmentChargesMasterRespositoryInterface $shipmentChargesMasterRespository) {}
-    public function addNew(array $data)
+    public function addShipmentChargeMaster(array $data)
     {
         return $this->shipmentChargesMasterRespository->create($data);
     }
-    public function delete(int $id)
+    public function deleteShipmentChargeMaster(int $id)
     {
         return $this->shipmentChargesMasterRespository->delete($id);
     }
-    public function getAllMasterCharges()
+    public function getAllShipmentChargeMaster()
     {
         return $this->shipmentChargesMasterRespository->getAll();
     }
 
-    public function getAllActiveMasterCharges()
+    public function getActiveShipmentChargeMaster()
     {
         return ShipmentChargesMaster::where('status', 'active')->get();
     }

@@ -7,12 +7,14 @@ use App\Repositories\Interface\CountryRepositoryInterface;
 use App\Repositories\Interface\RateCalRepositoryInterface;
 use App\Repositories\Interface\ServicePartnerRepositoryInterface;
 use App\Repositories\Interface\ServicePartnerZoneRateRepositoryInterface;
+use App\Repositories\Interface\ShipmentAdditionalChargesRepositoryInterface;
 use App\Repositories\Interface\ShipmentChargesMasterRespositoryInterface;
 use App\Repositories\Interface\UserRepositoryInterface;
 use App\Repositories\Interface\ZoneMasterRepositoryInterface;
 use App\Repositories\RateCalRepository;
 use App\Repositories\ServicePartnerRepository;
 use App\Repositories\ServicePartnerZoneRateRepository;
+use App\Repositories\ShipmentAdditionalChargesRepository;
 use App\Repositories\ShipmentChargesMasterRespository;
 use App\Repositories\UserRepository;
 use App\Repositories\ZoneMasterRepository;
@@ -32,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RateCalRepositoryInterface::class, RateCalRepository::class);
         $this->app->bind(ZoneMasterRepositoryInterface::class, ZoneMasterRepository::class);
         $this->app->bind(CountryRepositoryInterface::class, CountryRepository::class);
+        $this->app->bind(ShipmentAdditionalChargesRepositoryInterface::class, ShipmentAdditionalChargesRepository::class);
     }
 
     /**

@@ -7,106 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ServicePartnerZoneWiserateResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
-    // public function toArray(Request $request): array
-    // {
-    //     $zones = [];
-
-    //     if ($this->relationLoaded('zoneRates')) {
-    //         foreach ($this->zoneRates as $rate) {
-    //             $zoneId = $rate->zone_id;
-    //             if (!isset($zones[$zoneId])) {
-    //                 $zones[$zoneId] = [
-
-    //                     'id' => $rate->zone->id ?? null,
-    //                     'name' => $rate->zone->zone_name ?? null,
-    //                     'rates' => []
-
-    //                 ];
-    //             }
-
-    //             $zones[$zoneId]['rates'][] = [
-    //                 'id' => $rate->id,
-    //                 'package_type' => $rate->package_type,
-    //                 'weight_from' => $rate->weight_from,
-    //                 'weight_to' => $rate->weight_to,
-    //                 'rate' => $rate->rate,
-    //                 'rate_type' => $rate->rate_type,
-    //                 'currency' => $rate->currency,
-    //                 'max_transit_days' => $rate->max_transit_days,
-    //                 'min_transit_days' => $rate->min_transit_days,
-    //             ];
-    //         }
-    //     }
-
-    //     return [
-    //         'servicePartner' => [
-    //             'id' => $this->id,
-    //             'name' => $this->name,
-    //             'zones' => array_values($zones)
-    //         ],
-    //     ];
-    // }
-
-    // public function toArray(Request $request): array
-    // {
-    //     $zones = [];        // zoneId => ['id' => ..., 'name' => ...]
-    //     $slabs = [];         // "from-to" => ['weight_from'=>, 'weight_to'=>, 'rates' => [zoneId => rate]]
-    //     $packageTypes = [];  // set of package types seen
-    //     $rateType = null;
-
-    //     if ($this->relationLoaded('zoneRates')) {
-    //         foreach ($this->zoneRates as $rate) {
-    //             $zoneId = $rate->zone_id;
-
-    //             if (!isset($zones[$zoneId])) {
-    //                 $zones[$zoneId] = [
-    //                     'id'   => $rate->zone->id ?? null,
-    //                     'name' => $rate->zone->zone_name ?? null,
-    //                 ];
-    //             }
-
-    //             $slabKey = $rate->weight_from . '-' . $rate->weight_to;
-
-    //             if (!isset($slabs[$slabKey])) {
-    //                 $slabs[$slabKey] = [
-    //                     'weight_from' => $rate->weight_from,
-    //                     'weight_to'   => $rate->weight_to,
-    //                     'rates'       => [],
-    //                 ];
-    //             }
-
-    //             $slabs[$slabKey]['rates'][$zoneId] = $rate->rate;
-
-    //             $packageTypes[$rate->package_type] = true;
-    //             $rateType = $rate->rate_type; // assumes one rate_type per partner
-    //         }
-    //     }
-
-    //     // sort zones by name (natural order, so Zone_9 < Zone_10)
-    //     $zonesList = array_values($zones);
-    //     usort($zonesList, fn($a, $b) => strnatcmp($a['name'] ?? '', $b['name'] ?? ''));
-
-    //     // sort slabs by weight_from
-    //     $slabRows = array_values($slabs);
-    //     usort($slabRows, fn($a, $b) => $a['weight_from'] <=> $b['weight_from']);
-
-    //     return [
-    //         'servicePartner' => [
-    //             'id'            => $this->id,
-    //             'name'          => $this->name,
-    //             'package_types' => array_keys($packageTypes),
-    //             'rate_type'     => $rateType,
-    //             'zones'         => $zonesList,
-    //             'slab_rows'     => $slabRows,
-    //         ],
-    //     ];
-    // }
-
+    // SELECT sp.name,spr.* FROM `service_partner_rate_slab` spr INNER JOIN servicepartner sp on sp.id =spr.service_partner_id WHERE spr.zone_id in (15,17,1) and spr.package_type= 'nondoc' and spr.weight_from>=0.000 AND spr.weight_to <=0.500;
     public function toArray(Request $request): array
     {
         $zones = [];             // zoneId => ['id' => ..., 'name' => ...]
@@ -134,6 +35,7 @@ class ServicePartnerZoneWiserateResource extends JsonResource
                     $slabsByPackage[$packageType][$weightKey] = [
                         'weight_from' => $rate->weight_from,
                         'weight_to'   => $rate->weight_to,
+                        'rate_type'   => $rate->rate_type,
                         'rates'       => [],
                     ];
                 }
@@ -182,6 +84,7 @@ class ServicePartnerZoneWiserateResource extends JsonResource
                 $rows[] = [
                     'weight_from' => $slab['weight_from'],
                     'weight_to' => $slab['weight_to'],
+                    'rate_type' => $slab['rate_type'],
                     'zones'  => array_combine($zoneNamesArray, $zoneRatesArray),
                 ];
             }

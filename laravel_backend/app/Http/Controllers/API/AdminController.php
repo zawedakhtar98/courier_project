@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CountryResource;
 use App\Http\Resources\ServicePartnerResource;
 use App\Http\Resources\ServicePartnerZoneWiserateResource;
+use App\Http\Resources\ShipmentAdditionalChargesResource;
 use App\Http\Resources\ZoneMasterResource;
 use App\Models\Country;
 use App\Models\ZoneCountryMapping;
@@ -337,5 +338,104 @@ class AdminController extends Controller
     {
         $servicePartnerZoneRates = $this->servicePartnerServices->getAllServicePartnerWithZoneRates($request->per_page ?? 20);
         return ApiResponse::success(ServicePartnerZoneWiserateResource::collection($servicePartnerZoneRates), "Service Partner Zone Rates fetched successfully!");
+    }
+
+    //Shipment Charges Master Functionality
+    public function addShipmentChargesMaster(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'name' => 'required|string',
+                'code' => 'required',
+                'calculation_method' => 'required|string',
+                'calculation_basis' => 'required|string',
+                'status' => 'required|string',
+                'description' => 'required|string',
+            ],
+            [
+                'name.required' => 'Please enter shipment charges name.',
+                'code.required' => 'Please enter shipment charges.',
+                'calculation_method.required' => 'Please select calculation mehod.',
+                'calculation_basis.required' => 'Please select calculation basis.',
+                'description.required' => 'Please enter description',
+            ]
+        );
+        try {
+            DB::beginTransaction();
+            $this->shipmentChargesMasterService->addShipmentChargeMaster($validated);
+            DB::commit();
+            return ApiResponse::success([], "Shipment Charges Master created successfully!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return ApiResponse::error('Something went wrong!');
+        }
+    }
+
+    public function deleteShipmentChargesMaster(int $id)
+    {
+        try {
+            DB::beginTransaction();
+            $this->shipmentChargesMasterService->deleteShipmentChargeMaster($id);
+            DB::commit();
+            return ApiResponse::success([], "Shipment Charges Master deleted successfully!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return ApiResponse::error($e->getMessage());
+        }
+    }
+
+    public function getAllShipmentChargeMaster()
+    {
+        $shipmentChargesMaster = $this->shipmentChargesMasterService->getAllShipmentChargeMaster();
+        return ApiResponse::success($shipmentChargesMaster, "Shipment Charges Master fetched successfully!");
+    }
+
+    //mapped additional charges functionality
+    public function addShipmentAdditionalCharge(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'service_partner_id' => 'required|integer',
+                'charge_type_id' => 'required',
+                'value' => 'required',
+            ],
+            [
+                'service_partner_id.required' => 'Please select service partner.',
+                'charge_type_id.required' => 'Please select charge type.',
+                'value.required' => 'Please enter charges value.',
+            ]
+        );
+        $validated['sort_order'] = $this->shipmentAdditionalChargeService->getNextSortOrder();
+        try {
+            DB::beginTransaction();
+            $this->shipmentAdditionalChargeService->create($validated);
+            DB::commit();
+            return ApiResponse::success([], "Additional Charge mapped successfully!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            if ($e->getCode() == 1062) {
+                return ApiResponse::error('Additional Charge already mapped!');
+            }
+            return ApiResponse::error('Something went wrong!');
+        }
+    }
+
+    public function deleteShipmentAdditionalCharge(int $id)
+    {
+        try {
+            DB::beginTransaction();
+            $this->shipmentAdditionalChargeService->delete($id);
+            DB::commit();
+            return ApiResponse::success([], "Additional Charge deleted successfully!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return ApiResponse::error('Something went wrong!');
+        }
+    }
+
+    public function getServicePartnerAdditionalCharges()
+    {
+        $servicePartnerAdditionalCharges = $this->shipmentAdditionalChargeService->getAll();
+        return ApiResponse::success(ShipmentAdditionalChargesResource::collection($servicePartnerAdditionalCharges), "Service Partner Additional Charges fetched successfully!");
     }
 }

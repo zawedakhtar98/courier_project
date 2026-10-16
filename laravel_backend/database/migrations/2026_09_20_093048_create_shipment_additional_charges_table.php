@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('shipment_additional_charges', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('service_partner_id')->comment('this is mapped with service_partner_rate_slab table');
-            $table->unsignedBigInteger('charge_type_id');
+            $table->unsignedBigInteger('service_partner_id')->comment('this is mapped with service_partner table');
+            $table->unsignedBigInteger('charge_type_id')->comment('this is mapped with shipment_charges_master table');
 
             $table->decimal('value', 10, 2)->default(0.00);
 
