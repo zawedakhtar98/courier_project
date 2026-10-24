@@ -187,7 +187,7 @@ const filteredAvailableCountries = computed(() => {
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th class="border-0 rounded-start">Name</th>
+              <th class="border-0 rounded-start" style="padding-left: 50px;">Name</th>
               <th class="border-0">Service Code</th>
               <th class="border-0">Status</th>
               <th class="border-0 text-end rounded-end">Actions</th>
@@ -242,8 +242,12 @@ const filteredAvailableCountries = computed(() => {
               <tr v-for="servicePartnersList in filteredservicePartnersList" :key="servicePartnersList.id">
                 <td>
                   <div class="d-flex align-items-center gap-3">
-                    <div>
-                      <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="responsive py-3">
+                        <img :src="servicePartnersList.logo" :alt="servicePartnersList.name + ' logo'"
+                          class="img-fluid service-partner-logo">
+                      </div>
+                      <div class="fw-bold text-dark service-name">
                         {{ servicePartnersList.name }}
                       </div>
                     </div>
@@ -392,5 +396,19 @@ const filteredAvailableCountries = computed(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.service-partner-logo {
+  max-height: 85px;
+  object-fit: cover;
+  border-radius: 10%;
+  padding: 0px 4px;
+  width: 85px;
+}
+
+.service-name {
+  font-weight: 600;
+  font-size: 20px;
+  margin-left: 10px;
 }
 </style>

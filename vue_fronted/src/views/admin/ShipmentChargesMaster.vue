@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useToast } from "vue-toastification";
+import { shipmentCalculation_basis } from '@/constant';
 import { addNewShipCharges, getShipChargesList, deleteShipCharge } from '@/services/admin/shipmentChargesMasterService';
 const toast = useToast();
 const isEditing = ref(false);
@@ -22,6 +23,10 @@ const formData = reactive({
   calculation_basis: '',
   description: '',
   status: 'active',
+})
+
+const selectedBasisInfo = computed(() => {
+  return shipmentCalculation_basis.find((item) => item.value === formData.calculation_basis) || null;
 })
 
 const isValidated = computed(() => {
@@ -266,13 +271,22 @@ const formatSentenceCase = (text) => {
                     class="text-danger">*</span></label>
                 <select name="" id="" v-model="formData.calculation_basis" class="form-select">
                   <option value="">Select Method</option>
-                  <option value="weight">Weight</option>
-                  <option value="freight">Freight</option>
-                  <option value="shipment_value">Shipment Value</option>
-                  <option value="subtotal">Subtotal</option>
+                  <option v-for="basis in shipmentCalculation_basis" :key="basis.value" :value="basis.value">
+                    {{ basis.label }}
+                  </option>
                 </select>
               </div>
               <div class="col-md-12">
+                <!-- Calculation Basis Info -->
+                <div v-if="selectedBasisInfo?.description"
+                  class="alert alert-info py-2 px-3 mb-2 small d-flex align-items-start gap-2 rounded-3 border-0 bg-info-subtle text-info-emphasis">
+                  <i class="bi bi-info-circle-fill text-info fs-6 mt-0 flex-shrink-0"></i>
+                  <div>
+                    <span class="fw-semibold">{{ selectedBasisInfo.label }}:</span>
+                    <span class="ms-1">{{ selectedBasisInfo.description }}</span>
+                  </div>
+                </div>
+
                 <label class="form-label small fw-semibold">Description<span class="text-danger">*</span></label>
                 <textarea v-model="formData.description" class="form-control"
                   placeholder="Enter description"></textarea>
