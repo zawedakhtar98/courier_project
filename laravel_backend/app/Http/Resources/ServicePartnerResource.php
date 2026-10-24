@@ -19,6 +19,9 @@ class ServicePartnerResource extends JsonResource
             'id' => $this->id,
             'name' => ucfirst($this->name),
             'service_code' => $this->service_code,
+            'logo' => $this->logo
+                ? asset('service_partner_logo/' . ltrim($this->logo, '/'))
+                : '',
             'status' => ucfirst($this->status),
             'created_at' => Carbon::parse($this->created_at)->format('d-m-Y'),
         ];

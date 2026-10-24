@@ -58,5 +58,5 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 
-    Route::post('calculate-rate', [RateController::class, 'calculateRate']);
+    Route::post('shipment/calculator', [RateController::class, 'shipmentRateCalculator']);
 });

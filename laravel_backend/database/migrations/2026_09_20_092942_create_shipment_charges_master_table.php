@@ -14,7 +14,16 @@ return new class extends Migration
             $table->string('code')->comment('e.g., FSC');
             $table->text('description')->nullable();
             $table->enum('calculation_method', ['flat', 'percentage', 'per_kg']); // we can consider flat as the slab rate
-            $table->enum('calculation_basis', ['weight', 'freight', 'shipment_value',])->comment('weight: weight of the shipment, freight: freight charge, shipment: shipment value, subtotal: subtotal of the shipment');
+            $table->enum('calculation_basis', [
+                'per_shipment',
+                'per_box',
+                'chargeable_weight',
+                'actual_weight',
+                'freight',
+                'running_total',
+                'shipment_value',
+                'sub_total'
+            ])->comment('weight: weight of the shipment, freight: freight charge, shipment: shipment value, subtotal: subtotal of the shipment');
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });

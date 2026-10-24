@@ -12,7 +12,7 @@ class RateController extends Controller
 {
     public function __construct(protected RateCalService $rateCalService) {}
 
-    public function calculateRate(Request $request)
+    public function shipmentRateCalculator(Request $request)
     {
         // {
         //     "destination": 2,
@@ -35,32 +35,26 @@ class RateController extends Controller
         $request->validate(
             [
                 'destination' => 'required',
-                'package_type' => 'required',
+                'package_type' => 'required|string',
                 'boxes' => 'required|array',
-                'boxes.*.actWt' => 'required|numeric',
-                'boxes.*.length' => 'required|numeric',
-                'boxes.*.width' => 'required|numeric',
-                'boxes.*.height' => 'required|numeric',
+                'chargeable_weight' => 'nullable|numeric',
+                'actual_weight' => 'nullable|numeric',
             ],
             [
-                'destination.required' => 'Please select destination',
+                'destination.required' => 'Please select destination country',
                 'package_type.required' => 'Please select package type',
-                'boxes.required' => 'Please enter dimensions of box',
-                'boxes.*.actWt.required' => 'Please enter actual weight',
-                'boxes.*.length.required' => 'Please enter length',
-                'boxes.*.width.required' => 'Please enter width',
-                'boxes.*.height.required' => 'Please enter height',
-                'boxes.*.actWt.numeric' => 'Actual weight must be numeric',
-                'boxes.*.length.numeric' => 'Length must be numeric',
-                'boxes.*.width.numeric' => 'Width must be numeric',
-                'boxes.*.height.numeric' => 'Height must be numeric',
+                'boxes.required' => 'Please enter dimensions',
             ]
         );
-        $formData   = [
-            'country_id' => $request->destination,
+
+        $formData = [
+            'destination' => $request->destination,
             'package_type' => strtolower($request->package_type),
-            'dimensions' => $request->boxes
+            'dimensions' => $request->boxes ?? [],
+            'chargeable_weight' => (float)($request->chargeable_weight ?? 0),
+            'actual_weight' => (float)($request->actual_weight ?? 0),
         ];
+
         $rates = $this->rateCalService->calculateRate($formData);
         return ApiResponse::success($rates, 'Rate fetched successfully', 200);
     }

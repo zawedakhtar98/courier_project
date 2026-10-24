@@ -41,6 +41,7 @@ class ServicePartner extends Model
         'name',
         'service_code',
         'status',
+        'logo',
         'created_date',
         'updated_date',
     ];
@@ -57,5 +58,10 @@ class ServicePartner extends Model
     public function shipments(): HasMany
     {
         return $this->hasMany(ShipmentDetail::class, 'service_partner_id');
+    }
+
+    public function additionalCharges(): HasMany
+    {
+        return $this->hasMany(ShipmentAdditionalCharges::class, 'service_partner_id');
     }
 }
