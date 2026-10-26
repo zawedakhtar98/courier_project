@@ -2,6 +2,14 @@
    Page: Rate Calculator View
    ========================================================================== */
 
+/* Form Labels */
+.page-rate-calculator .form-label {
+  color: var(--primary-color) !important;
+  font-weight: 700;
+  transition: color 0.2s ease-in-out;
+  cursor: pointer;
+}
+
 /* Form Inputs */
 .page-rate-calculator .form-control-custom,
 .page-rate-calculator .form-select-custom {
@@ -16,9 +24,9 @@
 
 .page-rate-calculator .form-control-custom:focus,
 .page-rate-calculator .form-select-custom:focus {
-  border-color: #d01a24;
+  border-color: #1b357d;
   background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(208, 26, 36, 0.12);
+  box-shadow: 0 0 0 3px rgba(27, 53, 125, 0.12);
 }
 
 /* Custom styling for vue-select to match form-control-custom */
@@ -54,6 +62,7 @@
   padding: 0 0.25rem;
 }
 
+
 .page-rate-calculator .v-select .vs__dropdown-menu {
   border-radius: 8px;
   border: 1px solid #dcdcdc;
@@ -62,7 +71,7 @@
 }
 
 .page-rate-calculator .v-select .vs__dropdown-option--highlight {
-  background-color: #e02229;
+  background-color: #1b357d;
   color: white;
 }
 
@@ -86,7 +95,7 @@
 }
 
 .page-rate-calculator .btn-search-custom {
-  background-color: #d01a24;
+  background-color: #1b357d;
   color: #ffffff;
   border: none;
   padding-left: 1.25rem;
@@ -97,7 +106,7 @@
 
 .page-rate-calculator .btn-search-custom:hover {
   opacity: 0.9;
-  background-color: #b3131b;
+  background-color: #14275e;
   color: #ffffff;
 }
 
@@ -119,7 +128,7 @@
 }
 
 .page-rate-calculator .balance-badge {
-  background-color: #1b357d;
+  background-color: #d01a24;
   color: #ffffff;
   font-weight: 700;
   font-size: 0.98rem;
@@ -151,7 +160,7 @@
 /* Dimension Grid styling */
 .page-rate-calculator .custom-dim-table th {
   border: none;
-  color: #4b5563;
+  color: var(--primary-color);
   padding-bottom: 0.5rem;
 }
 
@@ -209,17 +218,19 @@
 
 /* Buttons */
 .page-rate-calculator .btn-add-box {
-  color: #1b357d;
+  color: var(--primary-color);
   background-color: #ffffff;
-  border: 1.5px solid #1b357d;
+  border: 1.5px solid var(--primary-color);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .page-rate-calculator .btn-add-box:hover {
-  background-color: #eef2ff;
-  color: #14275e;
+  background-color: var(--secondary-hover);
+  color: var(--secondary-color);
+  border: 1.5px solid var(--secondary-color);
   transform: translateY(-1px);
+  color: white;
 }
 
 .page-rate-calculator .btn-reset {
@@ -238,19 +249,19 @@
 }
 
 .page-rate-calculator .btn-get-rate {
-  background-color: #d01a24;
+  background-color: var(--primary-color);
   color: #ffffff;
   border: none;
   border-radius: 8px;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(208, 26, 36, 0.2);
+  box-shadow: 0 4px 10px rgba(27, 53, 125, 0.25);
 }
 
 .page-rate-calculator .btn-get-rate:hover {
-  background-color: #b3131b;
+  background-color: var(--secondary-color);
   color: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(208, 26, 36, 0.28);
+  box-shadow: 0 6px 14px rgba(27, 53, 125, 0.35);
 }
 
 /* Search results Rate cards */
@@ -285,7 +296,7 @@
 }
 
 .page-rate-calculator .btn-book-now {
-  background-color: #e02229;
+  background-color: var(--secondary-color, #d01a24);
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -293,7 +304,7 @@
 }
 
 .page-rate-calculator .btn-book-now:hover {
-  background-color: #c91b22;
+  background-color: var(--secondary-hover, #b3131b);
   color: #ffffff;
   transform: translateY(-1px);
 }
@@ -321,8 +332,8 @@
 }
 
 .page-rate-calculator .search-carrier-input:focus {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+  border-color: var(--primary-color, #1b357d);
+  box-shadow: 0 0 0 3px var(--primary-subtle, rgba(27, 53, 125, 0.12));
 }
 
 .page-rate-calculator .btn-filter-carrier {
@@ -355,13 +366,15 @@
 }
 
 .page-rate-calculator .carrier-thead-row th {
-  background: linear-gradient(135deg, #1b357d 0%, #0b1728 100%) !important;
+  /* background: linear-gradient(135deg, #1b357d 0%, #0b1728 100%) !important; */
+  background-color: var(--primary-color) !important;
   color: #ffffff !important;
   font-weight: 700;
-  font-size: 0.88rem;
-  padding: 0.95rem 1rem;
+  font-size: 0.80rem;
+  padding: 11px;
   border: none !important;
   vertical-align: middle;
+  text-align: center;
 }
 
 .page-rate-calculator .carrier-thead-row th i {
@@ -383,6 +396,10 @@
 
 .page-rate-calculator .border-end-cell {
   border-right: 1px solid #f1f5f9;
+}
+
+.page-rate-calculator .header-icon i {
+  color: var(--primary-color);
 }
 
 /* Col 1: Service */
@@ -408,7 +425,7 @@
 .page-rate-calculator .carrier-service-name {
   font-weight: 800;
   font-size: 0.95rem;
-  color: #0f172a;
+  color: var(--primary-color);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -417,7 +434,7 @@
 .page-rate-calculator .carrier-price-row {
   display: flex;
   align-items: center;
-  font-size: 0.88rem;
+  font-size: 0.80rem;
 }
 
 .page-rate-calculator .carrier-price-label {
@@ -431,9 +448,9 @@
 }
 
 .page-rate-calculator .carrier-grand-price {
-  font-size: 2.15rem;
+  font-size: 1.45rem;
   font-weight: 800;
-  color: #d01a24;
+  color: var(--primary-color);
   line-height: 1.1;
   margin-top: 4px;
   letter-spacing: -0.02em;
@@ -453,7 +470,7 @@
 }
 
 .page-rate-calculator .red-dot {
-  color: #d01a24;
+  color: var(--primary-color);
   font-size: 1.25rem;
   line-height: 0;
   margin-right: 6px;
@@ -474,8 +491,8 @@
 }
 
 .page-rate-calculator .carrier-weight-num {
-  font-size: 1.55rem;
-  font-weight: 800;
+  font-size: 0.80rem;
+  font-weight: 700;
   color: #0f172a;
   line-height: 1.1;
 }
@@ -498,6 +515,14 @@
   justify-content: center;
 }
 
+.carrier-clock-badge i {
+  color: var(--primary-color) !important;
+}
+
+.carrier-service-name {
+  color: var(--primary-color);
+}
+
 .page-rate-calculator .carrier-delivery-text {
   font-size: 0.82rem;
   color: #64748b;
@@ -507,7 +532,7 @@
 
 /* Col 6: Action / Create AWB */
 .page-rate-calculator .btn-create-awb {
-  background-color: #d01a24;
+  background-color: var(--primary-color);
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -520,7 +545,7 @@
 }
 
 .page-rate-calculator .btn-create-awb:hover {
-  background-color: #b3131b;
+  background-color: var(--secondary-hover);
   color: #ffffff;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(208, 26, 36, 0.28);

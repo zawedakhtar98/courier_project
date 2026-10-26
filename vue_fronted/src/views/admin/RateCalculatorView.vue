@@ -803,7 +803,7 @@ const bookShipment = (rate) => {
         <table class="table align-middle carrier-rates-table mb-0">
           <thead>
             <tr class="carrier-thead-row">
-              <th class="ps-4" style="width: 22%;">Service</th>
+              <th style="width: 22%;">Service</th>
               <th @click="toggleSort('price')" class="cursor-pointer" style="width: 20%;">
                 <span class="d-inline-flex align-items-center gap-1">
                   <span>Total Net Price</span>
@@ -812,7 +812,7 @@ const bookShipment = (rate) => {
               </th>
               <th style="width: 24%;">Price Breakdown</th>
               <th class="text-center" style="width: 14%;">Chargeable Weight</th>
-              <th class="text-center" style="width: 10%;">
+              <th class="text-center" style="width: 20%;">
                 <span class="d-inline-flex align-items-center gap-1">
                   <span>Expected delivery date</span>
                   <i class="bi bi-arrow-down-up opacity-75 small"></i>
@@ -908,7 +908,7 @@ const bookShipment = (rate) => {
                 <div class="d-flex flex-column align-items-center justify-content-center">
                   <div class="carrier-scale-icon mb-1">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                      stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
                       <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
                       <path d="M7 21h10" />
@@ -927,7 +927,7 @@ const bookShipment = (rate) => {
               <td class="text-center py-4 align-middle border-end-cell">
                 <div class="d-flex flex-column align-items-center justify-content-center">
                   <div class="carrier-clock-badge mb-1">
-                    <i class="bi bi-clock-fill text-danger fs-6"></i>
+                    <i class="bi bi-clock-fill fs-6"></i>
                   </div>
                   <span v-if="rate.max_transit_days" class="carrier-delivery-text">
                     {{ rate.max_transit_days }} Days
@@ -962,5 +962,3 @@ const bookShipment = (rate) => {
     </div>
   </div>
 </template>
-
-

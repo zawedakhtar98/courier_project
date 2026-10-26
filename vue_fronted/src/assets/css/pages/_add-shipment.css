@@ -18,8 +18,8 @@
 
 .page-add-shipment .form-control:focus,
 .page-add-shipment .form-select:focus {
-  border-color: #d01a24;
-  box-shadow: 0 0 0 3px rgba(208, 26, 36, 0.12);
+  border-color: #1b357d;
+  box-shadow: 0 0 0 3px rgba(27, 53, 125, 0.12);
 }
 
 .page-add-shipment .form-control-sm,
@@ -50,7 +50,7 @@
 }
 
 .page-add-shipment .btn-search-custom {
-  background-color: #d01a24;
+  background-color: #1b357d;
   color: #ffffff;
   border: none;
   padding-left: 1.25rem;
@@ -61,7 +61,7 @@
 
 .page-add-shipment .btn-search-custom:hover {
   opacity: 0.9;
-  background-color: #b3131b;
+  background-color: #14275e;
   color: #ffffff;
 }
 
@@ -84,7 +84,7 @@
 }
 
 .page-add-shipment .balance-badge {
-  background-color: #1b357d;
+  background-color: #d01a24;
   color: #ffffff;
   font-weight: 700;
   font-size: 0.98rem;
@@ -135,14 +135,14 @@
 }
 
 .page-add-shipment .nav-link-pill:hover {
-  color: #d01a24;
-  background-color: #fef2f2;
+  color: #1b357d;
+  background-color: #eef2ff;
 }
 
 .page-add-shipment .nav-link-pill.active {
-  background-color: #d01a24;
+  background-color: #1b357d;
   color: #ffffff;
-  box-shadow: 0 4px 10px rgba(208, 26, 36, 0.25);
+  box-shadow: 0 4px 10px rgba(27, 53, 125, 0.25);
 }
 
 /* Stepper Vertical Layout */
@@ -192,18 +192,18 @@
 
 /* Stepper Active State */
 .page-add-shipment .step-item.active .step-circle {
-  background-color: #d01a24;
+  background-color: #1b357d;
   color: #ffffff;
-  box-shadow: 0 0 0 4px rgba(208, 26, 36, 0.15);
+  box-shadow: 0 0 0 4px rgba(27, 53, 125, 0.15);
 }
 
 .page-add-shipment .step-item.active .step-title {
-  color: #d01a24;
+  color: #1b357d;
 }
 
 /* Stepper Completed State */
 .page-add-shipment .step-item.completed .step-circle {
-  background-color: #1b357d;
+  background-color: #d01a24;
   color: #ffffff;
 }
 
@@ -219,7 +219,7 @@
 
 /* Next / Prev Nav Buttons */
 .page-add-shipment .btn-next-custom {
-  background-color: #d01a24;
+  background-color: #1b357d;
   color: #ffffff;
   border: none;
   transition: opacity 0.15s ease;
@@ -227,7 +227,7 @@
 
 .page-add-shipment .btn-next-custom:hover {
   opacity: 0.9;
-  background-color: #b3131b;
+  background-color: #14275e;
   color: #ffffff;
 }
 
@@ -249,7 +249,7 @@
 
 .page-add-shipment .upload-box:hover {
   background-color: #eceff1 !important;
-  border-color: #d01a24 !important;
+  border-color: #1b357d !important;
 }
 
 .page-add-shipment .upload-icon-circle {

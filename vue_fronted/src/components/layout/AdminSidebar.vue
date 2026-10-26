@@ -158,7 +158,8 @@ const navSections = [
           <div class="mb-1 mt-3">
             <img :src="logoImg" alt="ExpressIt Logo" class="img-fluid" />
           </div>
-          <span class="text-secondary small text-center" style="font-size: 0.72rem;">Global Logistics Service</span>
+          <span class="small text-center" style="font-size: 0.72rem; color: rgb(255 255 255 / 89%)">Global Logistics
+            Service</span>
         </div>
       </router-link>
 
@@ -235,12 +236,11 @@ const navSections = [
           </div>
         </div>
 
-        <button v-if="!isCollapsed" @click="handleLogout" type="button"
-          class="btn btn-sm btn-outline-danger border-0 p-1 ms-1 text-danger-emphasis" title="Sign out">
+        <button v-if="!isCollapsed" @click="handleLogout" type="button" class="btn btn-sm  border-0 p-1 ms-1 logout-btn"
+          title="Sign out">
           <i class="bi bi-box-arrow-right fs-5"></i>
         </button>
       </div>
     </div>
   </aside>
 </template>
-

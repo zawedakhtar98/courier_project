@@ -7,29 +7,43 @@
   --sidebar-collapsed-width: 78px;
   --header-height: 70px;
 
-  /* --- Logo-Inspired Color Palette --- */
-  /* Primary Red: Express speed slash, ITS.IN badge & tagline */
-  --primary-color: #d01a24;
-  --primary-hover: #b3131b;
-  --primary-light: #fef2f2;
-  --primary-subtle: rgba(208, 26, 36, 0.12);
-  --primary-shadow: rgba(208, 26, 36, 0.3);
+  /* --- Logo-Inspired Color Palette (Royal Navy Primary / Express Red Secondary) --- */
+  /* Primary Royal Navy: EXPRESS bold typography */
+  --primary-color: #1b357d;
+  --primary-hover: #14275e;
+  --primary-light: #eef2ff;
+  --primary-subtle: rgba(27, 53, 125, 0.12);
+  --primary-shadow: rgba(27, 53, 125, 0.3);
 
-  /* Secondary Royal Navy: EXPRESS bold typography */
-  --secondary-color: #1b357d;
-  --secondary-hover: #14275e;
-  --secondary-light: #eef2ff;
-  --secondary-subtle: rgba(27, 53, 125, 0.12);
+  /* Secondary Red: Express speed slash, ITS.IN badge & tagline */
+  --secondary-color: #d01a24;
+  --secondary-hover: #b3131b;
+  --secondary-light: #fef2f2;
+  --secondary-subtle: rgba(208, 26, 36, 0.12);
+  --secondary-shadow: rgba(208, 26, 36, 0.3);
 
-  /* Speed Gradient (Express Red to Royal Navy) */
-  --primary-gradient: linear-gradient(135deg, #d01a24 0%, #1b357d 100%);
-  --secondary-gradient: linear-gradient(135deg, #1b357d 0%, #0b1728 100%);
+  /* Speed Gradient (Royal Navy to Express Red) */
+  --primary-gradient: linear-gradient(135deg, #1b357d 0%, #d01a24 100%);
+  --secondary-gradient: linear-gradient(135deg, #d01a24 0%, #1b357d 100%);
+
+  /* Bootstrap 5 Native CSS Variable Overrides (Propagates to ALL Bootstrap components) */
+  --bs-primary: #1b357d;
+  --bs-primary-rgb: 27, 53, 125;
+  --bs-primary-text-emphasis: #1b357d;
+  --bs-primary-bg-subtle: #eef2ff;
+  --bs-primary-border-subtle: #c7d2fe;
+  --bs-link-color: #d01a24;
+  --bs-link-hover-color: #d01a24;
+  --bs-link-color-rgb: 27, 53, 125;
+  --bs-link-hover-color-rgb: 20, 39, 94;
+  --bs-focus-ring-color: rgba(27, 53, 125, 0.25);
 
   /* Sidebar Theme: Matches Logo Dark Navy Backdrop */
-  --sidebar-bg: #0b1728;
-  --sidebar-hover: #13243d;
-  --sidebar-active: #d01a24;
-  --sidebar-text: #94a3b8;
+  --sidebar-bg: #1b357d;
+  /* --sidebar-bg: #0b1728; */
+  --sidebar-hover: #14275e;
+  --sidebar-active: #1b357d;
+  --sidebar-text: #ffffff;
   --sidebar-text-active: #ffffff;
 
   --card-bg: #ffffff;
@@ -47,6 +61,185 @@ body {
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Global Bootstrap Theme Overrides (Applied to ALL Pages)
+   ========================================================================== */
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px var(--primary-shadow) !important;
+}
+
+.btn-outline-primary {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  background-color: transparent !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary {
+  background-color: #64748b !important;
+  border-color: #64748b !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary:hover {
+  background-color: #475569 !important;
+  border-color: #475569 !important;
+}
+
+.btn-danger-brand {
+  background-color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+  color: #ffffff !important;
+}
+
+.btn-danger-brand:hover {
+  background-color: var(--secondary-hover) !important;
+  border-color: var(--secondary-hover) !important;
+}
+
+/* Text & Background Utilities */
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.text-secondary-brand {
+  color: var(--secondary-color) !important;
+}
+
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.bg-primary-subtle {
+  background-color: var(--primary-light) !important;
+  color: var(--primary-color) !important;
+}
+
+.bg-secondary-brand {
+  background-color: var(--secondary-color) !important;
+  color: #ffffff !important;
+}
+
+.bg-secondary-brand-subtle {
+  background-color: var(--secondary-light) !important;
+  color: var(--secondary-color) !important;
+}
+
+.border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+.border-secondary-brand {
+  border-color: var(--secondary-color) !important;
+}
+
+/* Input Box Labels (Applied across all pages) */
+.form-label,
+label.form-label,
+label {
+  color: var(--primary-color);
+  font-weight: 600;
+  transition: color 0.2s ease-in-out;
+}
+
+/* Form Controls & Inputs */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px var(--primary-subtle) !important;
+}
+
+/* Checkboxes, Radios & Switches */
+.form-check-input:checked {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.form-check-input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.25rem var(--primary-subtle) !important;
+}
+
+/* Nav Pills & Tabs across all pages */
+.nav-pills .nav-link.active,
+.nav-pills .show>.nav-link {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
+  color: var(--primary-color) !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--primary-color) !important;
+  border-bottom-color: var(--primary-color) !important;
+  font-weight: 600;
+}
+
+/* Dropdown active items */
+.dropdown-item:active,
+.dropdown-item.active {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+/* Accordions */
+.accordion-button:not(.collapsed) {
+  color: var(--primary-color) !important;
+  background-color: var(--primary-light) !important;
+  box-shadow: inset 0 -1px 0 rgba(27, 53, 125, 0.15) !important;
+}
+
+.accordion-button:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.25rem var(--primary-subtle) !important;
+}
+
+/* Progress bar */
+.progress-bar {
+  background-color: var(--primary-color) !important;
+}
+
+/* Pagination */
+.page-item.active .page-link {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+.page-link {
+  color: var(--primary-color) !important;
+}
+
+.page-link:hover {
+  background-color: var(--primary-light) !important;
+  color: var(--primary-hover) !important;
 }
 
 /* Custom Scrollbar */
@@ -124,14 +317,14 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: var(--primary-gradient);
+  background: var(--secondary-color);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
   font-size: 1.25rem;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px var(--primary-shadow);
+  box-shadow: 0 4px 12px transparent;
 }
 
 .sidebar-nav-container {
@@ -183,10 +376,10 @@ body {
 }
 
 .sidebar-nav-item.active {
-  background: var(--primary-gradient);
+  background: var(--secondary-color);
   color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 4px 14px var(--primary-shadow);
+  box-shadow: 0 4px 14px transparent;
 }
 
 .sidebar-nav-item.active i {
@@ -221,17 +414,17 @@ body {
 
 .sidebar-dropdown-toggle:hover i:first-child {
   transform: scale(1.1);
-  color: #ef4444;
+  color: var(--secondary-color);
 }
 
 .sidebar-dropdown-toggle.parent-active {
-  color: #fca5a5;
-  background-color: rgba(208, 26, 36, 0.15);
+  color: #ffffff;
+  background-color: rgba(27, 53, 125, 0.45);
   font-weight: 600;
 }
 
 .sidebar-dropdown-toggle.parent-active i:first-child {
-  color: #ef4444;
+  color: #f87171;
 }
 
 .sidebar-dropdown-chevron {
@@ -244,7 +437,7 @@ body {
 
 .sidebar-dropdown-chevron.open {
   transform: rotate(180deg) !important;
-  color: #ef4444;
+  color: #f87171;
 }
 
 .sidebar-submenu {
@@ -286,24 +479,24 @@ body {
 }
 
 .sidebar-sub-item:hover i {
-  color: #ef4444;
+  color: #f87171;
 }
 
 .sidebar-sub-item.active {
   color: #ffffff;
-  background: rgba(208, 26, 36, 0.25);
-  border: 1px solid rgba(208, 26, 36, 0.45);
+  background: rgba(27, 53, 125, 0.5);
+  border: 1px solid rgba(208, 26, 36, 0.35);
   font-weight: 600;
 }
 
 .sidebar-sub-item.active i {
-  color: #ef4444;
+  color: #f87171;
 }
 
 .sidebar-footer {
   padding: 1rem 0.85rem;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--primary-color)
 }
 
 .user-mini-profile {
@@ -314,6 +507,12 @@ body {
   border-radius: 8px;
   text-decoration: none;
   color: #ffffff;
+}
+
+
+.logout-btn {
+  color: var(--secondary-color) !important;
+  outline: none !important;
 }
 
 /* Main Content Area */
@@ -412,8 +611,13 @@ body {
 }
 
 .stat-icon-blue {
-  background-color: #eff6ff;
-  color: #2563eb;
+  background-color: var(--primary-light, #eef2ff);
+  color: var(--primary-color, #1b357d);
+}
+
+.stat-icon-red {
+  background-color: var(--secondary-light, #fef2f2);
+  color: var(--secondary-color, #d01a24);
 }
 
 .stat-icon-green {
