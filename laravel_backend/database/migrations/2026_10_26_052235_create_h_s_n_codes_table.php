@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('hsn_codes', function (Blueprint $table) {
             $table->id();
-            $table->string('hsn_code')->nullable();
+            $table->integer('hsn_code')->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
