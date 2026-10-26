@@ -7,21 +7,35 @@
   --sidebar-collapsed-width: 78px;
   --header-height: 70px;
 
-  --primary-color: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: #eff6ff;
-  /* --primary-gradient: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); */
-  --primary-gradient: linear-gradient(135deg, #961419 0%, #2218c6 100%);
-  --sidebar-bg: #0f172a;
-  --sidebar-hover: #1e293b;
-  --sidebar-active: #2563eb;
+  /* --- Logo-Inspired Color Palette --- */
+  /* Primary Red: Express speed slash, ITS.IN badge & tagline */
+  --primary-color: #d01a24;
+  --primary-hover: #b3131b;
+  --primary-light: #fef2f2;
+  --primary-subtle: rgba(208, 26, 36, 0.12);
+  --primary-shadow: rgba(208, 26, 36, 0.3);
+
+  /* Secondary Royal Navy: EXPRESS bold typography */
+  --secondary-color: #1b357d;
+  --secondary-hover: #14275e;
+  --secondary-light: #eef2ff;
+  --secondary-subtle: rgba(27, 53, 125, 0.12);
+
+  /* Speed Gradient (Express Red to Royal Navy) */
+  --primary-gradient: linear-gradient(135deg, #d01a24 0%, #1b357d 100%);
+  --secondary-gradient: linear-gradient(135deg, #1b357d 0%, #0b1728 100%);
+
+  /* Sidebar Theme: Matches Logo Dark Navy Backdrop */
+  --sidebar-bg: #0b1728;
+  --sidebar-hover: #13243d;
+  --sidebar-active: #d01a24;
   --sidebar-text: #94a3b8;
   --sidebar-text-active: #ffffff;
 
   --card-bg: #ffffff;
   --card-border: #f1f5f9;
-  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
-  --card-shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  --card-shadow: 0 4px 20px -2px rgba(11, 23, 40, 0.05), 0 2px 6px -1px rgba(11, 23, 40, 0.02);
+  --card-shadow-hover: 0 10px 25px -5px rgba(11, 23, 40, 0.08), 0 8px 10px -6px rgba(11, 23, 40, 0.03);
 
   --bg-surface: #f8fafc;
 }
@@ -117,7 +131,7 @@ body {
   color: #ffffff;
   font-size: 1.25rem;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 12px var(--primary-shadow);
 }
 
 .sidebar-nav-container {
@@ -165,14 +179,14 @@ body {
 
 .sidebar-nav-item:hover i {
   transform: scale(1.1);
-  color: #60a5fa;
+  color: #ef4444;
 }
 
 .sidebar-nav-item.active {
   background: var(--primary-gradient);
   color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 14px var(--primary-shadow);
 }
 
 .sidebar-nav-item.active i {
@@ -207,17 +221,17 @@ body {
 
 .sidebar-dropdown-toggle:hover i:first-child {
   transform: scale(1.1);
-  color: #60a5fa;
+  color: #ef4444;
 }
 
 .sidebar-dropdown-toggle.parent-active {
-  color: #93c5fd;
-  background-color: rgba(37, 99, 235, 0.15);
+  color: #fca5a5;
+  background-color: rgba(208, 26, 36, 0.15);
   font-weight: 600;
 }
 
 .sidebar-dropdown-toggle.parent-active i:first-child {
-  color: #60a5fa;
+  color: #ef4444;
 }
 
 .sidebar-dropdown-chevron {
@@ -230,7 +244,7 @@ body {
 
 .sidebar-dropdown-chevron.open {
   transform: rotate(180deg) !important;
-  color: #60a5fa;
+  color: #ef4444;
 }
 
 .sidebar-submenu {
@@ -272,18 +286,18 @@ body {
 }
 
 .sidebar-sub-item:hover i {
-  color: #60a5fa;
+  color: #ef4444;
 }
 
 .sidebar-sub-item.active {
   color: #ffffff;
-  background: rgba(37, 99, 235, 0.3);
-  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(208, 26, 36, 0.25);
+  border: 1px solid rgba(208, 26, 36, 0.45);
   font-weight: 600;
 }
 
 .sidebar-sub-item.active i {
-  color: #60a5fa;
+  color: #ef4444;
 }
 
 .sidebar-footer {
@@ -543,7 +557,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at top right, #1e293b, #0f172a);
+  background: radial-gradient(circle at top right, #1b357d, #0b1728);
   padding: 1.5rem;
 }
 
@@ -592,7 +606,7 @@ body {
 .btn-primary-gradient:hover {
   opacity: 0.92;
   color: #ffffff;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 6px 16px var(--primary-shadow);
   transform: translateY(-1px);
 }
 

@@ -1,0 +1,321 @@
+/* ==========================================================================
+   Page: Add New Shipment View
+   ========================================================================== */
+
+.page-add-shipment .text-dark-accent {
+  color: #2b2b2b;
+}
+
+/* Form inputs & selects styled round */
+.page-add-shipment .form-control,
+.page-add-shipment .form-select {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.page-add-shipment .form-control:focus,
+.page-add-shipment .form-select:focus {
+  border-color: #d01a24;
+  box-shadow: 0 0 0 3px rgba(208, 26, 36, 0.12);
+}
+
+.page-add-shipment .form-control-sm,
+.page-add-shipment .form-select-sm {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.82rem;
+}
+
+/* Header Panel Customizations */
+.page-add-shipment .header-panel {
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.page-add-shipment .header-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8a8a8a !important;
+}
+
+/* AWB Search input custom button */
+.page-add-shipment .search-group {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.page-add-shipment .btn-search-custom {
+  background-color: #d01a24;
+  color: #ffffff;
+  border: none;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  font-size: 0.9rem;
+  transition: opacity 0.15s ease;
+}
+
+.page-add-shipment .btn-search-custom:hover {
+  opacity: 0.9;
+  background-color: #b3131b;
+  color: #ffffff;
+}
+
+/* Wallet Recharge & Credit Indicators */
+.page-add-shipment .btn-recharge {
+  background-color: #d01a24;
+  color: #ffffff;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  transition: opacity 0.15s ease;
+}
+
+.page-add-shipment .btn-recharge:hover {
+  opacity: 0.9;
+  background-color: #b3131b;
+  color: #ffffff;
+}
+
+.page-add-shipment .balance-badge {
+  background-color: #1b357d;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.98rem;
+  border-radius: 8px;
+  height: 38px;
+  min-width: 100px;
+}
+
+.page-add-shipment .icon-btn {
+  background-color: #f7f9fa;
+  border: 1px solid #e9ecef;
+}
+
+.page-add-shipment .icon-btn:hover {
+  background-color: #e9ecef;
+}
+
+.page-add-shipment .profile-avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #6f42c1;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Pills Tab Custom Styling */
+.page-add-shipment .nav-custom-pills {
+  background-color: #ffffff;
+  border: 1px solid #f0f0f0;
+}
+
+.page-add-shipment .nav-link-pill {
+  border: none;
+  background: transparent;
+  color: #9b7a82;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.page-add-shipment .nav-link-pill:hover {
+  color: #d01a24;
+  background-color: #fef2f2;
+}
+
+.page-add-shipment .nav-link-pill.active {
+  background-color: #d01a24;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(208, 26, 36, 0.25);
+}
+
+/* Stepper Vertical Layout */
+.page-add-shipment .stepper-vertical {
+  position: relative;
+}
+
+.page-add-shipment .step-item {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.page-add-shipment .step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  color: #adb5bd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  border: 2px solid transparent;
+  z-index: 2;
+}
+
+.page-add-shipment .step-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6c757d;
+  transition: color 0.25s ease;
+}
+
+/* Connecting Line between step circles */
+.page-add-shipment .stepper-vertical::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 18px;
+  bottom: 10px;
+  width: 2px;
+  background-color: #e9ecef;
+  z-index: 1;
+}
+
+/* Stepper Active State */
+.page-add-shipment .step-item.active .step-circle {
+  background-color: #d01a24;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(208, 26, 36, 0.15);
+}
+
+.page-add-shipment .step-item.active .step-title {
+  color: #d01a24;
+}
+
+/* Stepper Completed State */
+.page-add-shipment .step-item.completed .step-circle {
+  background-color: #1b357d;
+  color: #ffffff;
+}
+
+.page-add-shipment .step-item.completed .step-title {
+  color: #6c757d;
+}
+
+/* Save Details top-right link */
+.page-add-shipment .save-link:hover {
+  text-decoration: underline !important;
+  opacity: 0.85;
+}
+
+/* Next / Prev Nav Buttons */
+.page-add-shipment .btn-next-custom {
+  background-color: #d01a24;
+  color: #ffffff;
+  border: none;
+  transition: opacity 0.15s ease;
+}
+
+.page-add-shipment .btn-next-custom:hover {
+  opacity: 0.9;
+  background-color: #b3131b;
+  color: #ffffff;
+}
+
+.page-add-shipment .upload-box .drop-text {
+  font-size: 13px;
+}
+
+.page-add-shipment .upload-icon-circle i {
+  font-size: 23px !important;
+}
+
+/* File Upload Box */
+.page-add-shipment .upload-box {
+  min-height: 75px;
+  border-color: #cfd8dc !important;
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+}
+
+.page-add-shipment .upload-box:hover {
+  background-color: #eceff1 !important;
+  border-color: #d01a24 !important;
+}
+
+.page-add-shipment .upload-icon-circle {
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* KYC / Booking Action Panels */
+.page-add-shipment .last-mile-banner {
+  background-color: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 10px;
+}
+
+.page-add-shipment .btn-create-label {
+  background-color: #2ecb71;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+}
+
+.page-add-shipment .btn-create-label:hover {
+  background-color: #27ae60;
+  color: #ffffff;
+}
+
+.page-add-shipment .btn-draft-booking {
+  background-color: #8ddca4;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+}
+
+.page-add-shipment .btn-draft-booking:hover {
+  background-color: #79c991;
+  color: #ffffff;
+}
+
+.page-add-shipment .btn-cancel-booking {
+  background-color: #ff8b94;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+}
+
+.page-add-shipment .btn-cancel-booking:hover {
+  background-color: #ff7680;
+  color: #ffffff;
+}
+
+/* Animations */
+.page-add-shipment .animate-fade {
+  animation: fadeIn 0.28s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

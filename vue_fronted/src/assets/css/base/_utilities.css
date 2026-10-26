@@ -1,0 +1,30 @@
+/* ==========================================================================
+   Common Utilities, Animations & Shared Transitions
+   ========================================================================== */
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.transition-all {
+  transition: all 0.2s ease;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.hover-opacity-100:hover {
+  opacity: 1 !important;
+}
+
+/* Vue Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

@@ -1,0 +1,23 @@
+/* ==========================================================================
+   ExpressIt - Central Master Stylesheet Entry Point
+   Organizes all layout, utility, and page-specific styles.
+   Vite automatically bundles and minifies this into a single CSS file.
+   ========================================================================== */
+
+/* 1. Global Framework & Theme */
+@import '../custom-bootstrap.css';
+
+/* 2. Common Utilities & Shared Animations */
+@import './base/_utilities.css';
+
+/* 3. Layout Styles */
+@import './layout/_header.css';
+@import './layout/_sidebar.css';
+
+/* 4. Page Specific Styles */
+@import './pages/_login.css';
+@import './pages/_add-shipment.css';
+@import './pages/_shipments.css';
+@import './pages/_rate-calculator.css';
+@import './pages/_service-partner.css';
+@import './pages/_service-partner-zone-rate.css';

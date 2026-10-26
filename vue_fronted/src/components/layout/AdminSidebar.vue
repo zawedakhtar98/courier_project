@@ -244,19 +244,3 @@ const navSections = [
   </aside>
 </template>
 
-<style scoped>
-.submenu-slide-enter-active,
-.submenu-slide-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  max-height: 200px;
-  opacity: 1;
-}
-
-.submenu-slide-enter-from,
-.submenu-slide-leave-to {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-6px);
-}
-</style>

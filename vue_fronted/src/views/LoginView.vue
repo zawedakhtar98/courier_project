@@ -171,15 +171,3 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-.tracking-tight {
-  letter-spacing: -0.025em;
-}
-
-.logo-img {
-  max-height: 64px;
-  max-width: 220px;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
-}
-</style>

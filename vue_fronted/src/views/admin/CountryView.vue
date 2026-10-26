@@ -306,18 +306,3 @@ const getStatusBadge = (status) => {
   </div>
 </template>
 
-<style scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

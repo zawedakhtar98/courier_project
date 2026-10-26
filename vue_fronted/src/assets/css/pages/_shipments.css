@@ -1,0 +1,151 @@
+/* ==========================================================================
+   Page: Shipments View
+   ========================================================================== */
+
+.shipment-view-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Table wrapper and scroll behavior */
+.shipment-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.shipment-table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.shipment-table thead th {
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0.8rem 0.9rem;
+  border-top: none;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.shipment-table tbody td {
+  padding: 0.8rem 0.9rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.shipment-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Action column */
+.action-cell {
+  position: relative;
+}
+
+/* Status: Hourglass + Pending in orange */
+.mf-status-pending {
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.mf-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.mf-status-completed {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Action: Green Copy/File button */
+.btn-action-green {
+  background-color: #22c55e;
+  color: #ffffff;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-action-green:hover {
+  background-color: #16a34a;
+  transform: scale(1.05);
+}
+
+.btn-action-green:active {
+  transform: scale(0.95);
+}
+
+/* Action: 3-dots menu button */
+.btn-action-dots {
+  background: transparent;
+  color: #64748b;
+  border: none;
+  width: 28px;
+  height: 30px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-action-dots:hover {
+  background-color: #f1f5f9;
+  color: #1e293b;
+}
+
+.btn-action-dots:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.shipment-view-container .dropdown-menu {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  min-width: 200px;
+  padding: 0.5rem;
+  z-index: 1050;
+}
+
+.shipment-view-container .dropdown-item {
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease;
+}
+
+.shipment-view-container .dropdown-item:hover {
+  background-color: #f8fafc;
+}

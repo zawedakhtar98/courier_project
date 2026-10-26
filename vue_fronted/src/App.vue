@@ -6,6 +6,3 @@ import { RouterView } from 'vue-router'
   <RouterView />
 </template>
 
-<style>
-/* Global base reset if needed */
-</style>

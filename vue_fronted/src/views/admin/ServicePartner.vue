@@ -379,36 +379,3 @@ const filteredAvailableCountries = computed(() => {
   </div>
 </template>
 
-<style scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.transition-all {
-  transition: all 0.2s ease;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.service-partner-logo {
-  max-height: 85px;
-  object-fit: cover;
-  border-radius: 10%;
-  padding: 0px 4px;
-  width: 85px;
-}
-
-.service-name {
-  font-weight: 600;
-  font-size: 20px;
-  margin-left: 10px;
-}
-</style>

@@ -2,6 +2,7 @@ const RATE_TYPES = [
     'Flat', 'Per_Kg'
 ]
 
+// Document type and package type same
 const DOCUMENT_TYPE = [
     'NONDOC',
     'DOC',

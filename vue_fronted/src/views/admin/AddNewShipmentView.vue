@@ -91,14 +91,14 @@ const processRecharge = () => {
 const shipperForm = ref({
   customerAccount: 'OVS1704-EXPRESS IT\'S',
   companyName: 'Sam Web Solutio',
-  contactPerson: 'Test',
+  shipper_name: 'Test',
   address1: 'Test one',
   address2: 'Test one',
   address3: '',
   pincode: '700001',
   city: 'Kolkata',
   state: 'WB',
-  telephone: '8947582597',
+  mobile_no: '8947582597',
   email: '',
   kycType: 'Aadhaar Number',
   kycNo: '224855584525'
@@ -114,10 +114,10 @@ const consigneeForm = ref({
   address1: '108',
   address2: 'AMOY',
   address3: 'STREET',
-  zipcode: '069928',
+  pincode: '069928',
   city: 'SINGAPORE',
   state: 'SINGAPORE',
-  telephone: '+6580708618',
+  mobile_no: '+6580708618',
   email: 'celine.chan@sofinagroup.com',
   vatTaxId: ''
 })
@@ -279,8 +279,8 @@ onMounted(() => {
     const rawType = String(route.query.goodsType || route.query.packageType).toUpperCase()
     serviceForm.value.goodsType = rawType.includes('NON') ? 'NDox' : (rawType.includes('DOX') ? 'Dox' : rawType)
   }
-  if (route.query.pincode || route.query.zipcode) {
-    consigneeForm.value.zipcode = String(route.query.pincode || route.query.zipcode)
+  if (route.query.pincode || route.query.pincode) {
+    consigneeForm.value.pincode = String(route.query.pincode || route.query.pincode)
   }
 
   // Pre-load boxes if sent in JSON format
@@ -317,9 +317,9 @@ onMounted(() => {
   // showAlert('Preloaded booking options from Rate Calculator.')
 })
 
-const nextStep = () => { if (currentStep.value < 5) currentStep.value++ }
+const nextStep = () => { if (currentStep.value < 4) currentStep.value++ }
 const prevStep = () => { if (currentStep.value > 1) currentStep.value-- }
-const jumpToStep = (stepNum) => { if (stepNum <= currentStep.value + 1) currentStep.value = stepNum }
+const jumpToStep = (stepNum) => { if (stepNum >= 1 && stepNum <= 4 && stepNum <= currentStep.value + 1) currentStep.value = stepNum }
 const saveDetailsDraft = () => { showAlert(`Details saved locally for Step ${currentStep.value}`) }
 
 const handleFileUpload = (type, event) => {
@@ -409,7 +409,7 @@ const loadDraft = (draft) => {
 </script>
 
 <template>
-  <div class="container-fluid p-0">
+  <div class="container-fluid p-0 page-add-shipment">
 
     <!-- Top Alert System -->
     <transition name="fade">
@@ -468,7 +468,7 @@ const loadDraft = (draft) => {
                 <i v-else class="bi bi-box-seam"></i>
               </div>
               <div class="step-label d-flex flex-column">
-                <span class="step-title">Service Details</span>
+                <span class="step-title">Package Details</span>
               </div>
             </div>
 
@@ -481,17 +481,6 @@ const loadDraft = (draft) => {
               </div>
               <div class="step-label d-flex flex-column">
                 <span class="step-title">Invoice Details</span>
-              </div>
-            </div>
-
-            <!-- Step 5 Indicator -->
-            <div @click="jumpToStep(5)" class="step-item d-flex align-items-center gap-3 cursor-pointer"
-              :class="{ active: currentStep === 5 }">
-              <div class="step-circle">
-                <i class="bi bi-shield-check"></i>
-              </div>
-              <div class="step-label d-flex flex-column">
-                <span class="step-title">KYC Details</span>
               </div>
             </div>
 
@@ -512,20 +501,18 @@ const loadDraft = (draft) => {
             </div>
 
             <div class="row g-3">
-              <div class="col-md-12">
+              <!-- <div class="col-md-12">
                 <label class="form-label small fw-bold">Customer Account <span class="text-danger">*</span></label>
                 <input v-model="shipperForm.customerAccount" type="text" class="form-control" />
+              </div> -->
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Shipper Name <span class="text-danger">*</span></label>
+                <input v-model="shipperForm.shipper_name" type="text" class="form-control" />
               </div>
-
               <div class="col-md-6">
                 <label class="form-label small fw-bold">Company Name <span class="text-danger">*</span></label>
                 <input v-model="shipperForm.companyName" type="text" class="form-control" />
               </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold">Contact Person <span class="text-danger">*</span></label>
-                <input v-model="shipperForm.contactPerson" type="text" class="form-control" />
-              </div>
-
               <div class="col-12">
                 <label class="form-label small fw-bold">Address Line 1 <span class="text-danger">*</span></label>
                 <input v-model="shipperForm.address1" type="text" class="form-control" />
@@ -553,8 +540,8 @@ const loadDraft = (draft) => {
               </div>
 
               <div class="col-md-6">
-                <label class="form-label small fw-bold">Telephone <span class="text-danger">*</span></label>
-                <input v-model="shipperForm.telephone" type="text" class="form-control" />
+                <label class="form-label small fw-bold">Mobile No<span class="text-danger">*</span></label>
+                <input v-model="shipperForm.mobile_no" type="text" class="form-control" />
               </div>
               <div class="col-md-6">
                 <label class="form-label small fw-bold">E-mail Id</label>
@@ -564,15 +551,77 @@ const loadDraft = (draft) => {
               <div class="col-md-6">
                 <label class="form-label small fw-bold">KYC Type <span class="text-danger">*</span></label>
                 <select v-model="shipperForm.kycType" class="form-select">
-                  <option>Aadhaar Number</option>
-                  <option>PAN Card</option>
-                  <option>GSTIN</option>
-                  <option>Passport</option>
+                  <option value="AADHAAR_NUMBER">Aadhaar Number</option>
+                  <option value="PAN_CARD">PAN Card</option>
+                  <option value="GST No">GST No</option>
+                  <option value="PASSPORT">Passport</option>
+                  <option value="VOTER_ID">Voter ID</option>
                 </select>
               </div>
               <div class="col-md-6">
                 <label class="form-label small fw-bold">KYC No. <span class="text-danger">*</span></label>
                 <input v-model="shipperForm.kycNo" type="text" class="form-control" />
+              </div>
+            </div>
+            <div class="row g-4 mb-2 mt-1">
+              <!-- KYC Document Upload -->
+              <div class="col-md-6">
+                <!-- <label for="" class="small fw-bold">Upload KYC Front Side Document</label> -->
+                <div
+                  class="upload-box d-flex flex-column align-items-center justify-content-center p-4 border border-2 border-dashed rounded-3 bg-light text-center position-relative">
+                  <input type="file" @change="handleFileUpload('kyc', $event)"
+                    class="opacity-0 position-absolute w-100 h-100 top-0 start-0 cursor-pointer"
+                    accept=".pdf,.png,.jpg,.jpeg" />
+
+                  <div v-if="!kycFile" class="d-flex flex-wrap align-items-center justify-content-center">
+                    <div class="upload-icon-circle bg-white shadow-sm me-2">
+                      <i class="bi bi-cloud-upload text-primary"></i>
+                    </div>
+                    <span class="fw-bold text-dark drop-text">Drag and Drop Front side of KYC Document</span>
+                    <span class="text-muted small drop-text">Supports PDF, PNG, JPG</span>
+                  </div>
+                  <div v-else class="uploaded-state d-flex flex-column align-items-center">
+                    <i class="bi bi-file-earmark-check text-success"></i>
+                    <span class="fw-semibold text-dark text-truncate" style="max-width: 220px;">{{
+                      kycFile.name
+                    }}</span>
+                    <span class="text-muted small mb-2">{{ kycFile.size }}</span>
+                    <button type="button" @click.stop="removeFile('kyc')"
+                      class="btn btn-sm btn-outline-danger px-3 py-1 rounded-pill">
+                      Remove File
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KYC back Document Upload -->
+              <div class="col-md-6">
+                <!-- <label for="" class="small fw-bold">Upload KYC Back Side Document</label> -->
+                <div
+                  class="upload-box d-flex flex-column align-items-center justify-content-center p-4 border border-2 border-dashed rounded-3 bg-light text-center position-relative">
+                  <input type="file" @change="handleFileUpload('invoice', $event)"
+                    class="opacity-0 position-absolute w-100 h-100 top-0 start-0 cursor-pointer"
+                    accept=".pdf,.png,.jpg,.jpeg" />
+
+                  <div v-if="!invoiceFile" class="d-flex flex-wrap align-items-center justify-content-center">
+                    <div class="upload-icon-circle bg-white shadow-sm me-2">
+                      <i class="bi bi-cloud-upload text-primary"></i>
+                    </div>
+                    <span class="fw-bold text-dark drop-text">Drag and Drop Back side of KYC Document</span>
+                    <span class="text-muted small drop-text">Supports PDF, PNG, JPG</span>
+                  </div>
+                  <div v-else class="uploaded-state d-flex flex-column align-items-center">
+                    <i class="bi bi-file-earmark-check text-success fs-2 mb-2"></i>
+                    <span class="fw-semibold text-dark text-truncate" style="max-width: 220px;">{{
+                      invoiceFile.name
+                    }}</span>
+                    <span class="text-muted small mb-2">{{ invoiceFile.size }}</span>
+                    <button type="button" @click.stop="removeFile('invoice')"
+                      class="btn btn-sm btn-outline-danger px-3 py-1 rounded-pill">
+                      Remove File
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -588,7 +637,7 @@ const loadDraft = (draft) => {
             </div>
 
             <div class="row g-3">
-              <div class="col-md-8">
+              <div class="col-md-4">
                 <label class="form-label small fw-bold">Destination <span class="text-danger">*</span></label>
                 <select v-model="consigneeForm.destination" class="form-select">
                   <option value="AUSTRIA">AUSTRIA</option>
@@ -601,25 +650,22 @@ const loadDraft = (draft) => {
                 </select>
               </div>
               <div class="col-md-4">
-                <label class="form-label small fw-bold">ISO Code <span class="text-danger">*</span></label>
-                <input v-model="consigneeForm.isoCode" type="text" class="form-control bg-light" readonly />
+                <label class="form-label small fw-bold">Consignee's Name <span class="text-danger">*</span></label>
+                <input v-model="consigneeForm.contactPerson" type="text" class="form-control" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Company Name <span class="text-danger">*</span></label>
+                <input v-model="consigneeForm.companyName" type="text" class="form-control" />
               </div>
 
               <div class="col-md-12">
                 <label class="form-label small fw-bold">Consignee Type <span class="text-danger">*</span></label>
                 <select v-model="consigneeForm.consigneeType" class="form-select">
-                  <option>Business</option>
-                  <option>Individual</option>
+                  <option :selected="selected">Select Consignee Type</option>
+                  <option value="Commercial">Commercial </option>
+                  <option value="CSB 4">CSB 4</option>
+                  <option value="CSB 5">CSB 5</option>
                 </select>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label small fw-bold">Company Name <span class="text-danger">*</span></label>
-                <input v-model="consigneeForm.companyName" type="text" class="form-control" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold">Contact Person <span class="text-danger">*</span></label>
-                <input v-model="consigneeForm.contactPerson" type="text" class="form-control" />
               </div>
 
               <div class="col-12">
@@ -636,8 +682,8 @@ const loadDraft = (draft) => {
               </div>
 
               <div class="col-md-4">
-                <label class="form-label small fw-bold">Zipcode <span class="text-danger">*</span></label>
-                <input v-model="consigneeForm.zipcode" type="text" class="form-control" />
+                <label class="form-label small fw-bold">Pincode <span class="text-danger">*</span></label>
+                <input v-model="consigneeForm.pincode" type="text" class="form-control" />
               </div>
               <div class="col-md-4">
                 <label class="form-label small fw-bold">City <span class="text-danger">*</span></label>
@@ -649,88 +695,33 @@ const loadDraft = (draft) => {
               </div>
 
               <div class="col-md-6">
-                <label class="form-label small fw-bold">Telephone <span class="text-danger">*</span></label>
-                <input v-model="consigneeForm.telephone" type="text" class="form-control" />
+                <label class="form-label small fw-bold">Mobile No. <span class="text-danger">*</span></label>
+                <input v-model="consigneeForm.mobile_no" type="text" class="form-control" />
               </div>
               <div class="col-md-6">
                 <label class="form-label small fw-bold">E-mail Id</label>
                 <input v-model="consigneeForm.email" type="email" class="form-control" />
               </div>
-
-              <div class="col-12">
-                <label class="form-label small fw-bold">VAT/TAX Id</label>
-                <input v-model="consigneeForm.vatTaxId" type="text" class="form-control" placeholder="Optional" />
-              </div>
             </div>
           </div>
 
-          <!-- STEP 3: SERVICE DETAILS -->
+          <!-- STEP 3: Package Details -->
           <div v-if="currentStep === 3" class="step-content-section animate-fade">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
               <h5 class="fw-bold mb-0 text-dark-accent">
-                <i class="bi bi-gear-fill me-2 text-danger"></i> Services Details
+                <i class="bi bi-gear-fill me-2 text-danger"></i> Package Details
               </h5>
             </div>
 
             <div class="row g-3 mb-4">
-              <div class="col-md-6">
-                <label class="form-label small fw-bold">Service <span class="text-danger">*</span></label>
-                <select v-model="serviceForm.service" class="form-select">
-                  <option value="UPS_SAVER">UPS_SAVER</option>
-                  <option value="DHL_EXPRESS">DHL_EXPRESS</option>
-                  <option value="FEDEX_PRIORITY">FEDEX_PRIORITY</option>
-                  <option value="ARAMEX_WORLDWIDE">ARAMEX_WORLDWIDE</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold">Service Code <span class="text-danger">*</span></label>
-                <input v-model="serviceForm.serviceCode" type="text" class="form-control bg-light" readonly />
-              </div>
 
               <div class="col-md-6">
-                <label class="form-label small fw-bold">Vendor <span class="text-danger">*</span></label>
+                <label class="form-label small fw-bold">Service Partner <span class="text-danger">*</span></label>
                 <input v-model="serviceForm.vendor" type="text" class="form-control bg-light" readonly />
               </div>
               <div class="col-md-6">
-                <label class="form-label small fw-bold">Vendor Code <span class="text-danger">*</span></label>
-                <input v-model="serviceForm.vendorCode" type="text" class="form-control bg-light" readonly />
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label small fw-bold">Goods Type <span class="text-danger">*</span></label>
-                <select v-model="serviceForm.goodsType" class="form-select">
-                  <option>NDox</option>
-                  <option>Dox</option>
-                </select>
-              </div>
-              <div class="col-md-6">
                 <label class="form-label small fw-bold">Package Type <span class="text-danger">*</span></label>
-                <select v-model="serviceForm.packageType" class="form-select">
-                  <option>PACKAGE</option>
-                  <option>BOX</option>
-                  <option>ENVELOPE</option>
-                </select>
-              </div>
-
-              <!-- Readonly summary outputs -->
-              <div class="col-md-3">
-                <label class="form-label small fw-bold">Total Pcs <span class="text-danger">*</span></label>
-                <input :value="totalPcs" type="number" class="form-control bg-light fw-bold" readonly />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small fw-bold">Actual Weight (kg) <span class="text-danger">*</span></label>
-                <input :value="totalActualWeight.toFixed(2)" type="text" class="form-control bg-light fw-bold"
-                  readonly />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small fw-bold">Vol Weight <span class="text-danger">*</span></label>
-                <input :value="totalVolWeight.toFixed(2)" type="text" class="form-control bg-light fw-bold" readonly />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small fw-bold">Chargeable Weight (kg) <span
-                    class="text-danger">*</span></label>
-                <input :value="totalChargeableWeight.toFixed(2)" type="text" class="form-control bg-light fw-bold"
-                  readonly />
+                <input v-model="serviceForm.vendor" type="text" class="form-control bg-light" readonly />
               </div>
             </div>
 
@@ -793,6 +784,29 @@ const loadDraft = (draft) => {
                     </tr>
                   </tbody>
                 </table>
+              </div>
+              <div class="row g-2 mt-3">
+                <!-- Readonly summary outputs -->
+                <div class="col-md-3">
+                  <label class="form-label small fw-bold">Total Pcs <span class="text-danger">*</span></label>
+                  <input :value="totalPcs" type="number" class="form-control bg-light fw-bold" readonly />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-bold">Actual Weight (kg) <span class="text-danger">*</span></label>
+                  <input :value="totalActualWeight.toFixed(2)" type="text" class="form-control bg-light fw-bold"
+                    readonly />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-bold">Vol Weight <span class="text-danger">*</span></label>
+                  <input :value="totalVolWeight.toFixed(2)" type="text" class="form-control bg-light fw-bold"
+                    readonly />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-bold">Chargeable Weight (kg) <span
+                      class="text-danger">*</span></label>
+                  <input :value="totalChargeableWeight.toFixed(2)" type="text" class="form-control bg-light fw-bold"
+                    readonly />
+                </div>
               </div>
             </div>
           </div>
@@ -902,10 +916,11 @@ const loadDraft = (draft) => {
 
               <div class="row g-3">
                 <div class="col-md-4">
-                  <label class="form-label small fw-bold">CSB Type <span class="text-danger">*</span></label>
+                  <label class="form-label small fw-bold">Invoice Type <span class="text-danger">*</span></label>
                   <select v-model="customsClearance.csbType" class="form-select">
-                    <option>CSB 4</option>
-                    <option>CSB 5</option>
+                    <option value="Commercial">Commercial</option>
+                    <option value="CSB 4">CSB 4</option>
+                    <option value="CSB 5">CSB 5</option>
                   </select>
                 </div>
                 <div class="col-md-4">
@@ -918,6 +933,11 @@ const loadDraft = (draft) => {
                 </div>
 
                 <div class="col-md-4">
+                  <label class="form-label small fw-bold">Reference No. <span class="text-danger">*</span></label>
+                  <input v-model="customsClearance.referenceNo" type="text" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
                   <label class="form-label small fw-bold">Term of Trade <span class="text-danger">*</span></label>
                   <select v-model="customsClearance.termOfTrade" class="form-select">
                     <option>DAP</option>
@@ -925,23 +945,7 @@ const loadDraft = (draft) => {
                     <option>CIF</option>
                   </select>
                 </div>
-                <div class="col-md-4">
-                  <label class="form-label small fw-bold">Reason For Export <span class="text-danger">*</span></label>
-                  <select v-model="customsClearance.reasonForExport" class="form-select">
-                    <option>Bonafide Gift</option>
-                    <option>Commercial Sample</option>
-                    <option>Merchandise</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label small fw-bold">Bond/UT <span class="text-danger">*</span></label>
-                  <input v-model="customsClearance.bondUt" type="text" class="form-control" />
-                </div>
 
-                <div class="col-md-4">
-                  <label class="form-label small fw-bold">Reference No. <span class="text-danger">*</span></label>
-                  <input v-model="customsClearance.referenceNo" type="text" class="form-control" />
-                </div>
                 <div class="col-md-4">
                   <label class="form-label small fw-bold">Duty Tax <span class="text-danger">*</span></label>
                   <select v-model="customsClearance.dutyTax" class="form-select">
@@ -949,115 +953,15 @@ const loadDraft = (draft) => {
                     <option>DDP</option>
                   </select>
                 </div>
-                <div class="col-md-4">
+                <!-- <div class="col-md-4">
                   <label class="form-label small fw-bold">Signature Required.</label>
                   <select v-model="customsClearance.signatureRequired" class="form-select">
                     <option>No</option>
                     <option>Yes</option>
                   </select>
-                </div>
+                </div> -->
               </div>
             </div>
-          </div>
-
-          <!-- STEP 5: KYC DETAILS -->
-          <div v-if="currentStep === 5" class="step-content-section animate-fade">
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-              <h5 class="fw-bold mb-0 text-dark-accent">
-                <i class="bi bi-shield-check me-2 text-danger"></i> KYC Details
-              </h5>
-            </div>
-
-            <!-- Upload Zones Grid -->
-            <div class="row g-4 mb-4">
-              <!-- KYC Document Upload -->
-              <div class="col-md-6">
-                <div
-                  class="upload-box d-flex flex-column align-items-center justify-content-center p-4 border border-2 border-dashed rounded-3 bg-light text-center position-relative">
-                  <input type="file" @change="handleFileUpload('kyc', $event)"
-                    class="opacity-0 position-absolute w-100 h-100 top-0 start-0 cursor-pointer"
-                    accept=".pdf,.png,.jpg,.jpeg" />
-
-                  <div v-if="!kycFile" class="d-flex flex-column align-items-center">
-                    <div class="upload-icon-circle bg-white shadow-sm mb-3">
-                      <i class="bi bi-cloud-upload text-primary fs-3"></i>
-                    </div>
-                    <span class="fw-bold text-dark mb-1">Drag and Drop OR Upload KYC</span>
-                    <span class="text-muted small">Supports PDF, PNG, JPG</span>
-                  </div>
-                  <div v-else class="uploaded-state d-flex flex-column align-items-center">
-                    <i class="bi bi-file-earmark-check text-success fs-2 mb-2"></i>
-                    <span class="fw-semibold text-dark text-truncate" style="max-width: 220px;">{{
-                      kycFile.name
-                    }}</span>
-                    <span class="text-muted small mb-2">{{ kycFile.size }}</span>
-                    <button type="button" @click.stop="removeFile('kyc')"
-                      class="btn btn-sm btn-outline-danger px-3 py-1 rounded-pill">
-                      Remove File
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Invoice Document Upload -->
-              <div class="col-md-6">
-                <div
-                  class="upload-box d-flex flex-column align-items-center justify-content-center p-4 border border-2 border-dashed rounded-3 bg-light text-center position-relative">
-                  <input type="file" @change="handleFileUpload('invoice', $event)"
-                    class="opacity-0 position-absolute w-100 h-100 top-0 start-0 cursor-pointer"
-                    accept=".pdf,.png,.jpg,.jpeg" />
-
-                  <div v-if="!invoiceFile" class="d-flex flex-column align-items-center">
-                    <div class="upload-icon-circle bg-white shadow-sm mb-3">
-                      <i class="bi bi-cloud-upload text-primary fs-3"></i>
-                    </div>
-                    <span class="fw-bold text-dark mb-1">Drag and Drop OR Upload Invoice</span>
-                    <span class="text-muted small">Supports PDF, PNG, JPG</span>
-                  </div>
-                  <div v-else class="uploaded-state d-flex flex-column align-items-center">
-                    <i class="bi bi-file-earmark-check text-success fs-2 mb-2"></i>
-                    <span class="fw-semibold text-dark text-truncate" style="max-width: 220px;">{{
-                      invoiceFile.name
-                    }}</span>
-                    <span class="text-muted small mb-2">{{ invoiceFile.size }}</span>
-                    <button type="button" @click.stop="removeFile('invoice')"
-                      class="btn btn-sm btn-outline-danger px-3 py-1 rounded-pill">
-                      Remove File
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Last Mile Toggle Switch -->
-            <!-- <div class="custom-card p-3 mb-4 last-mile-banner">
-              <div class="form-check form-switch ps-0 d-flex align-items-center gap-3">
-                <input v-model="generateLabelToggle" class="form-check-input ms-0" type="checkbox" role="switch"
-                  id="lastMileSwitch" style="width: 2.8em; height: 1.4em; cursor: pointer;" />
-                <label class="form-check-label fw-semibold text-dark cursor-pointer" for="lastMileSwitch">
-                  Click here to generate your last-mile delivery label.
-                </label>
-              </div>
-            </div> -->
-
-            <!-- Booking Actions Panel -->
-            <!-- <div class="d-flex justify-content-start gap-3 flex-wrap">
-              <button @click="triggerCreateLabel"
-                class="btn btn-create-label d-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold">
-                <i class="bi bi-file-earmark-check text-white"></i>
-                Create Label
-              </button>
-              <button @click="triggerDraftBooking"
-                class="btn btn-draft-booking d-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold">
-                <i class="bi bi-envelope text-white"></i>
-                Draft Booking
-              </button>
-              <button @click="triggerCancel"
-                class="btn btn-cancel-booking d-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold">
-                <i class="bi bi-x-circle text-white"></i>
-                Cancel
-              </button>
-            </div> -->
           </div>
 
           <!-- Bottom Navigation Stepper Buttons -->
@@ -1068,12 +972,12 @@ const loadDraft = (draft) => {
             </button>
             <div v-else></div> <!-- spacer -->
 
-            <button v-if="currentStep < 5" @click="nextStep" type="button"
+            <button v-if="currentStep < 4" @click="nextStep" type="button"
               class="btn btn-next-custom px-4 py-2 rounded-3 fw-bold">
               Next &rarr;
             </button>
-            <button v-if="currentStep >= 5" @click="nextStep" type="button"
-              class="btn btn-next-custom px-4 py-2 rounded-3 fw-bold">
+            <!-- @click="triggerCreateLabel" -->
+            <button v-if="currentStep === 4" type="button" class="btn btn-next-custom px-4 py-2 rounded-3 fw-bold">
               <i class="bi bi-calendar-check me-2"></i> Book Now
             </button>
           </div>
@@ -1259,315 +1163,3 @@ const loadDraft = (draft) => {
 
   </div>
 </template>
-<style scoped>
-/* ----------------------------------------------------
-   General Design Accents & Custom Colors
-   ---------------------------------------------------- */
-.text-dark-accent {
-  color: #2b2b2b;
-}
-
-/* Form inputs & selects styled round */
-.form-control,
-.form-select {
-  border-radius: 8px;
-  border: 1px solid #dcdcdc;
-  padding: 0.55rem 0.75rem;
-  font-size: 0.9rem;
-  transition: all 0.2s ease-in-out;
-}
-
-.form-control:focus,
-.form-select:focus {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
-}
-
-.form-control-sm,
-.form-select-sm {
-  padding: 0.35rem 0.5rem;
-  font-size: 0.82rem;
-}
-
-/* Header Panel Customizations */
-.header-panel {
-  border: 1px solid #f1f5f9;
-  border-radius: 12px;
-  background: #ffffff;
-}
-
-.header-label {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #8a8a8a !important;
-}
-
-/* AWB Search input custom button */
-.search-group {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.btn-search-custom {
-  background-color: #e02229;
-  color: #ffffff;
-  border: none;
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-  font-size: 0.9rem;
-  transition: opacity 0.15s ease;
-}
-
-.btn-search-custom:hover {
-  opacity: 0.9;
-  color: #ffffff;
-}
-
-/* Wallet Recharge & Credit Indicators */
-.btn-recharge {
-  background-color: #e02229;
-  color: #ffffff;
-  border: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  transition: opacity 0.15s ease;
-}
-
-.btn-recharge:hover {
-  opacity: 0.9;
-  color: #ffffff;
-}
-
-.balance-badge {
-  background-color: #a3181d;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 0.98rem;
-  border-radius: 8px;
-  height: 38px;
-  min-width: 100px;
-}
-
-.icon-btn {
-  background-color: #f7f9fa;
-  border: 1px solid #e9ecef;
-}
-
-.icon-btn:hover {
-  background-color: #e9ecef;
-}
-
-.profile-avatar-circle {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background-color: #6f42c1;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.88rem;
-  border: 2px solid #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-/* Pills Tab Custom Styling */
-.nav-custom-pills {
-  background-color: #ffffff;
-  border: 1px solid #f0f0f0;
-}
-
-.nav-link-pill {
-  border: none;
-  background: transparent;
-  color: #9b7a82;
-  font-weight: 700;
-  font-size: 0.88rem;
-  padding: 0.5rem 1.25rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.nav-link-pill:hover {
-  color: #e02229;
-  background-color: #faf3f5;
-}
-
-.nav-link-pill.active {
-  background-color: #e02229;
-  color: #ffffff;
-  box-shadow: 0 4px 10px rgba(224, 34, 41, 0.25);
-}
-
-/* Stepper Vertical Layout */
-.stepper-vertical {
-  position: relative;
-}
-
-.step-item {
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-.step-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: #e9ecef;
-  color: #adb5bd;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.05rem;
-  font-weight: 600;
-  transition: all 0.25s ease;
-  border: 2px solid transparent;
-  z-index: 2;
-}
-
-.step-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #6c757d;
-  transition: color 0.25s ease;
-}
-
-/* Connecting Line between step circles */
-.stepper-vertical::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 18px;
-  bottom: 10px;
-  width: 2px;
-  background-color: #e9ecef;
-  z-index: 1;
-}
-
-/* Stepper Active State */
-.step-item.active .step-circle {
-  background-color: #e02229;
-  color: #ffffff;
-  box-shadow: 0 0 0 4px rgba(224, 34, 41, 0.15);
-}
-
-.step-item.active .step-title {
-  color: #e02229;
-}
-
-/* Stepper Completed State */
-.step-item.completed .step-circle {
-  background-color: var(--primary-color);
-  color: #ffffff;
-}
-
-.step-item.completed .step-title {
-  color: #6c757d;
-}
-
-/* Save Details top-right link */
-.save-link:hover {
-  text-decoration: underline !important;
-  opacity: 0.85;
-}
-
-/* Next / Prev Nav Buttons */
-.btn-next-custom {
-  background-color: #e02229;
-  color: #ffffff;
-  border: none;
-  transition: opacity 0.15s ease;
-}
-
-.btn-next-custom:hover {
-  opacity: 0.9;
-  color: #ffffff;
-}
-
-/* Step 5 File Upload Box */
-.upload-box {
-  min-height: 180px;
-  border-color: #cfd8dc !important;
-  transition: all 0.2s ease-in-out;
-  overflow: hidden;
-}
-
-.upload-box:hover {
-  background-color: #eceff1 !important;
-  border-color: #e02229 !important;
-}
-
-.upload-icon-circle {
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* KYC Details Bottom Panel */
-.last-mile-banner {
-  background-color: #e8f5e9;
-  border: 1px solid #c8e6c9;
-  border-radius: 10px;
-}
-
-.btn-create-label {
-  background-color: #2ecb71;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-}
-
-.btn-create-label:hover {
-  background-color: #27ae60;
-  color: #ffffff;
-}
-
-.btn-draft-booking {
-  background-color: #8ddca4;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-}
-
-.btn-draft-booking:hover {
-  background-color: #79c991;
-  color: #ffffff;
-}
-
-.btn-cancel-booking {
-  background-color: #ff8b94;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-}
-
-.btn-cancel-booking:hover {
-  background-color: #ff7680;
-  color: #ffffff;
-}
-
-/* Animations */
-.animate-fade {
-  animation: fadeIn 0.28s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>

@@ -1,0 +1,26 @@
+/* ==========================================================================
+   Layout: Admin Header & Global Toast
+   ========================================================================== */
+
+#flash-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: sans-serif;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+#flash-toast.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}

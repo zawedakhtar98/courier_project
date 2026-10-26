@@ -1,0 +1,533 @@
+/* ==========================================================================
+   Page: Rate Calculator View
+   ========================================================================== */
+
+/* Form Inputs */
+.page-rate-calculator .form-control-custom,
+.page-rate-calculator .form-select-custom {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  background-color: #fcfcfc;
+}
+
+.page-rate-calculator .form-control-custom:focus,
+.page-rate-calculator .form-select-custom:focus {
+  border-color: #d01a24;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(208, 26, 36, 0.12);
+}
+
+/* Custom styling for vue-select to match form-control-custom */
+.page-rate-calculator .v-select .vs__dropdown-toggle {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  padding: 0.25rem 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  background-color: #fcfcfc;
+}
+
+.page-rate-calculator .v-select.vs--open .vs__dropdown-toggle,
+.page-rate-calculator .v-select .vs__search:focus {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.page-rate-calculator .vs__selected-options:focus {
+  border: 1px solid #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12) !important;
+}
+
+.page-rate-calculator .v-select .vs__selected {
+  margin: 2px;
+  padding: 0 0.25rem;
+}
+
+.page-rate-calculator .v-select .vs__search {
+  margin: 4px;
+  padding: 0 0.25rem;
+}
+
+.page-rate-calculator .v-select .vs__dropdown-menu {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+}
+
+.page-rate-calculator .v-select .vs__dropdown-option--highlight {
+  background-color: #e02229;
+  color: white;
+}
+
+.page-rate-calculator .header-panel {
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.page-rate-calculator .header-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8a8a8a !important;
+}
+
+.page-rate-calculator .search-group {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.page-rate-calculator .btn-search-custom {
+  background-color: #d01a24;
+  color: #ffffff;
+  border: none;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  font-size: 0.9rem;
+  transition: opacity 0.15s ease;
+}
+
+.page-rate-calculator .btn-search-custom:hover {
+  opacity: 0.9;
+  background-color: #b3131b;
+  color: #ffffff;
+}
+
+.page-rate-calculator .btn-recharge {
+  background-color: #d01a24;
+  color: #ffffff;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  transition: opacity 0.15s ease;
+}
+
+.page-rate-calculator .btn-recharge:hover {
+  opacity: 0.9;
+  background-color: #b3131b;
+  color: #ffffff;
+}
+
+.page-rate-calculator .balance-badge {
+  background-color: #1b357d;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.98rem;
+  border-radius: 8px;
+  height: 38px;
+  min-width: 100px;
+}
+
+.page-rate-calculator .icon-btn {
+  background-color: #f7f9fa;
+  border: 1px solid #e9ecef;
+}
+
+.page-rate-calculator .profile-avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #6f42c1;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Dimension Grid styling */
+.page-rate-calculator .custom-dim-table th {
+  border: none;
+  color: #4b5563;
+  padding-bottom: 0.5rem;
+}
+
+.page-rate-calculator .custom-dim-table td {
+  padding: 0.35rem;
+  border: none;
+}
+
+.page-rate-calculator .btn-action-copy {
+  color: #198754;
+  border-color: rgba(25, 135, 84, 0.2);
+  background-color: #ffffff;
+}
+
+.page-rate-calculator .btn-action-copy:hover {
+  background-color: #198754;
+  color: #ffffff;
+  border-color: #198754;
+}
+
+.page-rate-calculator .btn-action-delete {
+  color: #dc3545;
+  border-color: rgba(220, 53, 69, 0.2);
+  background-color: #ffffff;
+}
+
+.page-rate-calculator .btn-action-delete:hover {
+  background-color: #dc3545;
+  color: #ffffff;
+  border-color: #dc3545;
+}
+
+/* Totals styling */
+.page-rate-calculator .totals-bar {
+  border: 1px solid #e2e8f0;
+}
+
+.page-rate-calculator .input-group-totals {
+  width: auto;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.page-rate-calculator .input-group-totals .input-group-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  background-color: #5a6268 !important;
+}
+
+.page-rate-calculator .input-group-totals .form-control {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.88rem;
+}
+
+/* Buttons */
+.page-rate-calculator .btn-add-box {
+  color: #1b357d;
+  background-color: #ffffff;
+  border: 1.5px solid #1b357d;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.page-rate-calculator .btn-add-box:hover {
+  background-color: #eef2ff;
+  color: #14275e;
+  transform: translateY(-1px);
+}
+
+.page-rate-calculator .btn-reset {
+  color: #6c757d;
+  background-color: #ffffff;
+  border: 1.5px solid #dcdcdc;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.page-rate-calculator .btn-reset:hover {
+  background-color: #f8f9fa;
+  border-color: #6c757d;
+  color: #343a40;
+  transform: translateY(-1px);
+}
+
+.page-rate-calculator .btn-get-rate {
+  background-color: #d01a24;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(208, 26, 36, 0.2);
+}
+
+.page-rate-calculator .btn-get-rate:hover {
+  background-color: #b3131b;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(208, 26, 36, 0.28);
+}
+
+/* Search results Rate cards */
+.page-rate-calculator .rate-results-table th {
+  padding: 0.75rem;
+  border: none;
+}
+
+.page-rate-calculator .rate-results-table td {
+  padding: 1.25rem 0.75rem;
+  vertical-align: middle;
+}
+
+.page-rate-calculator .border-bottom-hover {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.page-rate-calculator .border-bottom-hover:hover {
+  background-color: #fafbfc;
+}
+
+.page-rate-calculator .vendor-logo-wrapper {
+  width: 72px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.01em;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.page-rate-calculator .btn-book-now {
+  background-color: #e02229;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.page-rate-calculator .btn-book-now:hover {
+  background-color: #c91b22;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Animations */
+.page-rate-calculator .animate-fade {
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Carrier Rates & AWB Table Design */
+.page-rate-calculator .carrier-section-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
+.page-rate-calculator .search-carrier-input {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  min-width: 250px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.page-rate-calculator .search-carrier-input:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+}
+
+.page-rate-calculator .btn-filter-carrier {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  color: #334155;
+  background-color: #ffffff;
+}
+
+.page-rate-calculator .btn-filter-carrier:hover {
+  background-color: #f8fafc;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.page-rate-calculator .carrier-table-wrapper {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.page-rate-calculator .carrier-rates-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.page-rate-calculator .carrier-thead-row th {
+  background: linear-gradient(135deg, #1b357d 0%, #0b1728 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.95rem 1rem;
+  border: none !important;
+  vertical-align: middle;
+}
+
+.page-rate-calculator .carrier-thead-row th i {
+  font-size: 0.75rem;
+}
+
+.page-rate-calculator .carrier-row {
+  transition: background-color 0.15s ease;
+}
+
+.page-rate-calculator .carrier-row:hover {
+  background-color: #fafbfc;
+}
+
+.page-rate-calculator .carrier-row td {
+  border-top: none;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.page-rate-calculator .border-end-cell {
+  border-right: 1px solid #f1f5f9;
+}
+
+/* Col 1: Service */
+.page-rate-calculator .carrier-logo-card {
+  width: 135px;
+  height: 56px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 6px 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.page-rate-calculator .carrier-logo-img {
+  max-height: 38px;
+  max-width: 110px;
+  object-fit: contain;
+}
+
+.page-rate-calculator .carrier-service-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Col 2: Total Net Price */
+.page-rate-calculator .carrier-price-row {
+  display: flex;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.page-rate-calculator .carrier-price-label {
+  font-weight: 700;
+  color: #334155;
+}
+
+.page-rate-calculator .carrier-price-val {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.page-rate-calculator .carrier-grand-price {
+  font-size: 2.15rem;
+  font-weight: 800;
+  color: #d01a24;
+  line-height: 1.1;
+  margin-top: 4px;
+  letter-spacing: -0.02em;
+}
+
+/* Col 3: Price Breakdown */
+.page-rate-calculator .carrier-breakdown-box {
+  max-width: 230px;
+  font-size: 0.86rem;
+}
+
+.page-rate-calculator .breakdown-name-item {
+  color: #334155;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.page-rate-calculator .red-dot {
+  color: #d01a24;
+  font-size: 1.25rem;
+  line-height: 0;
+  margin-right: 6px;
+}
+
+.page-rate-calculator .breakdown-val-item {
+  color: #1e293b;
+  font-weight: 600;
+  text-align: right;
+  min-width: 55px;
+}
+
+/* Col 4: Chargeable Weight */
+.page-rate-calculator .carrier-scale-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-rate-calculator .carrier-weight-num {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.page-rate-calculator .carrier-weight-unit {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+}
+
+/* Col 5: Expected delivery */
+.page-rate-calculator .carrier-clock-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #fee2e2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-rate-calculator .carrier-delivery-text {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Col 6: Action / Create AWB */
+.page-rate-calculator .btn-create-awb {
+  background-color: #d01a24;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0.65rem 1.4rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.page-rate-calculator .btn-create-awb:hover {
+  background-color: #b3131b;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(208, 26, 36, 0.28);
+}
+
+@media (min-width: 768px) {
+  .page-rate-calculator .border-end-md {
+    border-right: 1px solid #e9ecef;
+  }
+}
