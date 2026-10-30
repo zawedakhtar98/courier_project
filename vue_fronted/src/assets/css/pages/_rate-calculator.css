@@ -404,10 +404,10 @@
 
 /* Col 1: Service */
 .page-rate-calculator .carrier-logo-card {
-  width: 135px;
-  height: 56px;
+  width: 86px;
+  height: 86px;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -428,6 +428,8 @@
   color: var(--primary-color);
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  width: 100%;
+  margin-left: 14px;
 }
 
 /* Col 2: Total Net Price */

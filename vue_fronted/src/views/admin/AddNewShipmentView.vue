@@ -212,7 +212,7 @@ const totalChargeableWeight = computed(() => {
 
 // Step 4: Custom Invoice Details
 const invoiceRows = ref([
-  { boxNo: 1, description: 'TESI HAMMER', hsnCode: '82071900', htsCode: '82071900', unit: 'PCS', qty: 1, rate: 22, amount: 22 }
+  { boxNo: 1, description: 'TESI HAMMER', hsnCode: '82071900', unit: 'PCS', qty: 1, rate: 22, amount: 22 }
 ])
 
 const customsClearance = ref({
@@ -235,7 +235,6 @@ const addInvoiceRow = () => {
     boxNo: boxRows.value[0]?.boxNo || 1,
     description: 'TESI HAMMER',
     hsnCode: '82071900',
-    htsCode: '82071900',
     unit: 'PCS',
     qty: 1,
     rate: 22,
@@ -496,8 +495,6 @@ const loadDraft = (draft) => {
               <h5 class="fw-bold mb-0 text-dark-accent">
                 <i class="bi bi-building me-2 text-danger"></i> Shipper Details
               </h5>
-              <a href="#" @click.prevent="saveDetailsDraft"
-                class="save-link text-success fw-bold text-decoration-none">Save Details</a>
             </div>
 
             <div class="row g-3">
@@ -526,16 +523,20 @@ const loadDraft = (draft) => {
                 <input v-model="shipperForm.address3" type="text" class="form-control" />
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <label class="form-label small fw-bold">Pincode <span class="text-danger">*</span></label>
                 <input v-model="shipperForm.pincode" type="text" class="form-control" />
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <label class="form-label small fw-bold">City <span class="text-danger">*</span></label>
                 <input v-model="shipperForm.city" type="text" class="form-control" />
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <label class="form-label small fw-bold">State <span class="text-danger">*</span></label>
+                <input v-model="shipperForm.state" type="text" class="form-control" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-bold">Country <span class="text-danger">*</span></label>
                 <input v-model="shipperForm.state" type="text" class="form-control" />
               </div>
 
@@ -551,11 +552,11 @@ const loadDraft = (draft) => {
               <div class="col-md-6">
                 <label class="form-label small fw-bold">KYC Type <span class="text-danger">*</span></label>
                 <select v-model="shipperForm.kycType" class="form-select">
-                  <option value="AADHAAR_NUMBER">Aadhaar Number</option>
-                  <option value="PAN_CARD">PAN Card</option>
+                  <option value="Aadhaar Number">Aadhaar Number</option>
+                  <option value="PAN Card">PAN Card</option>
                   <option value="GST No">GST No</option>
-                  <option value="PASSPORT">Passport</option>
-                  <option value="VOTER_ID">Voter ID</option>
+                  <option value="Passport">Passport</option>
+                  <option value="Voter ID">Voter ID</option>
                 </select>
               </div>
               <div class="col-md-6">
@@ -632,8 +633,6 @@ const loadDraft = (draft) => {
               <h5 class="fw-bold mb-0 text-dark-accent">
                 <i class="bi bi-building me-2 text-danger"></i> Consignee Details
               </h5>
-              <a href="#" @click.prevent="saveDetailsDraft"
-                class="save-link text-success fw-bold text-decoration-none">Save Details</a>
             </div>
 
             <div class="row g-3">
@@ -656,16 +655,6 @@ const loadDraft = (draft) => {
               <div class="col-md-4">
                 <label class="form-label small fw-bold">Company Name <span class="text-danger">*</span></label>
                 <input v-model="consigneeForm.companyName" type="text" class="form-control" />
-              </div>
-
-              <div class="col-md-12">
-                <label class="form-label small fw-bold">Consignee Type <span class="text-danger">*</span></label>
-                <select v-model="consigneeForm.consigneeType" class="form-select">
-                  <option :selected="selected">Select Consignee Type</option>
-                  <option value="Commercial">Commercial </option>
-                  <option value="CSB 4">CSB 4</option>
-                  <option value="CSB 5">CSB 5</option>
-                </select>
               </div>
 
               <div class="col-12">
@@ -788,7 +777,7 @@ const loadDraft = (draft) => {
               <div class="row g-2 mt-3">
                 <!-- Readonly summary outputs -->
                 <div class="col-md-3">
-                  <label class="form-label small fw-bold">Total Pcs <span class="text-danger">*</span></label>
+                  <label class="form-label small fw-bold">Total Box <span class="text-danger">*</span></label>
                   <input :value="totalPcs" type="number" class="form-control bg-light fw-bold" readonly />
                 </div>
                 <div class="col-md-3">
@@ -815,7 +804,7 @@ const loadDraft = (draft) => {
           <div v-if="currentStep === 4" class="step-content-section animate-fade">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
               <h5 class="fw-bold mb-0 text-dark-accent">
-                <i class="bi bi-file-earmark-text-fill me-2 text-danger"></i> Custom Invoice Details
+                <i class="bi bi-file-earmark-text-fill me-2 text-danger"></i>Invoice Details
               </h5>
             </div>
 
@@ -827,7 +816,6 @@ const loadDraft = (draft) => {
                     <th style="width: 10%;">BOX</th>
                     <th>DESCRIPTION <span class="text-danger">*</span></th>
                     <th>HSN CODE</th>
-                    <th>HTS CODE</th>
                     <th style="width: 10%;">UNIT</th>
                     <th style="width: 10%;">QTY</th>
                     <th>RATE</th>
@@ -849,9 +837,6 @@ const loadDraft = (draft) => {
                     </td>
                     <td>
                       <input v-model="invItem.hsnCode" type="text" class="form-control form-control-sm" />
-                    </td>
-                    <td>
-                      <input v-model="invItem.htsCode" type="text" class="form-control form-control-sm" />
                     </td>
                     <td>
                       <input v-model="invItem.unit" type="text" class="form-control form-control-sm text-center" />
@@ -886,25 +871,17 @@ const loadDraft = (draft) => {
             <!-- Lower Summary Inputs -->
             <div class="row g-3 mb-4">
               <div class="col-md-6">
-                <label class="form-label small fw-bold">Description <span class="text-danger">*</span></label>
-                <input v-model="concatenatedDescriptions" type="text" class="form-control bg-light" readonly />
-              </div>
-              <div class="col-md-2">
                 <label class="form-label small fw-bold">Value <span class="text-danger">*</span></label>
                 <input :value="invoiceTotalValue.toFixed(2)" type="text" class="form-control bg-light fw-bold"
                   readonly />
               </div>
-              <div class="col-md-2">
+              <div class="col-md-6">
                 <label class="form-label small fw-bold">Currency <span class="text-danger">*</span></label>
                 <select v-model="invoiceCurrency" class="form-select">
                   <option value="INR">INR</option>
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
                 </select>
-              </div>
-              <div class="col-md-2">
-                <label class="form-label small fw-bold">Total IGST <span class="text-danger">*</span></label>
-                <input v-model.number="totalIgst" type="number" class="form-control" />
               </div>
             </div>
 
@@ -932,12 +909,7 @@ const loadDraft = (draft) => {
                   <input v-model="customsClearance.invoiceDate" type="date" class="form-control" />
                 </div>
 
-                <div class="col-md-4">
-                  <label class="form-label small fw-bold">Reference No. <span class="text-danger">*</span></label>
-                  <input v-model="customsClearance.referenceNo" type="text" class="form-control" />
-                </div>
-
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <label class="form-label small fw-bold">Term of Trade <span class="text-danger">*</span></label>
                   <select v-model="customsClearance.termOfTrade" class="form-select">
                     <option>DAP</option>
@@ -946,7 +918,7 @@ const loadDraft = (draft) => {
                   </select>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <label class="form-label small fw-bold">Duty Tax <span class="text-danger">*</span></label>
                   <select v-model="customsClearance.dutyTax" class="form-select">
                     <option>DDU</option>
