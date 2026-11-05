@@ -161,7 +161,7 @@
 .page-rate-calculator .custom-dim-table th {
   border: none;
   color: var(--primary-color);
-  padding-bottom: 0.5rem;
+  padding: unset;
 }
 
 .page-rate-calculator .custom-dim-table td {

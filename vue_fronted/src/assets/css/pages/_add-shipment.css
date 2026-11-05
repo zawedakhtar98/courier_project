@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .page-add-shipment .text-dark-accent {
-  color: #2b2b2b;
+  color: var(--primary-color);
 }
 
 /* Form inputs & selects styled round */
@@ -20,6 +20,179 @@
 .page-add-shipment .form-select:focus {
   border-color: #1b357d;
   box-shadow: 0 0 0 3px rgba(27, 53, 125, 0.12);
+}
+
+/* Custom styling for vue-select to match form-control */
+.page-add-shipment .v-select,
+.page-add-shipment .v-select.form-control,
+.v-select.form-control {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  min-height: auto;
+}
+
+.page-add-shipment .v-select.form-control:focus,
+.v-select.form-control:focus {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.page-add-shipment .v-select .vs__dropdown-toggle,
+.v-select.form-control .vs__dropdown-toggle {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-height: 41px;
+  height: 41px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.page-add-shipment .v-select.vs--open .vs__dropdown-toggle,
+.page-add-shipment .v-select.vs--focused .vs__dropdown-toggle,
+.v-select.form-control.vs--open .vs__dropdown-toggle,
+.v-select.form-control.vs--focused .vs__dropdown-toggle {
+  border-color: #1b357d !important;
+  box-shadow: 0 0 0 3px rgba(27, 53, 125, 0.12) !important;
+  background-color: #ffffff;
+}
+
+.page-add-shipment .v-select.vs--disabled .vs__dropdown-toggle,
+.v-select.form-control.vs--disabled .vs__dropdown-toggle {
+  background-color: #e9ecef !important;
+  border-color: #dcdcdc !important;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.page-add-shipment .v-select.vs--disabled .vs__selected,
+.v-select.form-control.vs--disabled .vs__selected {
+  color: #495057 !important;
+  font-weight: 600;
+  background: transparent !important;
+}
+
+.page-add-shipment .v-select.vs--disabled .vs__search,
+.v-select.form-control.vs--disabled .vs__search {
+  cursor: not-allowed;
+  background: transparent !important;
+  display: none !important;
+}
+
+.page-add-shipment .v-select.vs--disabled .vs__open-indicator,
+.v-select.form-control.vs--disabled .vs__open-indicator,
+.page-add-shipment .v-select.vs--disabled .vs__clear,
+.v-select.form-control.vs--disabled .vs__clear {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.page-add-shipment .v-select .vs__selected-options,
+.v-select.form-control .vs__selected-options {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.page-add-shipment .v-select .vs__selected,
+.v-select.form-control .vs__selected {
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem;
+  color: #2b2b2b;
+  border: none;
+  background: transparent;
+  line-height: 1.5;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.page-add-shipment .v-select .vs__search,
+.page-add-shipment .v-select .vs__search:focus,
+.v-select.form-control .vs__search,
+.v-select.form-control .vs__search:focus {
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #2b2b2b;
+}
+
+.page-add-shipment .v-select .vs__search::placeholder,
+.v-select.form-control .vs__search::placeholder {
+  color: #8c8c8c;
+  font-size: 0.9rem;
+}
+
+.page-add-shipment .v-select .vs__actions,
+.v-select.form-control .vs__actions {
+  padding: 0 0 0 0.35rem;
+  display: flex;
+  align-items: center;
+}
+
+.page-add-shipment .v-select .vs__clear,
+.v-select.form-control .vs__clear {
+  margin-right: 4px;
+  fill: #8c8c8c;
+}
+
+.page-add-shipment .v-select .vs__open-indicator,
+.v-select.form-control .vs__open-indicator {
+  fill: #6c757d;
+  transform: scale(0.85);
+  transition: transform 0.15s ease;
+}
+
+.page-add-shipment .v-select.vs--open .vs__open-indicator,
+.v-select.form-control.vs--open .vs__open-indicator {
+  transform: rotate(180deg) scale(0.85);
+}
+
+.page-add-shipment .v-select .vs__dropdown-menu,
+.v-select.form-control .vs__dropdown-menu {
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  font-size: 0.9rem;
+  padding: 4px 0;
+  top: calc(100% + 2px);
+  z-index: 1050;
+}
+
+.step-content-section .text-dark-accent i {
+  color: var(--primary-color);
+}
+
+.page-add-shipment .v-select .vs__dropdown-option,
+.v-select.form-control .vs__dropdown-option {
+  padding: 7px 12px;
+  color: #2b2b2b;
+  font-size: 0.88rem;
+}
+
+.page-add-shipment .v-select .vs__dropdown-option--highlight,
+.v-select.form-control .vs__dropdown-option--highlight {
+  background-color: #1b357d;
+  color: #ffffff;
+}
+
+.page-add-shipment .v-select .vs__dropdown-option--selected,
+.v-select.form-control .vs__dropdown-option--selected {
+  font-weight: 600;
 }
 
 .page-add-shipment .form-control-sm,
@@ -314,6 +487,7 @@
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
