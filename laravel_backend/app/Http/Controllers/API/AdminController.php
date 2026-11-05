@@ -20,6 +20,7 @@ use App\Services\ShipmentChargesMasterService;
 use App\Services\ZoneMasterService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -160,7 +161,9 @@ class AdminController extends Controller
 
     public function getCountryList()
     {
-        $country_data = $this->countryService->findAll();
+        $country_data = Cache::remember('country_list', now()->addDays(10), function () {
+            return $this->countryService->findAll();
+        });
         return ApiResponse::success(CountryResource::collection($country_data), "Countries fetched successfully!");
     }
 

@@ -17,7 +17,7 @@ class ShipmentDetail extends Model
      *
      * @var string
      */
-    protected $table = 'shipments_details';
+    protected $table = 'shipment_details';
 
     /**
      * The attributes that are mass assignable.
@@ -118,20 +118,5 @@ class ShipmentDetail extends Model
     {
         return $this->boxDetails();
     }
-
-    /**
-     * Get the customs invoices for the shipment.
-     */
-    public function customsInvoices(): HasMany
-    {
-        return $this->hasMany(CustomsInvoice::class, 'shipment_id');
-    }
-
-    /**
-     * Get the primary customs invoice for the shipment.
-     */
-    public function customsInvoice(): HasOne
-    {
-        return $this->hasOne(CustomsInvoice::class, 'shipment_id');
-    }
 }
+    

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('shipments_details', function (Blueprint $table) {
+        Schema::create('shipment_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->comment('shipment created by')->constrained('users')->nullOnDelete();
             $table->string('shipment_no', 100)->nullable()->unique()->comment('shipment no consider as AWB no');
@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('sender_email', 255)->nullable();
             $table->string('sender_city', 100)->nullable();
             $table->string('sender_state', 100)->nullable();
+            $table->string('sender_country', 100)->nullable();
             $table->string('sender_pincode', 50)->nullable();
             $table->string('sender_kyc_type', 50)->nullable();
             $table->string('sender_kyc_number', 100)->nullable();
@@ -47,6 +48,7 @@ return new class extends Migration
             $table->string('consignee_address_line_3', 255)->nullable();
             $table->string('consignee_city', 100)->nullable();
             $table->string('consignee_state', 100)->nullable();
+            $table->string('consignee_country', 100)->nullable();
             $table->string('consignee_pincode', 50)->nullable();
             $table->string('consignee_mobile_no', 50)->nullable();
             $table->string('consignee_email', 255)->nullable();
@@ -73,6 +75,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('shipments_details');
+        Schema::dropIfExists('shipment_details');
     }
 };
