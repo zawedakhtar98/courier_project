@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('box_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('shipment_id')->constrained('shipments_details')->cascadeOnDelete();
+            $table->foreignId('shipment_id')->constrained('shipment_details')->cascadeOnDelete();
             $table->integer('no_of_box')->nullable();
             $table->decimal('length', 10, 2)->nullable();
             $table->decimal('width', 10, 2)->nullable();

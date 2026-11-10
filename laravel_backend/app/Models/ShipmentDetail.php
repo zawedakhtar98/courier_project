@@ -25,44 +25,60 @@ class ShipmentDetail extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'service_partner_id',
         'user_id',
-        'awb_number',
+        'shipment_no',
+        'reference_no',
+        'shipment_type',
+        'origin',
+        'destination',
+        'booking_date',
+        'shipment_date',
+        'package_type',
+        'service_partner_id',
+
+        // Sender Details
         'sender_name',
         'sender_company_name',
-        'sender_contact_person_name',
         'sender_address_line_1',
         'sender_address_line_2',
         'sender_address_line_3',
+        'sender_mobile',
+        'sender_email',
         'sender_city',
         'sender_state',
+        'sender_country',
         'sender_pincode',
-        'sender_type',
         'sender_kyc_type',
         'sender_kyc_number',
-        'sender_telephone',
-        'sender_email',
-        'receiver_name',
-        'receiver_company_name',
-        'receiver_contact_person_name',
-        'receiver_address_line_1',
-        'receiver_address_line_2',
-        'receiver_address_line_3',
-        'receiver_city',
-        'receiver_state',
-        'receiver_pincode',
-        'receiver_type',
-        'receiver_vat_tax_id',
-        'receiver_telephone',
-        'receiver_email',
-        'receiver_country_id',
+        'sender_kyc_front',
+        'sender_kyc_back',
+
+        // Consignee Details
+        'consignee_name',
+        'consignee_company_name',
+        'consignee_address_line_1',
+        'consignee_address_line_2',
+        'consignee_address_line_3',
+        'consignee_city',
+        'consignee_state',
+        'consignee_country',
+        'consignee_pincode',
+        'consignee_mobile_no',
+        'consignee_email',
+
+        // Totals & Invoicing
+        'total_box',
+        'total_actual_weight',
+        'total_chargeable_weight',
+        'total_volume_weight',
+        'total_invoice_value',
+        'booking_amount',
         'payment_status',
         'status',
         'created_by',
-        'goods_type',
-        'actual_weight',
-        'chargeable_weight',
-        'shipment_total_cost',
+        'shipment_generated_from',
+        'payment_mode',
+        'currency',
     ];
 
     /**
@@ -73,14 +89,18 @@ class ShipmentDetail extends Model
     protected function casts(): array
     {
         return [
-            'actual_weight' => 'decimal:2',
-            'chargeable_weight' => 'decimal:2',
-            'shipment_total_cost' => 'decimal:2',
+            'total_actual_weight'     => 'decimal:2',
+            'total_chargeable_weight' => 'decimal:2',
+            'total_volume_weight'     => 'decimal:2',
+            'total_invoice_value'     => 'decimal:2',
+            'booking_amount'          => 'decimal:2',
+            'booking_date'            => 'date',
+            'shipment_date'           => 'date',
         ];
     }
 
     /**
-     * Get the service partner for the shipment.
+     * Service Partner relationship.
      */
     public function servicePartner(): BelongsTo
     {
@@ -88,7 +108,7 @@ class ShipmentDetail extends Model
     }
 
     /**
-     * Get the user who owns or created the shipment.
+     * User who created the shipment.
      */
     public function user(): BelongsTo
     {
@@ -96,15 +116,15 @@ class ShipmentDetail extends Model
     }
 
     /**
-     * Get the receiver country for the shipment.
+     * Destination Country relationship.
      */
-    public function receiverCountry(): BelongsTo
+    public function destinationCountry(): BelongsTo
     {
-        return $this->belongsTo(Country::class, 'receiver_country_id');
+        return $this->belongsTo(Country::class, 'destination');
     }
 
     /**
-     * Get the box details for the shipment.
+     * Box details for the shipment.
      */
     public function boxDetails(): HasMany
     {
@@ -118,5 +138,12 @@ class ShipmentDetail extends Model
     {
         return $this->boxDetails();
     }
+
+    /**
+     * Invoice details for the shipment.
+     */
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(InvoiceDetails::class, 'shipment_id');
+    }
 }
-    

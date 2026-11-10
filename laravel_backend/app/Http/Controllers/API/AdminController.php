@@ -441,4 +441,6 @@ class AdminController extends Controller
         $servicePartnerAdditionalCharges = $this->shipmentAdditionalChargeService->getAll();
         return ApiResponse::success(ShipmentAdditionalChargesResource::collection($servicePartnerAdditionalCharges), "Service Partner Additional Charges fetched successfully!");
     }
+
+    public function getHSNCode() {}
 }

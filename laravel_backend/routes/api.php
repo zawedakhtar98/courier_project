@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AdminController;
+use App\Http\Controllers\API\HsnController;
 use App\Http\Controllers\API\RateController;
 use App\Http\Controllers\API\ShipmentController;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +58,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('get-list', [AdminController::class, 'getServicePartnerAdditionalCharges']);
         });
     });
-
+    Route::get('hsn/search', [HsnController::class, 'search']);
     Route::post('shipment/calculator', [RateController::class, 'shipmentRateCalculator']);
+
+    Route::prefix('shipment')->group(function () {
+        Route::post('book', [ShipmentController::class, 'bookShipment']);
+        Route::get('get-list', [ShipmentController::class, 'getShipmentList']);
+        Route::get('{id}', [ShipmentController::class, 'getShipmentById']);
+        Route::delete('{id}', [ShipmentController::class, 'deleteShipment']);
+        Route::get('track/{awb}', [ShipmentController::class, 'getShipmentByAwb']);
+    });
 });
