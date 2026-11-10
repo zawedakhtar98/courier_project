@@ -81,7 +81,7 @@ const formRateSlab = ref({
   rateType: '',
   weightFrom: '0.00',
   weightTo: '0.500',
-  currency: '',
+  currency: 'INR',
   status: 'Active',
   selectedZones: [],
   zoneRates: {},
@@ -167,7 +167,7 @@ const openAddModal = () => {
     rateType: '',
     weightFrom: '0.00',
     weightTo: '0.500',
-    currency: '₹',
+    currency: 'INR',
     status: 'Active',
     selectedZones: [],
     zoneRates: {},
@@ -570,9 +570,9 @@ onMounted(async () => {
                   <div class="col-md-4">
                     <label class="form-label small fw-semibold">Currency</label>
                     <select v-model="formRateSlab.currency" class="form-select">
-                      <option v-for="c in CURRENCIES" :key="c.value" :value="c.value"
-                        :selected="c.value === formRateSlab.currency">
-                        {{ c.label }}
+                      <option v-for="curr in CURRENCIES" :key="curr" :value="curr"
+                        :selected="curr === formRateSlab.currency">
+                        {{ curr }}
                       </option>
                     </select>
                   </div>
@@ -736,4 +736,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-

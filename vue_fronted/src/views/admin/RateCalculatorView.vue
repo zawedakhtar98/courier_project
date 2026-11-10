@@ -532,11 +532,11 @@ const bookShipment = (rate) => {
       destination: destination.value,
       service: rate.service,
       packageType: packageType.value,
-      goodsType: packageType.value,
       pincode: pincode.value,
       city: city.value,
       state: state.value,
-      boxes: JSON.stringify(simplifiedBoxes)
+      boxes: JSON.stringify(simplifiedBoxes),
+      service_partner: rate.service_partner_id
     }
   })
 }

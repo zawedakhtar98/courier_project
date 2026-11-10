@@ -27,7 +27,7 @@ const partnerForm = ref({
 onMounted(async () => {
   isLoading.value = true;
   try {
-    const resp = await getAllServicePartners(10, 1);
+    const resp = await getAllServicePartners(20, 1);
     if (resp.status == 'success') {
       servicePartnersList.value = resp.data;
     }

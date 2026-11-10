@@ -23,7 +23,7 @@ const ShipAdditionalChargesList = ref([]);
 
 const fetchServicePartners = async () => {
   try {
-    const resp = await getAllServicePartners(10, 1);
+    const resp = await getAllServicePartners(20, 1);
     if (resp.status == "success") {
       ServicePartnerList.value = resp.data;
     }

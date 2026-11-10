@@ -35,7 +35,7 @@ const router = createRouter({
         {
           path: 'shipments',
           name: 'admin-shipments',
-          component: () => import('@/views/admin/ShipmentsView.vue'),
+          component: () => import('@/views/admin/ShipmentList.vue'),
           meta: { title: 'Shipment Management' },
         },
         {

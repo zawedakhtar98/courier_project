@@ -8,10 +8,6 @@ const DOCUMENT_TYPE = [
     'DOC',
 ]
 
-const CURRENCIES = [
-    { label: '₹ (INR)', value: '₹', value: '' },
-    { label: '$ (USD)', value: '$' },
-]
 
 const shipmentCalculation_basis = [
     { value: 'per_shipment', label: 'Per Shipment', description: 'One fixed amount for the whole shipment. Ex: Handling ₹100, Documentation ₹50' },
@@ -51,5 +47,10 @@ const shipmentCalculation_basis = [
 
  * 
  * **/
+
+
+const CURRENCIES = ['INR', 'USD', 'CAD', 'AUD', 'GBP', 'EUR', 'AED', 'MYR', 'NZD', 'SAR', 'SGD', 'AFN', 'ALL', 'DZD', 'AOA', 'ARS', 'AMD', 'AWG', 'AZN', 'BSD', 'BHD', 'BDT', 'BBD', 'BYR', 'BZD', 'BMD', 'BTN', 'BOB', 'BAM', 'BWP', 'BRL', 'BND', 'BGN', 'MMK', 'BIF', 'KHR', 'CVE', 'KYD', 'XAF', 'XPF', 'CLP', 'CNY', 'COP', 'KMF', 'CDF', 'CRC', 'HRK', 'CUC', 'CUP', 'CZK', 'DKK', 'DJF', 'DOP', 'XCD', 'EGP', 'ERN', 'ETB', 'FKP', 'FJD', 'GMD', 'GEL', 'GHS', 'GIP', 'GTQ', 'GGP', 'GNF', 'GYD', 'HTG', 'HNL', 'HKD', 'HUF', 'ISK', 'IDR', 'IRR', 'IQD', 'ILS', 'JMD', 'JPY', 'JOD', 'KZT', 'KES', 'KWD', 'KGS', 'LAK', 'LBP', 'LSL', 'LRD', 'LYD', 'MOP', 'MKD', 'MGA', 'MWK', 'MVR', 'MRO', 'MUR', 'MXN', 'MDL', 'MNT', 'MAD', 'MZN', 'NAD', 'NPR', 'ANG', 'TWD', 'NIO', 'NGN', 'KPW', 'NOK', 'OMR', 'PKR', 'PAB', 'PGK', 'PYG', 'PEN', 'PHP', 'PLN', 'QAR', 'RON', 'RUB', 'RWF', 'SHP', 'WST', 'STD', 'RSD', 'SCR', 'SLL', 'SBD', 'SOS', 'ZAR', 'KRW', 'SSP', 'LKR', 'SDG', 'SRD', 'SZL', 'SEK', 'CHF', 'SYP', 'TJS', 'TZS', 'THB', 'TOP', 'TTD', 'TND', 'TRY', 'TMT', 'UGX', 'UAH', 'UYU', 'UZS', 'VEF', 'XOF', 'YER', 'ZMW'
+];
+
 
 export { RATE_TYPES, DOCUMENT_TYPE, CURRENCIES, shipmentCalculation_basis }
