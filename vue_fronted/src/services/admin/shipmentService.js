@@ -33,6 +33,17 @@ export const getShipments = async (params = {}) => {
     }
 };
 
+export const getDashboardStats = async (params = {}) => {
+    try {
+        const response = await API.get('shipment/dashboard-stats', {
+            params
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const deleteShipment = async (id) => {
     try {
         const response = await API.delete(`shipment/${id}`);
@@ -46,5 +57,6 @@ export default {
     bookShipment,
     getShipmentById,
     getShipments,
+    getDashboardStats,
     deleteShipment
 };
