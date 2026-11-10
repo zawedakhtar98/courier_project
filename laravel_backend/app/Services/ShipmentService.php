@@ -161,6 +161,11 @@ class ShipmentService
         return $this->shipmentRepository->getAll($perPage, $page, $filters);
     }
 
+    public function getDashboardStats(array $filters = []): array
+    {
+        return $this->shipmentRepository->getDashboardStats($filters);
+    }
+
     public function deleteShipment(int $id): bool
     {
         return $this->shipmentRepository->delete($id);

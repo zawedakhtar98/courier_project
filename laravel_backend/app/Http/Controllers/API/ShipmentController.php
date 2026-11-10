@@ -120,6 +120,24 @@ class ShipmentController extends Controller
     }
 
     /**
+     * Get aggregated shipment statistics for dashboard KPI cards and overview
+     */
+    public function getDashboardStats(Request $request)
+    {
+        try {
+            $filters = [
+                'timeframe' => $request->get('timeframe', 'all'),
+                'from_date' => $request->get('from_date'),
+                'to_date'   => $request->get('to_date'),
+            ];
+            $stats = $this->shipmentService->getDashboardStats($filters);
+            return ApiResponse::success($stats, 'Dashboard statistics retrieved successfully');
+        } catch (\Throwable $e) {
+            return ApiResponse::error($e->getMessage(), 400);
+        }
+    }
+
+    /**
      * Delete shipment by ID
      */
     public function deleteShipment($id)

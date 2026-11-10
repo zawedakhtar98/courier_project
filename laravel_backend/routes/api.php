@@ -63,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('shipment')->group(function () {
         Route::post('book', [ShipmentController::class, 'bookShipment']);
+        Route::get('dashboard-stats', [ShipmentController::class, 'getDashboardStats']);
         Route::get('get-list', [ShipmentController::class, 'getShipmentList']);
         Route::get('{id}', [ShipmentController::class, 'getShipmentById']);
         Route::delete('{id}', [ShipmentController::class, 'deleteShipment']);

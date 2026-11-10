@@ -121,6 +121,72 @@ class ShipmentRepository implements ShipmentRepositoryInterface
         return $query->latest()->paginate($perPage, ['*'], 'page', $page);
     }
 
+    public function getDashboardStats(array $filters = []): array
+    {
+        $query = ShipmentDetail::query();
+
+        // Timeframe / Date filters
+        $timeframe = $filters['timeframe'] ?? 'all';
+        $fromDate = $filters['from_date'] ?? null;
+        $toDate = $filters['to_date'] ?? null;
+
+        if ($timeframe === 'today') {
+            $query->whereDate('booking_date', date('Y-m-d'));
+        } elseif ($timeframe === 'yesterday') {
+            $query->whereDate('booking_date', date('Y-m-d', strtotime('-1 day')));
+        } elseif ($timeframe === 'this_week') {
+            $monday = date('Y-m-d', strtotime('monday this week'));
+            $sunday = date('Y-m-d', strtotime('sunday this week'));
+            $query->whereBetween('booking_date', [$monday, $sunday]);
+        } elseif ($timeframe === 'this_month') {
+            $query->whereYear('booking_date', date('Y'))->whereMonth('booking_date', date('m'));
+        } elseif ($timeframe === 'this_year') {
+            $query->whereYear('booking_date', date('Y'));
+        } elseif (!empty($fromDate) && !empty($toDate)) {
+            $query->whereBetween('booking_date', [$fromDate, $toDate]);
+        } elseif (!empty($fromDate)) {
+            $query->whereDate('booking_date', '>=', $fromDate);
+        } elseif (!empty($toDate)) {
+            $query->whereDate('booking_date', '<=', $toDate);
+        }
+
+        // Status counts
+        $totalShipments = (clone $query)->count();
+        $delivered = (clone $query)->where('status', 'delivered')->count();
+        $inTransit = (clone $query)->whereIn('status', ['in_transit', 'pickup_in_progress', 'ready_to_ship'])->count();
+        $cancelled = (clone $query)->whereIn('status', ['cancel', 'cancelled'])->count();
+        $created = (clone $query)->where('status', 'created')->count();
+
+        // Weight, boxes and invoice totals
+        $totalWeight = (float)(clone $query)->sum('total_chargeable_weight');
+        $totalBoxes = (int)(clone $query)->sum('total_box');
+        $totalInvoiceAmount = (float)(clone $query)->sum('total_invoice_value');
+
+        // Recent shipments with relations
+        $recentShipments = (clone $query)
+            ->with(['destinationCountry', 'servicePartner', 'boxes', 'invoice'])
+            ->latest('id')
+            ->limit(8)
+            ->get();
+
+        return [
+            'summary' => [
+                'total_shipments'      => $totalShipments,
+                'delivered'            => $delivered,
+                'in_transit'           => $inTransit,
+                'cancelled'            => $cancelled,
+                'created'              => $created,
+                'total_weight'         => round($totalWeight, 2),
+                'total_boxes'          => $totalBoxes,
+                'total_invoice_amount' => round($totalInvoiceAmount, 2),
+            ],
+            'timeframe'        => $timeframe,
+            'from_date'        => $fromDate,
+            'to_date'          => $toDate,
+            'recent_shipments' => $recentShipments,
+        ];
+    }
+
     public function delete(int $id): bool
     {
         $shipment = ShipmentDetail::find($id);

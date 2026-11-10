@@ -19,5 +19,7 @@ interface ShipmentRepositoryInterface
 
     public function getAll(int $perPage = 15, int $page = 1, array $filters = []);
 
+    public function getDashboardStats(array $filters = []): array;
+
     public function delete(int $id): bool;
 }
