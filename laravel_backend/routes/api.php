@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('getAll-partners', [AdminController::class, 'getAllServicePartners']);
             Route::post('add-zone-rates', [AdminController::class, 'addServicePartnerZoneRate']);
             Route::get('get-zone-wise-rate', [AdminController::class, 'getServicePartnerZoneWiseRate']);
+            Route::post('bulk-upload-zone-rates', [AdminController::class, 'bulkUploadServicePartnerZoneRates']);
         });
 
         //country Master
@@ -43,6 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('update/{id}', [AdminController::class, 'updateZone']);
             Route::get('get-list', [AdminController::class, 'getZoneList']);
             Route::post('map-countries', [AdminController::class, 'MapZoneWithCountry']);
+            Route::post('unmap-country', [AdminController::class, 'unmapZoneCountry']);
+            Route::post('bulk-map-countries', [AdminController::class, 'bulkMapZoneWithCountry']);
         });
 
         //Shipment Charges Master
@@ -54,6 +57,9 @@ Route::middleware('auth:sanctum')->group(function () {
         //Additional charges maped with service partner
         Route::prefix('shipment-additional-charges')->group(function () {
             Route::post('add', [AdminController::class, 'addShipmentAdditionalCharge']);
+            Route::post('bulk-add', [AdminController::class, 'bulkAddShipmentAdditionalCharges']);
+            Route::post('bulk-upload', [AdminController::class, 'bulkUploadShipmentAdditionalCharges']);
+            Route::put('update/{id}', [AdminController::class, 'updateShipmentAdditionalCharge']);
             Route::delete('delete/{id}', [AdminController::class, 'deleteShipmentAdditionalCharge']);
             Route::get('get-list', [AdminController::class, 'getServicePartnerAdditionalCharges']);
         });
