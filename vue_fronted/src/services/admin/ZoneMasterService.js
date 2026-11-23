@@ -35,10 +35,34 @@ const addZoneCountryMapping = async (payload) => {
     }
 }
 
+const unmapZoneCountry = async (payload) => {
+    try {
+        const response = await API.post('admin/zone/unmap-country', payload);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const bulkMapZoneCountries = async (formData) => {
+    try {
+        const response = await API.post('admin/zone/bulk-map-countries', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 export {
     addZone,
     getZoneList,
     updateZone,
     deleteZone,
-    addZoneCountryMapping
+    addZoneCountryMapping,
+    unmapZoneCountry,
+    bulkMapZoneCountries
 }

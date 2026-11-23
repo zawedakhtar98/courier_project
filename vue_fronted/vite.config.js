@@ -6,7 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/expressit_admin/',
+  base: '/expressit_admin/new/',
   plugins: [
     vue(),
     vueDevTools(),

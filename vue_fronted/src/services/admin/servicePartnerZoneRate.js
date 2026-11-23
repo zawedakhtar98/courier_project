@@ -31,7 +31,25 @@ const getServicePartnerZoneRate = async (perPage, page) => {
 }
 
 
+const bulkUploadServicePartnerZoneRates = async (formData) => {
+    try {
+        const resp = await API.post('admin/service-partner/bulk-upload-zone-rates', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return resp.data;
+    }
+    catch (err) {
+        if (err.response?.data) {
+            return err.response.data;
+        }
+        throw err;
+    }
+}
+
 export {
     addServicePartnerZoneRate,
-    getServicePartnerZoneRate
+    getServicePartnerZoneRate,
+    bulkUploadServicePartnerZoneRates
 };

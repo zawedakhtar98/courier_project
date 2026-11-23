@@ -1,28 +1,33 @@
-<script>
-export function defaultSlabData() {
-  return [
-    { weight: '0.500', zones: ['1,214', '1,206', '1,366', '1,289', '1,609', '1,788', '1,460', '3,309', '1,607', '2,471', '3,343', '1,586', '2,752', '1,642', '1,642'] },
-    { weight: '1.000', zones: ['1,461', '1,441', '1,657', '1,442', '1,983', '2,132', '1,684', '4,221', '1,822', '3,215', '3,854', '1,779', '3,416', '1,694', '1,694'] },
-    { weight: '1.500', zones: ['1,707', '1,705', '1,946', '1,594', '2,349', '2,467', '1,910', '5,123', '1,990', '3,572', '4,362', '1,959', '3,944', '2,006', '2,006'] },
-    { weight: '2.000', zones: ['1,953', '1,962', '2,235', '1,745', '2,713', '2,804', '2,135', '6,027', '2,227', '3,931', '4,867', '2,136', '4,472', '2,306', '2,306'] },
-    { weight: '2.500', zones: ['2,242', '2,228', '2,386', '1,895', '2,813', '3,143', '2,362', '6,934', '2,473', '4,292', '5,375', '2,388', '5,000', '2,619', '2,619'] },
-    { weight: '3.000', zones: ['2,433', '2,436', '2,651', '2,137', '3,049', '3,413', '2,667', '7,882', '2,732', '4,663', '5,590', '2,634', '5,489', '2,863', '2,863'] },
-    { weight: '3.500', zones: ['2,623', '2,644', '2,915', '2,381', '3,285', '3,684', '2,971', '8,830', '2,991', '5,036', '5,804', '2,880', '5,979', '3,109', '3,109'] }
-  ]
-}
-</script>
-
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { RATE_TYPES, DOCUMENT_TYPE, CURRENCIES } from '@/constant'
 import { getZoneList } from '@/services/admin/ZoneMasterService'
 import { getAllServicePartners } from '@/services/admin/servicePartner'
 import { useToast } from 'vue-toastification'
-import { addServicePartnerZoneRate, getServicePartnerZoneRate } from '@/services/admin/servicePartnerZoneRate'
+import { addServicePartnerZoneRate, getServicePartnerZoneRate, bulkUploadServicePartnerZoneRates } from '@/services/admin/servicePartnerZoneRate'
 
 const toast = useToast();
 const servicePartnersList = ref([]);
 const zoneMastersList = ref([]);
+
+// Bulk Rate Upload states
+const showBulkUploadModal = ref(false)
+const bulkUploadFile = ref(null)
+const bulkUploadForm = ref({
+  servicePartner: '',
+  packageType: 'NONDOC',
+  currency: 'INR',
+  rateTypeMode: 'threshold',
+  perKgThreshold: 30.00,
+  mode: 'overwrite',
+})
+const bulkUploadZoneScope = ref('all') // 'all' | 'specific'
+const bulkUploadSelectedZones = ref([])
+const bulkUploadZoneSearch = ref('')
+const isUploadingRateSheet = ref(false)
+const rateUploadResult = ref(null)
+const isRateDragOver = ref(false)
+const rateFileInputRef = ref(null)
 
 const packageTypes = DOCUMENT_TYPE;
 
@@ -312,6 +317,149 @@ onMounted(async () => {
 
   await fetchRateGroups();
 });
+
+// Bulk Rate Upload Methods
+const bulkAvailableZones = computed(() => {
+  const zones = zoneMastersList.value?.data || (Array.isArray(zoneMastersList.value) ? zoneMastersList.value : [])
+  if (!bulkUploadZoneSearch.value.trim()) return zones
+  const q = bulkUploadZoneSearch.value.trim().toLowerCase()
+  return zones.filter(z => (z.name || z.zone_name || '').toLowerCase().includes(q))
+})
+
+const toggleBulkZone = (zoneId) => {
+  const idx = bulkUploadSelectedZones.value.indexOf(zoneId)
+  if (idx > -1) {
+    bulkUploadSelectedZones.value.splice(idx, 1)
+  } else {
+    bulkUploadSelectedZones.value.push(zoneId)
+  }
+}
+
+const isBulkZoneSelected = (zoneId) => {
+  return bulkUploadSelectedZones.value.includes(zoneId)
+}
+
+const selectAllBulkZones = () => {
+  const zones = zoneMastersList.value?.data || (Array.isArray(zoneMastersList.value) ? zoneMastersList.value : [])
+  bulkUploadSelectedZones.value = zones.map(z => z.id)
+}
+
+const clearAllBulkZones = () => {
+  bulkUploadSelectedZones.value = []
+}
+
+const openBulkUploadModal = () => {
+  bulkUploadFile.value = null
+  rateUploadResult.value = null
+  isUploadingRateSheet.value = false
+  isRateDragOver.value = false
+  bulkUploadZoneScope.value = 'all'
+  bulkUploadSelectedZones.value = []
+  bulkUploadZoneSearch.value = ''
+  const partners = servicePartnersList.value?.data || (Array.isArray(servicePartnersList.value) ? servicePartnersList.value : []);
+  if (!bulkUploadForm.value.servicePartner && partners.length > 0) {
+    bulkUploadForm.value.servicePartner = partners[0].id
+  }
+  showBulkUploadModal.value = true
+}
+
+const closeBulkUploadModal = () => {
+  showBulkUploadModal.value = false
+  bulkUploadFile.value = null
+  rateUploadResult.value = null
+  isUploadingRateSheet.value = false
+}
+
+const onRateFileChange = (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  validateAndSetRateFile(file)
+}
+
+const onRateDropFile = (e) => {
+  isRateDragOver.value = false
+  const file = e.dataTransfer?.files?.[0]
+  if (!file) return
+  validateAndSetRateFile(file)
+}
+
+const validateAndSetRateFile = (file) => {
+  const fileName = file.name.toLowerCase()
+  if (!fileName.endsWith('.csv') && !fileName.endsWith('.txt')) {
+    toast.error('Please upload a valid CSV file (.csv).')
+    return
+  }
+  bulkUploadFile.value = file
+  rateUploadResult.value = null
+}
+
+const removeRateFile = () => {
+  bulkUploadFile.value = null
+  if (rateFileInputRef.value) {
+    rateFileInputRef.value.value = ''
+  }
+}
+
+const downloadSampleRateSheet = () => {
+  const sampleData = `ToWeight,1,2,3,4,5,6,7,8,9,10,11,12,13,14
+`
+  const blob = new Blob([sampleData], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.setAttribute('download', 'service_partner_rate_matrix_sample.csv')
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+const handleBulkRateUpload = async () => {
+  if (!bulkUploadForm.value.servicePartner) {
+    toast.error('Please select a Service Partner.')
+    return
+  }
+  if (!bulkUploadFile.value) {
+    toast.error('Please select a CSV file to upload.')
+    return
+  }
+  if (bulkUploadZoneScope.value === 'specific' && bulkUploadSelectedZones.value.length === 0) {
+    toast.error('Please select at least one zone to map.')
+    return
+  }
+
+  isUploadingRateSheet.value = true
+  rateUploadResult.value = null
+
+  try {
+    const formData = new FormData()
+    formData.append('file', bulkUploadFile.value)
+    formData.append('service_partner_id', bulkUploadForm.value.servicePartner)
+    formData.append('package_type', bulkUploadForm.value.packageType)
+    formData.append('currency', bulkUploadForm.value.currency)
+    formData.append('rate_type_mode', bulkUploadForm.value.rateTypeMode)
+    formData.append('per_kg_threshold', bulkUploadForm.value.perKgThreshold)
+    formData.append('mode', bulkUploadForm.value.mode)
+
+    if (bulkUploadZoneScope.value === 'specific') {
+      bulkUploadSelectedZones.value.forEach(id => {
+        formData.append('selected_zone_ids[]', id)
+      })
+    }
+
+    const resp = await bulkUploadServicePartnerZoneRates(formData)
+    if (resp.status === 'success') {
+      rateUploadResult.value = resp.data
+      toast.success(resp.message || 'Rate sheet uploaded successfully!')
+      await fetchRateGroups()
+    } else {
+      toast.error(resp.message || 'Failed to upload rate sheet.')
+    }
+  } catch (err) {
+    const errorMsg = err.response?.data?.message || err.message || 'An error occurred during upload.'
+    toast.error(errorMsg)
+  } finally {
+    isUploadingRateSheet.value = false
+  }
+}
 </script>
 
 <template>
@@ -328,6 +476,12 @@ onMounted(async () => {
       </div>
 
       <div class="d-flex align-items-center gap-2">
+        <button
+          class="btn btn-outline-primary btn-sm rounded-3 px-3 py-2 shadow-sm d-flex align-items-center gap-2 fw-semibold"
+          @click="openBulkUploadModal">
+          <i class="bi bi-file-earmark-arrow-up"></i>
+          <span>Bulk Upload Rate Sheet</span>
+        </button>
         <button class="btn btn-primary btn-sm rounded-3 px-3 py-2 shadow-sm d-flex align-items-center gap-2 fw-semibold"
           @click="openAddModal">
           <i class="bi bi-plus-circle"></i>
@@ -734,5 +888,353 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+
+    <!-- MODAL: BULK UPLOAD SERVICE PARTNER ZONE RATES (RATE MATRIX) -->
+    <div v-if="showBulkUploadModal" class="modal-backdrop fade show"></div>
+    <div v-if="showBulkUploadModal" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+          <!-- Modal Header -->
+          <div class="modal-header border-bottom px-4 py-3 bg-light">
+            <div class="d-flex align-items-center gap-2">
+              <div class="bg-primary text-white p-2 rounded-3 d-flex align-items-center justify-content-center"
+                style="width: 38px; height: 38px;">
+                <i class="bi bi-file-earmark-arrow-up fs-5"></i>
+              </div>
+              <div>
+                <h5 class="modal-title fw-bold text-dark mb-0">Bulk Upload Service Partner Rate Matrix</h5>
+                <span class="text-muted small">Upload CSV rate matrix (ToWeight vs Zones 1..14)</span>
+              </div>
+            </div>
+            <button type="button" class="btn-close" @click="closeBulkUploadModal"
+              :disabled="isUploadingRateSheet"></button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body px-4 py-4" style="max-height: 75vh; overflow-y: auto;">
+            <!-- Configuration Settings Card -->
+            <div class="card border border-light-subtle rounded-3 p-3 mb-4 bg-white shadow-sm">
+              <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-sliders text-primary"></i> Target Rate Configuration
+              </h6>
+
+              <div class="row g-3">
+                <!-- Service Partner -->
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Service Partner <span class="text-danger">*</span></label>
+                  <select v-model="bulkUploadForm.servicePartner" class="form-select" required>
+                    <option value="" disabled>Select Service Partner</option>
+                    <option v-for="p in (servicePartnersList.data || servicePartnersList || [])" :key="p.id"
+                      :value="p.id">
+                      {{ p.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Package Type -->
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Package Type <span class="text-danger">*</span></label>
+                  <select v-model="bulkUploadForm.packageType" class="form-select" required>
+                    <option v-for="pt in packageTypes" :key="pt" :value="pt">{{ pt }}</option>
+                  </select>
+                </div>
+
+                <!-- Currency -->
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Currency <span class="text-danger">*</span></label>
+                  <select v-model="bulkUploadForm.currency" class="form-select" required>
+                    <option v-for="curr in CURRENCIES" :key="curr" :value="curr">{{ curr }}</option>
+                  </select>
+                </div>
+
+                <!-- Rate Type Logic -->
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Rate Type Logic</label>
+                  <select v-model="bulkUploadForm.rateTypeMode" class="form-select">
+                    <option value="threshold">Threshold-Based (Flat up to limit, Per KG above)</option>
+                    <option value="all_flat">All Flat Rates</option>
+                    <option value="all_per_kg">All Per KG Rates</option>
+                  </select>
+                  <div class="form-text small text-muted">
+                    Typically 0.5kg-30kg are flat rates, and 50kg+ are charged per kg.
+                  </div>
+                </div>
+
+                <!-- Per KG Threshold -->
+                <div v-if="bulkUploadForm.rateTypeMode === 'threshold'" class="col-md-3">
+                  <label class="form-label small fw-semibold">Per KG Threshold (kg)</label>
+                  <div class="input-group">
+                    <input v-model.number="bulkUploadForm.perKgThreshold" type="number" step="0.1" min="0"
+                      class="form-control" />
+                    <span class="input-group-text small">kg</span>
+                  </div>
+                  <div class="form-text small text-muted">Default: 30 kg</div>
+                </div>
+
+                <!-- Import Mode -->
+                <div :class="bulkUploadForm.rateTypeMode === 'threshold' ? 'col-md-3' : 'col-md-6'">
+                  <label class="form-label small fw-semibold">Import Mode</label>
+                  <select v-model="bulkUploadForm.mode" class="form-select">
+                    <option value="overwrite">Overwrite (Replace existing rates)</option>
+                    <option value="upsert">Upsert (Update matching slabs only)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Zone Mapping Scope Card -->
+            <div class="card border border-light-subtle rounded-3 p-3 mb-4 bg-white shadow-sm">
+              <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+                <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                  <i class="bi bi-geo-alt-fill text-primary"></i> Zone Mapping Scope
+                </h6>
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn px-3 rounded-start-pill"
+                    :class="bulkUploadZoneScope === 'all' ? 'btn-primary text-white fw-semibold' : 'btn-outline-secondary'"
+                    @click="bulkUploadZoneScope = 'all'">
+                    <i class="bi bi-asterisk me-1"></i> All Zones in File (Auto-Detect)
+                  </button>
+                  <button type="button" class="btn px-3 rounded-end-pill"
+                    :class="bulkUploadZoneScope === 'specific' ? 'btn-primary text-white fw-semibold' : 'btn-outline-secondary'"
+                    @click="bulkUploadZoneScope = 'specific'">
+                    <i class="bi bi-check2-square me-1"></i> Select Specific Zones ({{ bulkUploadSelectedZones.length }})
+                  </button>
+                </div>
+              </div>
+
+              <!-- Scope: All Zones -->
+              <div v-if="bulkUploadZoneScope === 'all'" class="small text-muted bg-light p-3 rounded-2 border d-flex align-items-center gap-2">
+                <i class="bi bi-info-circle text-primary fs-5"></i>
+                <div>
+                  Rates will be imported for <strong>all matching zone columns</strong> in your CSV file that exist in Zone Master.
+                  Any unrecognized zone columns will be skipped automatically without failing the upload.
+                </div>
+              </div>
+
+              <!-- Scope: Specific Zones Only -->
+              <div v-else>
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-2">
+                  <div class="small text-muted">
+                    Only rates for your <strong>selected zones below</strong> will be imported. All other zone columns in the CSV will be ignored.
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2 py-0" style="font-size: 0.75rem;"
+                      @click="selectAllBulkZones">
+                      Select All
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0" style="font-size: 0.75rem;"
+                      @click="clearAllBulkZones">
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Zone Search Filter -->
+                <div class="mb-2">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input v-model="bulkUploadZoneSearch" type="text" class="form-control border-start-0"
+                      placeholder="Search zones..." />
+                  </div>
+                </div>
+
+                <!-- Zone Checkbox Chips Grid -->
+                <div class="zone-chips-container p-2 rounded-3 bg-light border" style="max-height: 180px; overflow-y: auto;">
+                  <div class="row g-2">
+                    <div v-for="zone in bulkAvailableZones" :key="zone.id" class="col-6 col-sm-4 col-md-3">
+                      <div
+                        class="zone-chip p-2 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer transition-all"
+                        :class="{
+                          'border-primary bg-primary text-white shadow-sm': isBulkZoneSelected(zone.id),
+                          'bg-white text-dark': !isBulkZoneSelected(zone.id),
+                        }" @click="toggleBulkZone(zone.id)">
+                        <div class="d-flex align-items-center gap-2 overflow-hidden">
+                          <input type="checkbox" class="form-check-input m-0 cursor-pointer"
+                            :checked="isBulkZoneSelected(zone.id)" @click.stop="toggleBulkZone(zone.id)" />
+                          <span class="small fw-semibold text-truncate">{{ zone.name || zone.zone_name }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="bulkAvailableZones.length === 0" class="col-12 text-center py-2 text-muted small">
+                      No zones found matching "{{ bulkUploadZoneSearch }}"
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-2 d-flex justify-content-between align-items-center">
+                  <span class="small text-muted">Click a zone to toggle selection</span>
+                  <span class="badge" :class="bulkUploadSelectedZones.length > 0 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle'">
+                    {{ bulkUploadSelectedZones.length }} zone(s) selected
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Download Sample Guide -->
+            <div class="card border-0 bg-primary-subtle text-primary rounded-3 p-3 mb-4">
+              <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                <div>
+                  <div class="fw-bold small d-flex align-items-center gap-2">
+                    <i class="bi bi-info-circle-fill"></i> Sheet Format: Zone Matrix CSV
+                  </div>
+                  <div class="small text-muted mt-1" style="color: #495057 !important;">
+                    Row header: <code>ToWeight</code> (e.g. 0.5, 1, 1.5 ... 30, 50, 70, 99999). Column headers: <code>1, 2,
+                  3 ... 14</code> or <code>Zone_1</code>.
+                  </div>
+                </div>
+                <button type="button"
+                  class="btn btn-outline-primary btn-sm text-nowrap rounded-pill px-3 fw-semibold bg-white"
+                  @click="downloadSampleRateSheet">
+                  <i class="bi bi-download me-1"></i> Download Sample CSV
+                </button>
+              </div>
+            </div>
+
+            <!-- Drag & Drop Upload Zone -->
+            <div class="mb-4">
+              <label class="form-label small fw-semibold">Select CSV Rate Sheet <span
+                  class="text-danger">*</span></label>
+              <div v-if="!bulkUploadFile"
+                class="upload-dropzone p-4 rounded-3 text-center cursor-pointer transition-all"
+                :class="{ 'border-primary bg-primary-subtle': isRateDragOver, 'border-secondary-subtle bg-light': !isRateDragOver }"
+                @dragover.prevent="isRateDragOver = true" @dragleave.prevent="isRateDragOver = false"
+                @drop.prevent="onRateDropFile" @click="rateFileInputRef?.click()">
+                <input ref="rateFileInputRef" type="file" accept=".csv,text/csv" class="d-none"
+                  @change="onRateFileChange" />
+                <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2 d-block"></i>
+                <span class="fw-semibold text-dark d-block">Drag & drop your rate sheet CSV here, or <span
+                    class="text-primary text-decoration-underline">browse</span></span>
+                <span class="text-muted small">Supports .csv exported from Excel (matching example sheet)</span>
+              </div>
+
+              <!-- Selected File Card -->
+              <div v-else class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="fs-3 text-success">
+                    <i class="bi bi-file-earmark-spreadsheet"></i>
+                  </div>
+                  <div>
+                    <div class="fw-bold text-dark small text-truncate" style="max-width: 320px;">
+                      {{ bulkUploadFile.name }}
+                    </div>
+                    <div class="text-muted small">
+                      {{ (bulkUploadFile.size / 1024).toFixed(1) }} KB
+                    </div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger rounded-2" :disabled="isUploadingRateSheet"
+                  @click="removeRateFile">
+                  <i class="bi bi-trash me-1"></i> Remove
+                </button>
+              </div>
+            </div>
+
+            <!-- Upload Results Card -->
+            <div v-if="rateUploadResult" class="mb-2">
+              <div class="alert alert-success border-0 shadow-xs rounded-3 p-3 mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill fs-4 text-success"></i>
+                <div>
+                  <div class="fw-bold">Rates Uploaded & Configured Successfully!</div>
+                  <div class="small">The service partner zone rates have been saved and are ready for shipment
+                    calculations.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Metrics -->
+              <div class="row g-2 text-center mb-3">
+                <div class="col-4">
+                  <div class="p-2 bg-light rounded-3 border">
+                    <div class="fs-5 fw-bold text-dark">{{ rateUploadResult.total_slabs ||
+                      rateUploadResult.processed_slabs
+                    }}</div>
+                    <div class="small text-muted" style="font-size: 0.72rem;">SLAB ROWS</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-2 bg-primary-subtle rounded-3 border border-primary-subtle">
+                    <div class="fs-5 fw-bold text-primary">{{ rateUploadResult.zones_mapped }}</div>
+                    <div class="small text-primary" style="font-size: 0.72rem;">ZONES MAPPED</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-2 bg-success-subtle rounded-3 border border-success-subtle">
+                    <div class="fs-5 fw-bold text-success">{{ rateUploadResult.total_rates_created ||
+                      rateUploadResult.total_rates_inserted }}</div>
+                    <div class="small text-success" style="font-size: 0.72rem;">RATES INSERTED</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Unmatched Columns Warning Details -->
+              <div v-if="rateUploadResult.unmatched_columns && rateUploadResult.unmatched_columns.length > 0"
+                class="p-3 bg-warning-subtle rounded-3 border border-warning mb-2">
+                <div class="fw-semibold text-warning-emphasis small mb-1 d-flex align-items-center gap-1">
+                  <i class="bi bi-exclamation-triangle-fill"></i> Unmatched Zone Headers:
+                </div>
+                <div class="small text-muted">
+                  The following columns could not be matched to any zone in Zone Master:
+                  <strong>{{ rateUploadResult.unmatched_columns.join(', ') }}</strong>
+                </div>
+              </div>
+
+              <!-- Skipped Unselected Zones Notice -->
+              <div v-if="rateUploadResult.skipped_unselected_zones && rateUploadResult.skipped_unselected_zones.length > 0"
+                class="p-3 bg-info-subtle rounded-3 border border-info">
+                <div class="fw-semibold text-info-emphasis small mb-1 d-flex align-items-center gap-1">
+                  <i class="bi bi-info-circle-fill"></i> Skipped Unselected Zones:
+                </div>
+                <div class="small text-muted">
+                  The following zones were present in the CSV file but skipped per your zone selection:
+                  <strong>{{ rateUploadResult.skipped_unselected_zones.join(', ') }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer border-top px-4 py-3 bg-light rounded-bottom-4 d-flex justify-content-between">
+            <button v-if="!rateUploadResult" type="button" class="btn btn-light rounded-3 px-3"
+              :disabled="isUploadingRateSheet" @click="closeBulkUploadModal">
+              Cancel
+            </button>
+            <button v-else type="button" class="btn btn-secondary rounded-3 px-3"
+              @click="rateUploadResult = null; bulkUploadFile = null">
+              Upload Another Sheet
+            </button>
+
+            <button v-if="!rateUploadResult" type="button"
+              class="btn btn-primary rounded-3 px-4 shadow-sm d-flex align-items-center gap-2"
+              :disabled="!bulkUploadFile || !bulkUploadForm.servicePartner || isUploadingRateSheet"
+              @click="handleBulkRateUpload">
+              <span v-if="isUploadingRateSheet" class="spinner-border spinner-border-sm" role="status"></span>
+              <i v-if="!isUploadingRateSheet" class="bi bi-cloud-arrow-up"></i>
+              <span>{{ isUploadingRateSheet ? 'Uploading & Processing...' : 'Upload Rate Sheet' }}</span>
+            </button>
+            <button v-else type="button" class="btn btn-primary rounded-3 px-4 shadow-sm" @click="closeBulkUploadModal">
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.upload-dropzone {
+  border: 2px dashed #cbd5e1;
+  background-color: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upload-dropzone:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+</style>
